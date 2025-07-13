@@ -1,0 +1,7 @@
+HELLO {{ user.email }} 
+
+Click to this link for activate your account
+
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+if you didnt send this request dont care about it

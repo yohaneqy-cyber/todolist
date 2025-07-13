@@ -1,0 +1,16 @@
+{% extends 'base/main.html' %}
+
+{% block content %}
+
+
+
+<h2>Resend Activation Link</h2>
+<form method="POST">
+    {% csrf_token %}
+    <label for="email">Email: </label>
+    <input type="email" name="email" required value="{{ first }}">
+    <button type="submit">Resend</button>
+    <a href="{% url 'email_verification_sent' %}">cancel</a>
+</form>
+
+{% endblock content %}

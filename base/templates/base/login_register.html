@@ -1,0 +1,47 @@
+{% extends 'base/main.html' %}
+
+{% block content %}
+
+{% if page == 'login' %}
+<div>
+    <h2>Login</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="email">Email:</label>
+        <input type="text" name="email" placeholder="Enter Email" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" name="password" placeholder="Enter Password" required>
+
+        <input type="submit" value="Login">
+    </form>
+    <br>
+    <a href="{% url 'password_reset_request' %}">Forgot Your Password?</a>
+    <p>Don't have an account?</p>
+    <a href="{% url 'register' %}">Register</a>
+
+  {% if show_resend_link %}
+    <p>Your account is not activated yet. <a href="{% url 'resend_activation' %}">Resend activation email</a></p>
+  {% endif %}
+
+</div>
+
+{% else %}
+<div>
+    <h2>Register</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Register">
+    </form>
+    <p>Already have an account?</p>
+    <a href="{% url 'login' %}">Login</a>
+
+  {% if show_resend_link %}
+    <p>Your account is not activated yet. <a href="{% url 'resend_activation' %}">Resend activation email</a></p>
+  {% endif %}
+
+</div>
+{% endif %}
+
+{% endblock content %}

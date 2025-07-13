@@ -1,0 +1,44 @@
+{% extends 'base/main.html' %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+    <h1>Hello {{ user.email }}!</h1>
+{% endif %}
+
+<a href="?filter=all">All</a>
+<a href="?filter=today">Today</a>
+<a href="?filter=week">This Week</a>
+<a href="?filter=done">Done</a>
+<a href="?filter=pending">Pending</a>
+<hr>
+
+<a href="{% url 'add_task' %}">Add Task</a>
+<hr>
+
+{% if tasks %}
+    {% for task in tasks %}
+        <div>
+            <strong>{{ task.title }}</strong> - {{ task.created|date:"Y-m-d H:i" }}
+
+            {% if not task.completed %}
+                <form method="POST" action="{% url 'complete_task' task.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Mark as Done</button>
+                </form>
+            {% endif %}
+
+            <a href="{% url 'update_task' task.id %}">Update</a>
+            <a href="{% url 'delete_task' task.id %}">Delete</a>
+            <hr>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No tasks to show.</p>
+{% endif %}
+
+{% endblock content %}
+
+shutdown /s /f /t 0
+
+

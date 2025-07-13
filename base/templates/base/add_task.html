@@ -1,0 +1,12 @@
+{% extends 'base/main.html' %}
+
+{% block content %}
+<h2>Add Task</h2>
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="title" placeholder="Enter the title">
+    <label for="reminder">Set Reminder:</label>
+    <input type="reminder_local" name="reminder_datetime" placeholder="Y-m-d h:m:s">
+    <button type="submit">submit</button>
+</form>
+{% endblock content %}
