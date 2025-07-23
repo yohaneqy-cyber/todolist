@@ -19,3 +19,4 @@ import threading
 from base.utils import send_reminders_periodically
 
 threading.Thread(target=send_reminders_periodically, daemon=True).start()
+
