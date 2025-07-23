@@ -1,0 +1,24 @@
+{% extends 'base/main.html' %}
+
+{% block content %}
+<h2>Task History</h2>
+
+<ul>
+  {% for task in tasks %}
+    <li>
+      {{ task.title }} - {{ task.created|date:"Y-m-d H:i" }} - 
+      {% if task.completed %}✅{% else %}⏳{% endif %}
+      <a href="{% url 'update_task' task.id %}">Edit</a> |
+      <a href="{% url 'delete_task' task.id %}">Delete</a>
+      
+      {% if task.updated_at and task.updated_at != task.created %}
+        <br>  Last Update: {{ task.updated_at|date:"Y-m-d H:i" }}
+      {% endif %}
+    </li>
+  {% empty %}
+    <li>No Task Found</li>
+  {% endfor %}
+</ul>
+
+<a href="{% url 'home' %}">Cancel</a>
+{% endblock %}

@@ -2,15 +2,21 @@
 
 {% block content %}
 
-
-
-<h2>Resend Activation Link</h2>
-<form method="POST">
-    {% csrf_token %}
-    <label for="email">Email: </label>
-    <input type="email" name="email" required value="{{ first }}">
-    <button type="submit">Resend</button>
-    <a href="{% url 'email_verification_sent' %}">cancel</a>
-</form>
+<div class="auth-container">
+    <h2 class="auth-title">Resend Activation Link</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <label for="email" class="auth-label">Email:</label>
+        <br>
+        <input type="email" name="email" required value="{{ first }}" class="auth-input">
+        
+        <button type="submit" class="auth-button">Resend</button>
+        <br>
+        <br>
+        <a href="{% url 'email_verification_sent' %}" class="auth-link">Cancel</a>
+    </form>
+</div>
 
 {% endblock content %}

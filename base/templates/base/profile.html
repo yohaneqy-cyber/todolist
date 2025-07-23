@@ -1,0 +1,31 @@
+{% extends 'base/main.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="profile-container">
+  <h1>Welcome To Your Profile {{ user.name }}</h1>
+
+<div class="navbar-avatar">
+  {% if user.avatar %}
+    <img src="{{ user.avatar.url }}" alt="Avatar" class="profile-avatar">
+  {% else %}
+      <div class="avatar-placeholder">
+        {{ user.name|slice:":1"|upper }}
+      </div>
+  {% endif %}
+</div>
+
+  <form method="POST" enctype="multipart/form-data" class="profile-form">
+      {% csrf_token %}
+      {{ form.as_p|safe }}
+
+      <button type="submit">Save Changes</button>
+  </form>
+</div>
+{% endblock %}

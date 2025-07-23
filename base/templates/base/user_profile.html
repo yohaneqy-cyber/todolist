@@ -1,0 +1,19 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
+
+
+
+<div class="user-profile-ajax">
+  <h3>{{ user.name }}</h3>
+  {% if user.avatar %}
+    <img src="{{ user.avatar.url }}" alt="Avatar" class="profile-avatar">
+  {% else %}
+  <div class="avatar-placeholder">
+    {{ user.name|slice:":1"|upper }}
+  </div>
+  {% endif %}
+  <p><strong>Name: </strong>{{ user.name }}</p>
+  <p><strong>Email:</strong> {{ user.email }}</p>
+  <p><strong>Bio:</strong> {{ user.bio }}</p>
+  {# هر فیلد دلخواه دیگر... #}
+</div>

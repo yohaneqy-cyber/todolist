@@ -1,15 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />  <!-- ✅ این خط مهمه -->
-    <title>My Site</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>mysite</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
+    
+    {% block extra_css %}{% endblock %}
 </head>
+
+
+
 <body>
 
-    {% include 'base/navbar.html' %}
 
-    {% if messages %}
+
+    {% include 'base/navbar.html' %}  <!-- اینجا نوار رو وارد می‌کنیم -->
+
+
+
+    {% for error in field.errors %}
+        <div class="text-danger small">{{ error }}</div>
+    {% endfor %}
+
+
+    
+   {% if messages %}
     <ul class="messages">
         {% for message in messages %}
             <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>

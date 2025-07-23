@@ -3,44 +3,47 @@
 {% block content %}
 
 {% if page == 'login' %}
-<div>
-    <h2>Login</h2>
-    <form method="POST">
+<div class="auth-container">
+    <h2 class="auth-title">Login</h2>
+    <form method="POST" class="auth-form">
         {% csrf_token %}
         <label for="email">Email:</label>
-        <input type="text" name="email" placeholder="Enter Email" required>
+        <input type="text" name="email" placeholder="Enter Email" required class="auth-input" autofocus>
         
         <label for="password">Password:</label>
-        <input type="password" name="password" placeholder="Enter Password" required>
+        <input type="password" name="password" placeholder="Enter Password" required class="auth-input">
 
-        <input type="submit" value="Login">
+        <input type="submit" value="Login" class="auth-button">
     </form>
-    <br>
-    <a href="{% url 'password_reset_request' %}">Forgot Your Password?</a>
-    <p>Don't have an account?</p>
-    <a href="{% url 'register' %}">Register</a>
 
-  {% if show_resend_link %}
-    <p>Your account is not activated yet. <a href="{% url 'resend_activation' %}">Resend activation email</a></p>
-  {% endif %}
+    <div class="auth-links">
+        <a href="{% url 'password_reset_request' %}">Forgot Your Password?</a>
+        <p>Don't have an account?</p>
+        <a href="{% url 'register' %}">Register</a>
+    </div>
 
+    {% if show_resend_link %}
+    <p class="resend-note">Your account is not activated yet. <a href="{% url 'resend_activation' %}">Resend activation email</a></p>
+    {% endif %}
 </div>
 
 {% else %}
-<div>
-    <h2>Register</h2>
-    <form method="POST">
+<div class="auth-container">
+    <h2 class="auth-title">Register</h2>
+    <form method="POST" class="auth-form">
         {% csrf_token %}
         {{ form.as_p }}
-        <input type="submit" value="Register">
+        <input type="submit" value="Register" class="auth-button">
     </form>
-    <p>Already have an account?</p>
-    <a href="{% url 'login' %}">Login</a>
 
-  {% if show_resend_link %}
-    <p>Your account is not activated yet. <a href="{% url 'resend_activation' %}">Resend activation email</a></p>
-  {% endif %}
+    <div class="auth-links">
+        <p>Already have an account?</p>
+        <a href="{% url 'login' %}">Login</a>
+    </div>
 
+    {% if show_resend_link %}
+    <p class="resend-note">Your account is not activated yet. <a href="{% url 'resend_activation' %}">Resend activation email</a></p>
+    {% endif %}
 </div>
 {% endif %}
 

@@ -1,11 +1,788 @@
-<a href="/"><h1>My site</h1></a>
+{% load static %}
 
-<hr>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MySite</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
-{% if request.user.is_authenticated %}
-<a href="{% url 'logout' %}">Logout</a>
-<hr>
-{% else %}
-<a href="{% url 'login' %}">Login</a>
-<hr>
-{% endif %}
+  <style>
+    /* Modal Base */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      overflow-y: auto;
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-content {
+      background: #fff;
+      margin: 5% auto;
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      position: relative;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .close {
+      color: #888;
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: #000;
+    }
+
+    /* Tabs Buttons */
+    #searchTabBtn, #requestsTabBtn, #friendsTabBtn {
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 15px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    #searchTabBtn:disabled,
+    #requestsTabBtn:disabled,
+    #friendsTabBtn:disabled {
+      background-color: #2196f3;
+      color: white;
+      cursor: default;
+    }
+
+    #searchTabBtn:hover:not(:disabled),
+    #requestsTabBtn:hover:not(:disabled),
+    #friendsTabBtn:hover:not(:disabled) {
+      background-color: #dbefff;
+    }
+
+    /* Input */
+    #userSearchInput {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 15px;
+    }
+
+    /* Lists */
+    #userList, #friendRequestsList, #friendsList {
+      list-style: none;
+      padding: 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    /* List items */
+    #friendRequestsList li,
+    #userList li,
+    #friendsList li {
+      padding: 6px 12px;
+      border-bottom: 1px solid #eee;
+      font-size: 14.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #friendRequestsList li:hover,
+    #userList li:hover,
+    #friendsList li:hover {
+      background-color: #f9f9f9;
+    }
+
+    /* Friend request buttons */
+    .friend-request-btn {
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      min-width: 80px;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .friend-request-btn.accept {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    .friend-request-btn.accept:hover {
+      background-color: #388e3c;
+    }
+
+    .friend-request-btn.decline {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .friend-request-btn.decline:hover {
+      background-color: #d32f2f;
+    }
+
+    /* Add Friend Button */
+    .add-friend-btn {
+      padding: 4px 10px;
+      font-size: 13px;
+      min-width: 50px;
+      height: 26px;
+      border-radius: 4px;
+      border: none;
+      background-color: #2196f3;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .add-friend-btn:hover {
+      background-color: #1976d2;
+    }
+
+    /* Error message */
+    #errorMessage {
+      display: none;
+      background-color: #f44336;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-weight: bold;
+      position: relative;
+    }
+
+    #errorMessage button {
+      position: absolute;
+      top: 4px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    /* Navbar */
+    .navbar-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background-color: #e3f2fd;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .navbar-links-container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .navbar-link {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      font-size: 15px;
+      padding: 4px 6px;
+    }
+
+    .navbar-link:hover {
+      color: #1976d2;
+    }
+
+    .navbar-avatar-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .navbar-avatar-placeholder {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #90caf9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    /* Confirmation Modal */
+    #confirmUnfriendModal .modal-content {
+      max-width: 400px;
+      text-align: center;
+    }
+
+    #confirmUnfriendModal button {
+      margin: 12px 6px 0 6px;
+      padding: 8px 18px;
+      font-size: 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      min-width: 100px;
+    }
+
+    #confirmUnfriendModal .confirm-btn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    #confirmUnfriendModal .confirm-btn:hover {
+      background-color: #d32f2f;
+    }
+
+    #confirmUnfriendModal .cancel-btn {
+      background-color: #ccc;
+      color: #333;
+    }
+
+    #confirmUnfriendModal .cancel-btn:hover {
+      background-color: #999;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="navbar-container">
+    <a href="/" class="navbar-logo">
+      <h1 class="navbar-logo-text">MySite</h1>
+    </a>
+
+    <div class="navbar-links-container">
+      {% if user.is_authenticated %}
+        <a href="{% url 'profile' %}" class="navbar-avatar-topright">
+          {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="Avatar" class="navbar-avatar-img" />
+          {% else %}
+            <div class="navbar-avatar-placeholder">{{ user.name|slice:":1"|upper }}</div>
+          {% endif %}
+        </a>
+
+        <a href="#" id="openFriendsModal" class="navbar-link">Friends</a>
+        <a href="{% url 'dashbord' %}" class="navbar-link">Dashboard</a>
+        <a href="{% url 'logout' %}" class="navbar-link">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="navbar-link">Login</a>
+      {% endif %}
+      <a href="{% url 'calendar' %}" class="navbar-link">📅</a>
+    </div>
+  </header>
+
+  <div id="friendsModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="modalTitle" aria-modal="true" style="display:none;">
+    <div class="modal-content">
+      <span id="closeFriendsModal" class="close" role="button" aria-label="Close">&times;</span>
+
+      <div id="errorMessage" style="display:none;">
+        <span id="errorText"></span>
+        <button onclick="hideErrorMessage()">&times;</button>
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <button id="searchTabBtn">Search</button>
+        <button id="requestsTabBtn">Requests</button>
+        <button id="friendsTabBtn">Friends</button>
+      </div>
+
+      <div id="searchSection">
+        <input type="text" id="userSearchInput" placeholder="Search users..." autocomplete="off" />
+        <ul id="userList"></ul>
+      </div>
+
+      <div id="requestsSection" style="display:none;">
+        <ul id="friendRequestsList"></ul>
+        <p id="noRequestsMsg" style="display:none;">No Requests</p>
+        <p id="errorLoadingRequests" style="display:none; color: red; font-weight: bold;">Error to load requests.</p>
+      </div>
+
+      <div id="friendsSection" style="display:none;">
+        <ul id="friendsList"></ul>
+        <p id="noFriendsMsg" style="display:none;">No Friends Yet</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation modal for unfriend -->
+  <div id="confirmUnfriendModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="confirmUnfriendTitle" style="display:none;">
+    <div class="modal-content">
+      <span id="closeConfirmUnfriendModal" class="close" role="button" aria-label="Close">&times;</span>
+      <h2 id="confirmUnfriendTitle">Confirm Unfriend</h2>
+      <p>Are you sure you want to remove  {{ user.name }} from friend list?</p>
+      <button class="confirm-btn" id="confirmUnfriendBtn">Yes, Remove</button>
+      <button class="cancel-btn" id="cancelUnfriendBtn">Cancel</button>
+    </div>
+  </div>
+
+  <!-- User profile modal -->
+  <div id="userProfileModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="userProfileTitle" style="display:none;">
+    <div class="modal-content">
+      <span id="closeUserProfileModal" class="close" role="button" aria-label="Close">&times;</span>
+      <div id="userProfileContent">
+        <!-- اطلاعات پروفایل کاربر اینجا بارگذاری می‌شود -->
+      </div>
+    </div>
+  </div>
+
+  {% block content %}{% endblock %}
+
+<script>
+  // CSRF token helper
+  function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith('csrftoken=')) {
+          cookieValue = decodeURIComponent(cookie.substring('csrftoken='.length));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Modal elements
+  const openBtn = document.getElementById("openFriendsModal");
+  const modal = document.getElementById("friendsModal");
+  const closeBtn = document.getElementById("closeFriendsModal");
+
+  const searchTabBtn = document.getElementById("searchTabBtn");
+  const requestsTabBtn = document.getElementById("requestsTabBtn");
+  const friendsTabBtn = document.getElementById("friendsTabBtn");
+
+  const searchSection = document.getElementById("searchSection");
+  const requestsSection = document.getElementById("requestsSection");
+  const friendsSection = document.getElementById("friendsSection");
+
+  const friendRequestsList = document.getElementById("friendRequestsList");
+  const noRequestsMsg = document.getElementById("noRequestsMsg");
+  const errorLoadingRequests = document.getElementById("errorLoadingRequests");
+
+  const friendsList = document.getElementById("friendsList");
+  const noFriendsMsg = document.getElementById("noFriendsMsg");
+
+  const searchInput = document.getElementById("userSearchInput");
+  const userList = document.getElementById("userList");
+
+  // Confirmation modal elements
+  const confirmUnfriendModal = document.getElementById("confirmUnfriendModal");
+  const closeConfirmUnfriendModal = document.getElementById("closeConfirmUnfriendModal");
+  const confirmUnfriendBtn = document.getElementById("confirmUnfriendBtn");
+  const cancelUnfriendBtn = document.getElementById("cancelUnfriendBtn");
+
+  let friendToRemoveId = null;
+
+  // User profile modal elements
+  const userProfileModal = document.getElementById("userProfileModal");
+  const closeUserProfileModal = document.getElementById("closeUserProfileModal");
+
+  // Open friends modal
+  openBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+    modal.style.display = "block";
+    modal.setAttribute('aria-hidden', 'false');
+    showSearchTab();
+    searchInput.value = "";
+    userList.innerHTML = "";
+    searchInput.focus();
+  });
+
+  // Close friends modal
+  closeBtn.addEventListener("click", function() {
+    modal.style.display = "none";
+    modal.setAttribute('aria-hidden', 'true');
+    hideErrorMessage();
+  });
+
+  // Close modals on outside click or Escape key
+  window.addEventListener("click", function(event) {
+    if (event.target === modal) {
+      modal.style.display = "none";
+      modal.setAttribute('aria-hidden', 'true');
+      hideErrorMessage();
+    }
+    if (event.target === confirmUnfriendModal) {
+      confirmUnfriendModal.style.display = "none";
+      confirmUnfriendModal.setAttribute('aria-hidden', 'true');
+    }
+    if (event.target === userProfileModal) {
+      userProfileModal.style.display = "none";
+      userProfileModal.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  window.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") {
+      if (modal.style.display === "block") {
+        modal.style.display = "none";
+        modal.setAttribute('aria-hidden', 'true');
+        hideErrorMessage();
+      }
+      if (confirmUnfriendModal.style.display === "block") {
+        confirmUnfriendModal.style.display = "none";
+        confirmUnfriendModal.setAttribute('aria-hidden', 'true');
+      }
+      if (userProfileModal.style.display === "block") {
+        userProfileModal.style.display = "none";
+        userProfileModal.setAttribute('aria-hidden', 'true');
+      }
+    }
+  });
+
+  // Tab functions
+  function showSearchTab() {
+    searchSection.style.display = "block";
+    requestsSection.style.display = "none";
+    friendsSection.style.display = "none";
+    searchTabBtn.disabled = true;
+    requestsTabBtn.disabled = false;
+    friendsTabBtn.disabled = false;
+    hideErrorMessage();
+  }
+
+  function showRequestsTab() {
+    searchSection.style.display = "none";
+    requestsSection.style.display = "block";
+    friendsSection.style.display = "none";
+    searchTabBtn.disabled = false;
+    requestsTabBtn.disabled = true;
+    friendsTabBtn.disabled = false;
+    loadFriendRequests();
+    hideErrorMessage();
+  }
+
+  function showFriendsTab() {
+    searchSection.style.display = "none";
+    requestsSection.style.display = "none";
+    friendsSection.style.display = "block";
+    searchTabBtn.disabled = false;
+    requestsTabBtn.disabled = false;
+    friendsTabBtn.disabled = true;
+    loadFriendsList();
+    hideErrorMessage();
+  }
+
+  searchTabBtn.addEventListener("click", showSearchTab);
+  requestsTabBtn.addEventListener("click", showRequestsTab);
+  friendsTabBtn.addEventListener("click", showFriendsTab);
+
+  // Search users
+  let timeout = null;
+  searchInput.addEventListener("input", function() {
+    clearTimeout(timeout);
+    const query = this.value.trim();
+
+    timeout = setTimeout(() => {
+      if(query.length === 0) {
+        userList.innerHTML = "";
+        return;
+      }
+
+      fetch("{% url 'search_users' %}?q=" + encodeURIComponent(query), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => response.json())
+      .then(data => {
+        userList.innerHTML = "";
+        if (data.users.length === 0) {
+          userList.innerHTML = "<li>No users found.</li>";
+          return;
+        }
+        data.users.forEach(user => {
+          const li = document.createElement("li");
+          li.style.padding = "6px 0";
+          li.style.display = "flex";
+          li.style.justifyContent = "space-between";
+          li.style.alignItems = "center";
+
+          const userText = document.createElement("span");
+          userText.textContent = user.name + " - " + user.email;
+          userText.style.cursor = "pointer";
+
+          // کلیک روی نام کاربر: باز کردن مودال پروفایل
+          userText.onclick = () => {
+            fetch(`/user_profile_ajax/${user.id}/`, {
+              headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.text())
+            .then(html => {
+              document.getElementById("userProfileContent").innerHTML = html;
+              userProfileModal.style.display = "block";
+              userProfileModal.setAttribute('aria-hidden', 'false');
+            })
+            .catch(() => alert("خطا در بارگذاری پروفایل"));
+          };
+
+          const addBtn = document.createElement("button");
+          addBtn.textContent = "Add Friend";
+          addBtn.classList.add("add-friend-btn");
+          addBtn.onclick = () => {
+            fetch(`/friends/request/${user.id}/`, {
+              method: "POST",
+              headers: { 
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+              }
+            })
+            .then(res => res.json())
+            .then(data => {
+              if(data.success){
+                addBtn.textContent = "Requested";
+                addBtn.disabled = true;
+                hideErrorMessage();
+              }
+              else if (data.code === "already_friends") {
+                showErrorMessage("Already Friend");
+                addBtn.textContent = "Already Friends";
+                addBtn.disabled = true;
+                addBtn.style.backgroundColor = "#ccc";
+                addBtn.style.cursor = "default";
+              }
+              else if (data.code === "already_requested") {
+                showErrorMessage("Request sent before");
+                addBtn.textContent = "Already Requested";
+                addBtn.disabled = true;
+                addBtn.style.backgroundColor = "#ccc";
+                addBtn.style.cursor = "default";
+              } else {
+                showErrorMessage(data.error || "Error");
+              }
+            })
+            .catch(() => showErrorMessage("Network error, please try again."));
+          };
+
+          li.appendChild(userText);
+          li.appendChild(addBtn);
+          userList.appendChild(li);
+        });
+      })
+      .catch(() => {
+        userList.innerHTML = "<li>Error loading users.</li>";
+      });
+    }, 300);
+  });
+
+  // Load friend requests
+  function loadFriendRequests() {
+    friendRequestsList.innerHTML = "Loading...";
+    noRequestsMsg.style.display = "none";
+    errorLoadingRequests.style.display = "none";
+
+    fetch("{% url 'friend_requests_api' %}", {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+      friendRequestsList.innerHTML = "";
+      if (data.requests && data.requests.length > 0) {
+        noRequestsMsg.style.display = "none";
+        errorLoadingRequests.style.display = "none";
+
+        data.requests.forEach(req => {
+          const li = document.createElement("li");
+          li.textContent = req.from_user_name;
+
+          const buttonsDiv = document.createElement("div");
+
+          const acceptBtn = document.createElement("button");
+          acceptBtn.textContent = "Accept";
+          acceptBtn.classList.add("friend-request-btn", "accept");
+          acceptBtn.onclick = () => {
+            fetch(`/friends/accept/${req.id}/`, {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+              }
+            })
+            .then(res => res.json())
+            .then(resData => {
+              if(resData.success){
+                li.remove();
+                if(friendRequestsList.children.length === 0) {
+                  noRequestsMsg.style.display = "block";
+                }
+                hideErrorMessage();
+                loadFriendsList();
+              } else {
+                showErrorMessage(resData.error || "Failed to accept request");
+              }
+            })
+            .catch(() => showErrorMessage("Network error, please try again."));
+          };
+
+          const declineBtn = document.createElement("button");
+          declineBtn.textContent = "Decline";
+          declineBtn.classList.add("friend-request-btn", "decline");
+          declineBtn.onclick = () => {
+            fetch(`/friends/decline/${req.id}/`, {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+              }
+            })
+            .then(res => res.json())
+            .then(resData => {
+              if(resData.success){
+                li.remove();
+                if(friendRequestsList.children.length === 0) {
+                  noRequestsMsg.style.display = "block";
+                }
+                hideErrorMessage();
+              } else {
+                showErrorMessage(resData.error || "Failed to decline request");
+              }
+            })
+            .catch(() => showErrorMessage("Network error, please try again."));
+          };
+
+          buttonsDiv.appendChild(acceptBtn);
+          buttonsDiv.appendChild(declineBtn);
+
+          li.appendChild(buttonsDiv);
+          friendRequestsList.appendChild(li);
+        });
+      } else {
+        noRequestsMsg.style.display = "block";
+        errorLoadingRequests.style.display = "none";
+      }
+    })
+    .catch(() => {
+      friendRequestsList.innerHTML = "";
+      noRequestsMsg.style.display = "none";
+      errorLoadingRequests.style.display = "block";
+    });
+  }
+
+  // Load friends list
+  function loadFriendsList() {
+    friendsList.innerHTML = "Loading...";
+    noFriendsMsg.style.display = "none";
+
+    fetch("{% url 'friends_list_api' %}", {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+      friendsList.innerHTML = "";
+      if (data.friends && data.friends.length > 0) {
+        noFriendsMsg.style.display = "none";
+
+        data.friends.forEach(friend => {
+          const li = document.createElement("li");
+
+          const friendName = document.createElement("span");
+          friendName.textContent = friend.name;
+
+          const unfriendBtn = document.createElement("button");
+          unfriendBtn.textContent = "Unfriend";
+          unfriendBtn.classList.add("friend-request-btn", "decline");
+          unfriendBtn.onclick = () => {
+            friendToRemoveId = friend.id;
+            confirmUnfriendModal.style.display = "block";
+            confirmUnfriendModal.setAttribute('aria-hidden', 'false');
+          };
+
+          li.appendChild(friendName);
+          li.appendChild(unfriendBtn);
+
+          friendsList.appendChild(li);
+        });
+      } else {
+        noFriendsMsg.style.display = "block";
+      }
+    })
+    .catch(() => {
+      friendsList.innerHTML = "";
+      noFriendsMsg.style.display = "block";
+      noFriendsMsg.textContent = "Error loading friends.";
+    });
+  }
+
+  // Confirm unfriend
+  confirmUnfriendBtn.addEventListener("click", () => {
+    if (!friendToRemoveId) return;
+    fetch(`/unfriend/${friendToRemoveId}/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        confirmUnfriendModal.style.display = "none";
+        confirmUnfriendModal.setAttribute('aria-hidden', 'true');
+        friendToRemoveId = null;
+        loadFriendsList();
+      } else {
+        alert(data.error || "Failed to unfriend.");
+      }
+    })
+    .catch(() => alert("Network error, please try again."));
+  });
+
+  cancelUnfriendBtn.addEventListener("click", () => {
+    confirmUnfriendModal.style.display = "none";
+    confirmUnfriendModal.setAttribute('aria-hidden', 'true');
+    friendToRemoveId = null;
+  });
+
+  closeConfirmUnfriendModal.addEventListener("click", () => {
+    confirmUnfriendModal.style.display = "none";
+    confirmUnfriendModal.setAttribute('aria-hidden', 'true');
+    friendToRemoveId = null;
+  });
+
+  // Close user profile modal
+  closeUserProfileModal.addEventListener("click", () => {
+    userProfileModal.style.display = "none";
+    userProfileModal.setAttribute('aria-hidden', 'true');
+  });
+
+  // Show and hide error messages
+  function showErrorMessage(message) {
+    const errorDiv = document.getElementById("errorMessage");
+    const errorText = document.getElementById("errorText");
+    errorText.textContent = message;
+    errorDiv.style.display = "block";
+  }
+
+  function hideErrorMessage() {
+    const errorDiv = document.getElementById("errorMessage");
+    errorDiv.style.display = "none";
+  }
+
+</script>
+
+</body>
+</html>

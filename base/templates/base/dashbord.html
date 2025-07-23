@@ -1,0 +1,52 @@
+{% extends 'base/main.html' %}
+
+{% block content %}
+<h2>Dashbord</h2>
+<p><strong>Total tasks: {{ total }}</strong></p>
+<p><strong>Today tasks: {{ today_tasks }}</strong></p>
+<p><strong>SubTasks: {{ subtasks_count }}</strong></p>
+<p><strong>Completed tasks: {{done_tasks}}</strong></p>
+
+
+<h2>Normal Tasks</h2>
+<ul>
+    {% for task in normal_tasks %}
+        <li>
+            {{ task.title }} - {{ task.created|date:"Y-m-d H:i" }}
+            {% if task.completed %} ✅{% else %} ⏳{% endif %}
+        </li>
+    {% empty %}
+        <li>No Normal Task</li>
+    {% endfor %}
+</ul>
+
+
+
+<h2>🔃 Recurring Tasks</h2>
+
+<ul>
+    {% for rec in recurring_tasks %}
+        <li>
+            {{ rec.title }} - every {{ rec.interval }} {{ rec.interval_type }}
+            (start: {{ rec.start_date|date:"Y-m-d H:i" }})
+        </li>
+    {% empty %}
+        <li>No Recurring Task</li>
+    {% endfor %}
+</ul>
+
+
+
+<h2>➖ SubTasks</h2>
+
+<ul>
+    {% for subtask in subtasks_list %}
+        <li>
+            {{ subtask.title }} - {{ subtask.created|date:"Y-m-d H:i" }}
+        </li>
+    {% empty %}
+        <li>No Subtasks</li>
+    {% endfor %}
+</ul>
+
+{% endblock content %}

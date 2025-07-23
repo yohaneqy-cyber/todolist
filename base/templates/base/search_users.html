@@ -1,0 +1,73 @@
+{% extends 'base/main.html' %}
+
+{% block content %}
+<h2>جستجوی کاربران</h2>
+
+<form id="searchForm">
+  <input
+    type="text"
+    id="searchInput"
+    name="q"
+    placeholder="Search Users..."
+    autocomplete="off"
+    style="padding: 6px; width: 300px;"
+    value="{{ query }}"
+  />
+</form>
+
+<ul id="userList" style="margin-top: 10px;">
+  <!-- لیست کاربران اینجا نمایش داده میشه -->
+</ul>
+
+<p id="noResult" style="display:none; color: red;">No users found.</p>
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const userList = document.getElementById('userList');
+  const noResult = document.getElementById('noResult');
+
+  function renderUsers(users) {
+    userList.innerHTML = '';
+    if (users.length === 0) {
+      noResult.style.display = 'block';
+      return;
+    }
+    noResult.style.display = 'none';
+    users.forEach(user => {
+      const li = document.createElement('li');
+      li.textContent = `${user.name} - ${user.email}`;
+      userList.appendChild(li);
+    });
+  }
+
+  async function searchUsers(query) {
+    if (!query) {
+      renderUsers([]);
+      return;
+    }
+    try {
+      const response = await fetch(`{% url 'search_users' %}?q=${encodeURIComponent(query)}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      renderUsers(data.users);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  let debounceTimeout;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(() => {
+      searchUsers(searchInput.value.trim());
+    }, 300);
+  });
+
+  // اگر مقدار اولیه‌ای داشت، نتایج رو بارگذاری کن
+  if (searchInput.value.trim()) {
+    searchUsers(searchInput.value.trim());
+  }
+</script>
+{% endblock %}

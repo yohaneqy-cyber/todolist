@@ -1,0 +1,15 @@
+{% extends 'base/main.html' %}
+
+{% block content %}
+<h2 class="form-heading">Add Recurring Task</h2>
+
+<form method="post" enctype="multipart/form-data" class="custom-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    
+    <div class="form-group">
+        <button type="submit" class="form-button">Save</button>
+    </div>
+</form>
+{% endblock content %}

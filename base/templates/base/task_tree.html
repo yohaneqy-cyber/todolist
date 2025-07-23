@@ -1,0 +1,27 @@
+{% load task_tags %} {# فقط یکبار بالای فایل #}
+
+<ul>
+  <li>
+    {{ task.title }} - {{ task.created|date:"Y-m-d H:i" }}
+    {% if task.completed %}✅{% else %}⏳{% endif %}
+    <a href="{% url 'update_task' task.id %}">Edit</a>
+    <a href="{% url 'delete_task' task.id %}">Delete</a>
+
+    {% if not task.completed %}
+      <form action="{% url 'complete_task' task.id %}" method="POST" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Mark Done</button>
+      </form>
+    {% endif %}
+
+    <a href="{% url 'add_subtask' task.id %}">Add Subtask</a>
+
+    {% if subtasks %}
+      <ul>
+        {% for child in subtasks %}
+          {% show_task_tree child %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </li>
+</ul>

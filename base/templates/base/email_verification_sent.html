@@ -1,9 +1,22 @@
 {% extends 'base/main.html' %}
 
 {% block content %}
-  <h2>Are You Sure This Is Your Email? {{ email }} <br> <a href="{% url 'register' %}">Update Your Email</a></h2><hr>
-  <p>We've sent an activation link to your email address.</p>
-  <p>Please check your email and click on the link to activate your account.</p>
+<div class="auth-container">
+  <h2 class="auth-title">
+    Are You Sure This Is Your Email? <br> 
+    <span class="auth-email">{{ email }}</span><br>
+    <a href="{% url 'register' %}" class="auth-link">Update Your Email</a>
+  </h2>
+<hr class="custom-hr">
 
-  <p>Didn't receive the email? <a href="{% url 'resend_activation' %}">Resend Activation Email</a></p>
+  <p class="auth-subtitle">
+    We've sent an activation link to your email address.<br>
+    Please check your email and click on the link to activate your account.
+  </p>
+<hr class="custom-hr">
+  <p class="auth-subtitle">
+    Didn't receive the email? 
+    <a href="{% url 'resend_activation' %}" class="auth-link">Resend Activation Email</a>
+  </p>
+</div>
 {% endblock %}

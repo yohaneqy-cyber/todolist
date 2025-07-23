@@ -1,6 +1,13 @@
+import json
+from django.db import models
 from django.template.loader import render_to_string
 from django.http import HttpResponse
+from django.http import JsonResponse
+from django.db.models import Q
+from datetime import timedelta
+from datetime import timezone
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_GET, require_POST
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -9,6 +16,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import SetPasswordForm
 from django.utils.timezone import now
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_str
@@ -16,15 +24,16 @@ from datetime import timedelta
 from rest_framework import status 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from django.db.models import IntegerField
+from django.db.models.functions import Cast
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.conf import settings
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser
-from rest_framework.permissions import IsAuthenticated
-from .models import Task, User
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship
 from .serializers import TaskSerializer
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, ReminderForm, ChengeForm, RecurringTaskForm, TaskForm
 
 User = get_user_model()
 
@@ -38,13 +47,12 @@ def task_detail(request, pk):
     serializer = TaskSerializer(task)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def api(request):
+    return Response('Welcome to api')
 
-class ApiOverView(APIView):
-    permission_classes = [IsAdminUser]
 
-    def get(self, request, format=None):
-        return Response({'message': 'Welcome to the Task API'}, status=status.HTTP_200_OK)
-    
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def task_list(request):
@@ -60,84 +68,255 @@ def task_create(request):
         return Response(serializer.data)
     return Response(serializer.data)
 
-@login_required
+
+from django.db.models import Q, IntegerField
+from django.db.models.functions import Cast
+from django.utils.timezone import now
+from datetime import timedelta
+from django.shortcuts import render
+
 def home(request):
     filter_type = request.GET.get('filter', 'all')
+    category_id = request.GET.get('category')
+    query = request.GET.get('q') or ""
+    today = now().date()
+    categories = Category.objects.all()
+    
+    if request.user.is_authenticated:
+        user = request.user
+        own_tasks = Task.objects.filter(user=user)
+        shared_tasks = Task.objects.filter(share_with=user)
+        tasks = (own_tasks | shared_tasks).distinct()
+
+        try:
+            priority = int(request.GET.get('priority'))
+            if priority not in [1, 2, 3]:
+                priority = None
+        except (ValueError, TypeError):
+            priority = None
+
+        def iranian_weekday(d):
+            return (d.weekday() + 2) % 7
+
+        if priority:
+            tasks = tasks.filter(priority=priority)
+
+        if filter_type == 'category' and category_id:
+            try:
+                category_id_int = int(category_id)
+                tasks = tasks.filter(category_id=category_id_int)
+            except (ValueError, TypeError):
+                pass
+            show_only = 'category'
+
+        elif filter_type == 'today':
+            tasks = tasks.filter(due_date__date=today)
+            show_only = 'today'
+
+        elif filter_type == 'week':
+            start_week = today - timedelta(days=iranian_weekday(today))
+            end_week = start_week + timedelta(days=6)
+            tasks = tasks.filter(due_date__date__range=[start_week, end_week])
+            show_only = 'week'
+
+        elif filter_type == 'tomorrow':
+            tomorrow = today + timedelta(days=1)
+            tasks = tasks.filter(due_date__date=tomorrow)
+            show_only = 'tomorrow'
+
+        elif filter_type == 'done':
+            tasks = tasks.filter(completed=True, parent=None)
+            show_only = 'done'
+
+        elif filter_type == 'pending':
+            tasks = tasks.filter(completed=False, parent=None)
+            show_only = 'pending'
+
+        elif query:
+            tasks = tasks.filter(
+                Q(title__icontains=query) | Q(bio__icontains=query)
+            )
+            show_only = 'search'
+
+        else:
+            show_only = 'all'
+
+        tasks = tasks.annotate(priority_int=Cast('priority', IntegerField())).order_by('-priority_int', '-created')
+
+        if priority:
+            recurring_tasks = RecurringTask.objects.none()
+        else:
+            recurring_tasks = RecurringTask.objects.filter(user=user, active=True, title__icontains=query)
+            if filter_type == 'today':
+                recurring_tasks = recurring_tasks.filter(start_date__date=today)
+            elif filter_type == 'tomorrow':
+                tomorrow = today + timedelta(days=1)
+                recurring_tasks = recurring_tasks.filter(start_date__date=tomorrow)
+            elif filter_type == 'week':
+                start_week = today - timedelta(days=iranian_weekday(today))
+                end_week = start_week + timedelta(days=6)
+                recurring_tasks = recurring_tasks.filter(start_date__date__range=[start_week, end_week])
+
+        normal_tasks = tasks.filter(recurring_task__isnull=True, parent__isnull=True)
+        for task in normal_tasks:
+            task.has_subtask = task.subtasks.exists()
+            task.progress = task.progress_percent(user=user)
+
+        pending_tasks = tasks.filter(completed=False, parent=None)
+        completed_tasks = tasks.filter(completed=True, parent=None)
+
+    else:
+        tasks = Task.objects.none()
+        recurring_tasks = RecurringTask.objects.none()
+        normal_tasks = []
+        pending_tasks = Task.objects.none()
+        completed_tasks = Task.objects.none()
+        show_only = 'all'
+        priority = None
+
+    context = {
+        'tasks': tasks,
+        'pending_tasks': pending_tasks,
+        'completed_tasks': completed_tasks,
+        'categories': categories,
+        'recurring_tasks': recurring_tasks,
+        'normal_tasks': normal_tasks,
+        'show_only': show_only,
+        'priority': priority,
+    }
+    return render(request, 'base/home.html', context)
+
+
+
+def view_task(request, pk):
+    task = get_object_or_404(Task, pk=pk)
+
+    if not (task.user == request.user or request.user in task.share_with.all()):
+        messages.error(request, 'You Dont Have Success')
+        return redirect('home')
+    return render(request, 'base/view_task.html', {'task':task})
+
+@login_required
+def add_task(request):
+    categories = Category.objects.all()
+    print("User friends count:", request.user.friends.count())  # <-- این را اضافه کن
+    
+    if request.method == 'POST':
+        form = TaskForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+
+            reminder_minutes = request.POST.get('remind_in_minutes')
+            if reminder_minutes:
+                task.reminder_at = timezone.now() + timedelta(minutes=int(reminder_minutes))
+
+            category_id = request.POST.get('category')
+            task.category = Category.objects.get(id=category_id) if category_id else None
+
+            time_to_do = request.POST.get('time_to_do')
+            if time_to_do:
+                task.time_to_do = time_to_do
+
+            task.save()
+            form.save_m2m()
+            return redirect('home')
+    else:
+        form = TaskForm(user=request.user)
+
+    return render(request, 'base/add_task.html', {
+        'form': form,
+        'categories': categories,
+    })
+
+
+def dashbord(request):
+    user = request.user
     today = now().date()
 
-    def iranian_weekday(d):
-        wd = d.weekday()
-        return(wd + 2) % 7
-    
-    if filter_type == 'today':
-        tasks = Task.objects.filter(user=request.user, created__date=today)
-    
-    elif filter_type == 'week':
-        start_week = today - timedelta(days=iranian_weekday(today))
-        end_week = start_week + timedelta(days=6)
-        tasks = Task.objects.filter(user=request.user, created__date__range=[start_week, end_week])
+    normal_tasks = Task.objects.filter(user=user, recurring_task__isnull=True)
+    recurring_tasks_instance = Task.objects.filter(user=user, recurring_task__isnull=False)
+    recurring_tasks = RecurringTask.objects.filter(user=user, active=True)
 
-    elif filter_type == 'done':
-        tasks = Task.objects.filter(user=request.user ,completed=True)
+    total_recurring_definitions = RecurringTask.objects.filter(user=user).count()
+    total_normal = Task.objects.filter(user=user).count()
+    total = total_normal + total_recurring_definitions
+    done_tasks = Task.objects.filter(user=user, completed=True).count()
+    today_normal_tasks = Task.objects.filter(user=user, created__date=today).count()
+    today_tasks = today_normal_tasks + total_recurring_definitions
+    subtasks_count = Task.objects.filter(user=user).exclude(parent=None).count()
+    subtasks_list = Task.objects.filter(user=user).exclude(parent=None).order_by('-created')
 
-    elif filter_type == 'pending':
-        tasks = Task.objects.filter(user=request.user,completed=False)
+    context = {
+        'total': total,
+        'done_tasks': done_tasks,
+        'today_tasks': today_tasks,
+        'recurring_tasks': recurring_tasks,
+        'normal_tasks': normal_tasks,
+        'recurring_tasks_instance': recurring_tasks_instance,
+        'total_normal':total_normal,
+        'total_recurring_definitions':total_recurring_definitions,
+        'subtasks_count':subtasks_count,
+        'subtasks_list':subtasks_list
+        
+    }
 
-    else:
-        tasks = Task.objects.filter(user=request.user).order_by('-created')
+    return render(request, 'base/dashbord.html', context)
 
-    if filter_type == 'all':
-        pending_tasks = tasks.filter(completed=False)
-        completed_tasks = tasks.filter(completed=True)
-    else:
-        pending_tasks = tasks
-        completed_tasks = []
-
-
-
-    context = {'tasks': tasks, 'pending_tasks': pending_tasks, 'completed_tasks': completed_tasks}
-    return render(request, 'base/home.html', context )
-
-@login_required(login_url='/login')
-def add_task(request):
+def complete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id, user=request.user)
     if request.method == 'POST':
-        title = request.POST.get('title')
-        remainder_str = request.POST.get('remainder_datetime')
-        reminder = None
-        if remainder_str:
-            reminder = parse_datetime(remainder_str)
-        Task.objects.create(user = request.user, title=title, reminder_datetime=reminder)
-        return redirect('home')
-    return render(request, 'base/add_task.html')
-
-
-def complete_task(request, pk):
-    task = get_object_or_404(Task, id=pk, user = request.user)
-    task.completed = True
-    task.save()
-    return redirect('home')
-
-def update_task(request, pk):
-    task = get_object_or_404(Task, id=pk, user = request.user)
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        task.title = title
+        old_copleted = task.completed
+        task.completed = True
         task.save()
-        return redirect('home')
-    else:
-        context = {'task':task}
-        return render(request, 'base/update_task.html', context)
-    
 
-def delete_task(request,pk):
-    task = get_object_or_404(Task, id=pk, user = request.user)
+        TaskHistory.objects.create(
+            task=task,
+            user=request.user,
+            action='Done',
+            old_title=task.title,
+            new_title=task.title
+        )
+        return redirect('home')
+    return render(request, 'base/completed_task.html', {'task':task})
+
+@login_required
+def update_task(request, pk):
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    categories = Category.objects.all()
+
     if request.method == 'POST':
-        task.delete()
-        return redirect('home')
-    return render(request, 'base/delete.html', {'task':task})
+        form = TaskForm(request.POST,request.FILES,instance=task,user=request.user,)
+        if form.is_valid():
+            updated_task = form.save(commit=False)
+            category_id = request.POST.get('category')
+            if category_id:
+                try:
+                    updated_task.category = Category.objects.get(id=int(category_id))
+                except Category.DoesNotExist:
+                    updated_task.category = None
+            else:
+                updated_task.category = None
 
-from django.contrib.auth import get_user_model
-User = get_user_model()
+            updated_task.save()
+            form.save_m2m()
+            return redirect('home')
+    else:
+        form = TaskForm(instance=task, user=request.user)
+
+    context = {'form': form, 'task': task, 'categories': categories}
+    return render(request, 'base/update_task.html', context)
+
+def delete_task(request, pk):
+    task = get_object_or_404(Task, pk=pk, user=request.user)
+    
+    if request.method == "POST":
+        task.delete()
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return HttpResponse(status=204)
+        return redirect('home')
+    return render(request, 'base/delete.html', {'task': task})
+
 
 def LoginPage(request):
     page = 'login'
@@ -157,6 +336,18 @@ def LoginPage(request):
 
     return render(request, 'base/login_register.html', {'page': page})
 
+@login_required
+def profile_view(request):
+    user = request.user
+    if request.method == 'POST':
+        form = ChengeForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = ChengeForm(instance=request.user)
+    return render(request, 'base/profile.html', {'form': form})
+
 def LogoutUser(request):
     logout(request)
     return redirect('home')
@@ -166,32 +357,37 @@ def RegisterPage(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data.get('email')
-            existing  = User.objects.filter(email=email, is_active=False).first()
-            if existing:
-                existing.delete()
+            
+            if User.objects.filter(email=email, is_active=True).exists():
+                form.add_error('email', 'This email is already used by an active user.')
+            else:
+                inactive_users = User.objects.filter(email=email, is_active=False)
+                if inactive_users.exists():
+                    inactive_users.delete()
 
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
+                user = form.save(commit=False)
+                user.is_active = False
+                user.save()
 
-            request.session['registered_email'] = user.email  
+                request.session['registered_email'] = user.email  
 
-            current_site = get_current_site(request)
-            mail_subject = 'Activate Your Account'
-            message = render_to_string('base/activate_account_email.html', {
-                'user': user, 
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': default_token_generator.make_token(user),
-            })
-            user.email_user(mail_subject, message)
+                current_site = get_current_site(request)
+                mail_subject = 'Activate Your Account'
+                message = render_to_string('base/activate_account_email.html', {
+                    'user': user, 
+                    'domain': current_site.domain,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                    'token': default_token_generator.make_token(user),
+                })
+                user.email_user(mail_subject, message)
 
-            return redirect('email_verification_sent')  
+                return redirect('email_verification_sent')
 
     else:
         form = CustomUserCreationForm()
 
     return render(request, 'base/login_register.html', {'form': form, 'page': 'register'})
+
 def activate_account(request,uidb64,token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
@@ -312,3 +508,278 @@ def password_reset_confirm(request, uidb64, token):
     else:
         messages.error(request, 'Link Is Invalid')
         return redirect('password_reset_request')
+    
+def create_reminder(request):
+    if request.method == 'POST':
+        form = ReminderForm(request.POST)
+        if form.is_valid():
+            remind_at = timezone.now() + timedelta(minutes=form.cleaned_data['remind_in_minutes'])
+            Task.objects.create(
+                user=request.user,
+                title=form.cleaned_data['task_title'], 
+                reminder_at=remind_at,
+            )
+            return redirect('home')
+    else:
+        form = ReminderForm()
+    return render(request, 'base/create_reminder.html', {'form': form})
+
+
+@login_required
+def cerate_recurring_task(request):
+    if request.method == 'POST':
+        form = RecurringTaskForm(request.POST)
+        if form.is_valid():
+            recurring_task = form.save(commit=False)
+            recurring_task.user = request.user
+            recurring_task.save()
+            return redirect('home')
+    else:
+        form = RecurringTaskForm()
+    return render(request, 'base/create_recurring_task.html', {'form':form})
+
+def update_recurring_task(request, pk):
+    recurring_task = get_object_or_404(RecurringTask, id=pk ,user=request.user)
+
+    if request.method == 'POST':
+        form = RecurringTaskForm(request.POST, instance=recurring_task)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = RecurringTaskForm(instance=recurring_task)
+
+    return render(request, 'base/update_recurring_task.html', {'form':form})
+    
+def delete_recurring_task(request, pk):
+    recurring_task = get_object_or_404(RecurringTask, id=pk ,user=request.user)
+
+    if request.method == 'POST':
+        recurring_task.delete()
+        return redirect('home')
+    return render(request, 'base/delete_recurring_task.html', {'recurring_task':recurring_task})
+
+def add_subtask(request, task_id):
+    parent = get_object_or_404(Task, id=task_id, user=request.user)
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST, user=request.user)
+        if form.is_valid():
+            subtask = form.save(commit=False)
+            subtask.user = request.user
+
+            parent_from_form = form.cleaned_data.get('parent')
+            if parent_from_form and parent_from_form.user == request.user:
+                subtask.parent = parent_from_form
+            else:
+                subtask.parent = parent  
+
+            subtask.save()
+            return redirect('home')
+    else:
+        form = TaskForm(user=request.user, initial={'parent': parent})
+
+    return render(request, 'base/add_subtask.html', {
+        'form': form,
+        'parent': parent
+    })
+
+def task_history(request):
+    user = request.user
+    tasks = Task.objects.filter(user=user).order_by('-created')
+    return render(request, 'base/task_history.html', {'tasks': tasks})
+
+@login_required
+def calendar(request):
+    tasks = Task.objects.filter(user=request.user).values('title', 'id', 'due_date')
+    task_list = list(tasks)
+
+    for t in task_list:
+        if t['due_date']:
+            t['due_date'] = t['due_date'].isoformat()
+        else:
+            t['due_date'] = None
+
+    tasks_json = json.dumps(task_list)
+
+    return render(request, 'base/calendar.html', {'tasks_json':tasks_json})
+
+def complete_subtask(request, subtask_id):
+    subtask = get_object_or_404(Task, id=subtask_id, user=request.user)
+    subtask.completed = True
+    subtask.save()
+    return redirect('home')
+
+def friend_requests(request):
+    recived_request = FriendRequest.objects.filter(user_to=request)
+    return render(request, 'base/friend_request_modal.html', {'recived_request':recived_request})
+
+@login_required
+def friend_requests_api(request):
+    requests = FriendRequest.objects.filter(to_user=request.user)
+    data = []
+    for req in requests:
+        data.append({
+            'id': req.id,
+            'from_user_name': req.from_user.name,
+            'accept_url': reverse('accept_friend_request', args=[req.id]),
+            'decline_url': reverse('decline_friend_request', args=[req.id]),
+        })
+    return JsonResponse({'requests': data})
+
+@login_required
+def search_users(request):
+    query = request.GET.get('q', '').strip()
+    
+    if query:
+        users = User.objects.exclude(id=request.user.id).filter(name__icontains=query)
+    else:
+        users = User.objects.exclude(id=request.user.id)[:20]  
+    
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        users_data = [
+            {'id': u.id, 'name': u.name, 'email': u.email}
+            for u in users
+        ]
+        return JsonResponse({'users': users_data})
+
+    context = {
+        'users': users,
+        'query': query,
+    }
+    return render(request, 'base/search_users.html', context)
+    
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.db.models import Q
+from .models import User, Friendship, FriendRequest
+
+@login_required
+@require_POST
+def send_friend_request(request, user_id):
+    try:
+        to_user = User.objects.get(id=user_id)
+
+        if to_user == request.user:
+            return JsonResponse({
+                'success': False,
+                'error': 'You cannot send a friend request to yourself.',
+                'code': 'self_request'
+            })
+
+        already_friends = Friendship.objects.filter(
+            user1=min(request.user, to_user, key=lambda u: u.id),
+            user2=max(request.user, to_user, key=lambda u: u.id)
+        ).exists()
+        if already_friends:
+            return JsonResponse({
+                'success': False,
+                'error': 'You are already friends.',
+                'code': 'already_friends'
+            })
+
+        already_requested = FriendRequest.objects.filter(
+            Q(from_user=request.user, to_user=to_user) |
+            Q(from_user=to_user, to_user=request.user)
+        ).exists()
+
+        if already_requested:
+            return JsonResponse({
+                'success': False,
+                'error': 'Friend request already exists.',
+                'code': 'already_requested'
+            })
+
+        FriendRequest.objects.create(from_user=request.user, to_user=to_user)
+        return JsonResponse({'success': True, 'message': 'Friend request sent successfully.'})
+
+    except User.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'User not found.',
+            'code': 'not_found'
+        }, status=404)
+
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e),
+            'code': 'server_error'
+        }, status=400)
+
+@login_required
+@require_POST
+def accept_friend_request(request, request_id):
+    friend_request = get_object_or_404(FriendRequest, id=request_id, to_user=request.user)
+
+    Friendship.objects.get_or_create(
+        user1=min(friend_request.from_user, friend_request.to_user, key=lambda u: u.id),
+        user2=max(friend_request.from_user, friend_request.to_user, key=lambda u: u.id)
+    )
+    friend_request.delete()
+    return JsonResponse({'success': True, 'message': 'Friend request accepted.'})
+
+
+@login_required
+@require_POST
+def decline_friend_request(request, request_id):
+    friend_request = get_object_or_404(FriendRequest, id=request_id, to_user=request.user)
+    friend_request.delete()
+    return JsonResponse({'success': True, 'message': 'Friend request declined.'})
+
+
+@login_required
+def friends_list_api(request):
+    friendships = Friendship.objects.filter(user1=request.user) | Friendship.objects.filter(user2=request.user)
+    friends = []
+    for friendship in friendships:
+        if friendship.user1 == request.user:
+            friend = friendship.user2
+        else:
+            friend = friendship.user1
+        friends.append({'id': friend.id, 'name': friend.name})
+
+    return JsonResponse({'friends': friends})
+
+
+from django.db import transaction
+
+@login_required
+@require_POST
+def unfriend(request, user_id):
+    try:
+        other_user = User.objects.get(id=user_id)
+
+        with transaction.atomic():
+            # حذف رابطه در Friendship (اگر هست)
+            friendship = Friendship.objects.filter(
+                Q(user1=request.user, user2=other_user) |
+                Q(user1=other_user, user2=request.user)
+            ).first()
+            if friendship:
+                friendship.delete()
+
+            # حذف از فیلد friends هر دو کاربر
+            request.user.friends.remove(other_user)
+            other_user.friends.remove(request.user)
+
+            # حذف دوست از تمام تسک‌هایی که با او به اشتراک گذاشته شده
+            tasks_with_friend = Task.objects.filter(share_with=other_user)
+            for task in tasks_with_friend:
+                task.share_with.remove(other_user)
+
+        return JsonResponse({'success': True, 'message': 'Unfriended successfully.'})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'User not found.'})
+
+
+def user_profile_ajax(request, user_id):
+    if not request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return HttpResponse(status=400)    
+    
+    user = get_object_or_404(User, id=user_id)
+    return render(request, 'base/user_profile.html', {'user': user})    
+

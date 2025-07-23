@@ -1,0 +1,55 @@
+{% extends 'base/main.html' %}
+
+{% block content %}
+<h2 class="form-heading">Task Details</h2>
+
+<div class="custom-form">
+
+  <div class="form-group">
+    <label class="form-label"><strong>Title:</strong></label>
+    <p class="form-input">{{ task.title }}</p>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label"><strong>Bio:</strong></label>
+    <p class="form-input">{{ task.bio }}</p>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label"><strong>Due Date:</strong></label>
+    <p class="form-input">{{ task.due_date }}</p>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label"><strong>Priority:</strong></label>
+    <p class="form-input">{{ task.get_priority_display }}</p>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label"><strong>Completed?</strong></label>
+    <p class="form-input">{{ task.completed|yesno:"YES,NO" }}</p>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label"><strong>Attachment:</strong></label>
+    {% if task.attachment %}
+      <a class="form-input" href="{{ task.attachment.url }}" target="_blank">Download</a>
+    {% else %}
+      <p class="form-input">nothing</p>
+    {% endif %}
+  </div>
+
+  <hr style="margin: 20px 0;">
+
+  <div class="form-group">
+    {% if request.user == task.user %}
+      <a href="{% url 'update_task' task.pk %}" class="form-button">Edit</a>
+      <a href="{% url 'delete_task' task.pk %}" class="form-button" style="background-color: #f44336;">Delete</a>
+    {% else %}
+      <p style="color: gray; font-style: italic;">Just Owner  Can Edit</p>
+    {% endif %}
+    <a href="{% url 'home' %}" class="form-button">Back</a>
+  </div>
+
+</div>
+{% endblock %}
