@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: todolist
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn todolist.wsgi:application"
+    autoDeploy: true
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: todolist.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
