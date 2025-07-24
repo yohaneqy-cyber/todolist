@@ -82,16 +82,25 @@ TEMPLATES = [
 WSGI_APPLICATION = 'todolist.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+import os
+import dj_database_url
+from pathlib import Path
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
-        conn_max_age=600,
-        ssl_require=False  # چون SQLite به SSL نیاز نداره
-    )
-}
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+if os.getenv('RENDER'):
+    # اینجا دیتابیس رندر
+    DATABASES = {
+        'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+    }
+else:
+    # دیتابیس لوکال (SQLite)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
