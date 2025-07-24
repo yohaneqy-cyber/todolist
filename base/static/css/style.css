@@ -603,33 +603,36 @@
   .navbar-container {
     padding: 6px 10px;
     font-size: 12px;
-    height: 45px;
-    flex-wrap: wrap; /* اجازه خط خوردن برای موبایل */
+    height: auto; /* اجازه بده ارتفاع اتوماتیک باشه */
+    flex-wrap: wrap; /* اجازه بده فرزندان اگر جا نشدند، خط بشکنند */
+    align-items: flex-start; /* در صورت شکست خط، بالا تراز شوند */
   }
 
-  /* لوگوی سایت - کوچکتر و اگر لازم باشد کوتاه یا مخفی */
   .navbar-logo-text {
     font-size: 16px;
-    max-width: 120px; /* حداکثر عرض برای جلوگیری از پهن شدن بیش از حد */
+    max-width: 120px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* لینک‌ها در موبایل کوچکتر و با padding کمتر */
   .navbar-links {
     width: 100%;
     margin-top: 6px;
     gap: 8px;
-    overflow-x: auto; /* اجازه اسکرول افقی */
+    flex-wrap: wrap; /* این خط اضافه شده */
+    overflow-x: visible; /* چون می‌خواهیم شکست خط داشته باشیم */
   }
 
   .navbar-links a {
     font-size: 14px;
     padding: 6px 8px;
-    white-space: nowrap;
+    white-space: normal; /* به جای nowrap اجازه شکست خط */
+    flex: 1 1 auto; /* لینک‌ها انعطاف پذیر باشند */
+    text-align: center; /* برای بهتر دیده شدن */
   }
 }
+
 
 
 /* لوگو */
@@ -734,10 +737,10 @@
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
 }
 
-.add-btn:active {
-  transform: scale(0.96);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
+  .add-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
 
 /* خط جداکننده زیبا */
 .custom-hr {
