@@ -601,12 +601,12 @@
 
 @media (max-width: 600px) {
   .navbar-links a {
-    font-size: 10px; /* فونت موبایل کوچکتر */
-    padding: 3px 5px;
+    font-size: 2px; /* فونت موبایل کوچکتر */
+    padding: 1px 3px;
   }
 
   .navbar-logo-text {
-    font-size: 14px; /* فونت لوگو کمی کوچکتر */
+    font-size: 2px; /* فونت لوگو کمی کوچکتر */
     max-width: 100px;
     white-space: nowrap;
     overflow: hidden;
