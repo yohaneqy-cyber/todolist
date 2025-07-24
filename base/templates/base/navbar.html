@@ -408,7 +408,7 @@
     @media (max-width: 768px) {
       .navbar-avatar-topright {
         top: 10px;
-        left: 10px;
+        left: 10px;     /* برای موبایل بیا گوشه چپ بالا */
         right: auto;
       }
 
@@ -496,9 +496,7 @@
             </div>
           {% endif %}
         </div>
-      {% endif %}
-
-
+ 
         <a href="#" id="openFriendsModal" class="navbar-link">Friends</a>
         <a href="{% url 'dashbord' %}" class="navbar-link">Dashboard</a>
         <a href="#" id="openLogoutModal" class="navbar-link">Logout</a>
