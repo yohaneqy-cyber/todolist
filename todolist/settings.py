@@ -166,7 +166,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'todolist-4-stxk.onrender.com']
+ALLOWED_HOSTS = ['todolist-5-ae2p.onrender.com', 'localhost', '127.0.0.1']
 
 
 # برای استفاده از استاتیک فشرده و کش شده:
