@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import dj_database_url
 import os
+from decouple import config
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -87,7 +89,7 @@ import dj_database_url
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),  # اینجا مقدار متغیر محیطی را به طور صریح می‌دهیم
+        default=config('DATABASE_URL'),  # به جای os.getenv از config استفاده کن
         conn_max_age=600,
         ssl_require=True
     )
