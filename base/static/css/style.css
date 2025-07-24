@@ -600,10 +600,28 @@
 }
 
 @media (max-width: 600px) {
-  .navbar-container {
-    background-color: red !important;
+  .navbar-links {
+    justify-content: flex-end !important; /* لینک‌ها سمت راست بچسبند */
+    gap: 8px;
+    overflow: visible !important; /* جلوگیری از اسکرول اضافی */
+  }
+
+  .navbar-profile-link {
+    margin-left: auto; /* فاصله از بقیه لینک‌ها و چسبیدن به راست */
+    padding-left: 8px;
+    border-left: 1px solid #ccc;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .profile-avatar {
+    width: 28px;
+    height: 28px;
   }
 }
+
 
 
 /* لوگو */
