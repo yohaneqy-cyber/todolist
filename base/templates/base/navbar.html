@@ -156,6 +156,42 @@
       background-color: rgba(0, 0, 0, 0.6);
     }
 
+    @media (max-width: 600px) {
+      .navbar-container {
+        padding: 4px 8px;
+        height: auto;
+        flex-wrap: nowrap;
+      }
+
+      .navbar-links {
+        flex-grow: 1;
+        justify-content: space-between;
+        overflow: hidden;
+        gap: 4px;
+      }
+
+      .navbar-links a {
+        font-size: 13px;
+        padding: 4px 6px;
+        white-space: nowrap;
+      }
+
+      .navbar-avatar {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+      }
+
+      .navbar-avatar img {
+        width: 40px;
+        height: 40px;
+      }
+
+      .navbar-logo-text {
+        font-size: 16px;
+      }
+    }
+
 
     .modal-content {
       background: #fff;

@@ -561,68 +561,6 @@
   cursor: pointer;
 }
 
-/* ساختار کلی نوار بالا */
-/* کانتینر اصلی نوار ناوبری */
-.navbar-container {
-  width: 100%;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 10;
-  background-color: transparent;
-  box-shadow: none;
-}
-
-/* استایل برای لینک‌های داخل نوار ناوبری */
-.navbar-links {
-  display: flex;
-  gap: 12px; /* فاصله بین لینک‌ها */
-  flex-wrap: nowrap; /* از شکست خط جلوگیری می‌کند */
-  overflow-x: auto; /* اسکرول افقی اگر جا نشد */
-}
-
-/* لینک‌ها */
-.navbar-links a {
-  font-size: 16px;
-  padding: 8px 12px;
-  white-space: nowrap; /* جلوگیری از شکست خط */
-  text-decoration: none;
-  color: inherit;
-  transition: color 0.3s ease;
-}
-
-.navbar-links a:hover {
-  color: #3498db; /* تغییر رنگ هنگام هاور */
-}
-
-@media (max-width: 600px) {
-  .navbar-links {
-    justify-content: flex-end !important; /* لینک‌ها سمت راست بچسبند */
-    gap: 8px;
-    overflow: visible !important; /* جلوگیری از اسکرول اضافی */
-  }
-
-  .navbar-profile-link {
-    margin-left: auto; /* فاصله از بقیه لینک‌ها و چسبیدن به راست */
-    padding-left: 8px;
-    border-left: 1px solid #ccc;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .profile-avatar {
-    width: 28px;
-    height: 28px;
-  }
-}
-
-
 
 /* لوگو */
 .navbar-logo {
