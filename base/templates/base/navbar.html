@@ -156,43 +156,6 @@
       background-color: rgba(0, 0, 0, 0.6);
     }
 
-    @media (max-width: 600px) {
-      .navbar-container {
-        padding: 4px 8px;
-        height: auto;
-        flex-wrap: nowrap;
-      }
-
-      .navbar-links {
-        flex-grow: 1;
-        justify-content: space-between;
-        overflow: hidden;
-        gap: 4px;
-      }
-
-      .navbar-links a {
-        font-size: 13px;
-        padding: 4px 6px;
-        white-space: nowrap;
-      }
-
-      .navbar-avatar {
-        position: absolute;
-        top: 6px;
-        right: 8px;
-      }
-
-      .navbar-avatar img {
-        width: 40px;
-        height: 40px;
-      }
-
-      .navbar-logo-text {
-        font-size: 16px;
-      }
-    }
-
-
     .modal-content {
       background: #fff;
       margin: 5% auto;
@@ -407,15 +370,26 @@
 
     @media (max-width: 768px) {
       .navbar-avatar-topright {
+        position: absolute;
         top: 10px;
-        left: 10px;     /* برای موبایل بیا گوشه چپ بالا */
-        right: auto;
+        left: 10px;
+        width: 36px;
+        height: 36px;
+        z-index: 50;
+      }
+
+      .navbar-avatar-topright img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
       }
 
       .navbar-logo-text {
-        display: none;  /* مخفی کردن لوگو در موبایل */
+        display: none;
       }
     }
+
 
     /* Confirmation Modal */
     #confirmUnfriendModal .modal-content {
