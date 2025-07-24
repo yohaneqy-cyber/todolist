@@ -488,6 +488,7 @@
 .profile-form button:hover {
   background-color: #303f9f;
   box-shadow: 0 6px 24px rgba(48,63,159,0.65);
+  
 }
 .search-form {
   display: flex;
@@ -561,42 +562,6 @@
   cursor: pointer;
 }
 
-/* ساختار کلی نوار بالا */
-/* کانتینر اصلی نوار ناوبری */
-.navbar-container {
-  width: 100%;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 10;
-  /* بدون پس‌زمینه و سایه */
-  background-color: transparent;
-  box-shadow: none;
-}
-
-/* لوگو */
-.navbar-logo {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  float: left;
-}
-
-.navbar-logo-text {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #222;
-  margin: 0;
-  padding: 0;
-}
-
-
-
-
 /* کانتینر دکمه‌ها: چینش افقی و وسط‌چین */
 .add-buttons-container {
   display: flex;
@@ -628,10 +593,10 @@
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
 }
 
-.add-btn:active {
-  transform: scale(0.96);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-}
+  .add-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
 
 /* خط جداکننده زیبا */
 .custom-hr {
@@ -683,13 +648,105 @@
 }
 
 /* تنظیمات کلی صفحه */
+/* تنظیم فونت کلی سایت */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  color: #333;
+  line-height: 1.6;
   background-color: #f9f9f9;
   margin: 0;
-  padding: 0 20px;
-  color: #333;
+  padding: 0 15px;
 }
+
+/* استایل بخش bio */
+.bio {
+  background-color: #eef2f7;
+  border-left: 4px solid #4a90e2;
+  padding: 15px 20px;
+  margin: 15px 0;
+  border-radius: 6px;
+  color: #555;
+  font-style: italic;
+  font-size: 1rem;
+  max-width: 700px;
+  word-wrap: break-word;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: background-color 0.3s ease;
+}
+
+@media (max-width: 600px) {
+  .profile-container {
+    max-width: 90%;
+    margin: 30px auto;
+    padding: 20px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 60, 0.1);
+  }
+
+  .profile-container h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .profile-avatar {
+    width: 110px;
+    height: 110px;
+    margin-bottom: 20px;
+    border-width: 4px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-form {
+    padding: 20px 18px;
+    border-radius: 12px;
+    border-width: 1.5px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+  }
+
+  .profile-form p {
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+  }
+
+  .profile-form input[type="text"],
+  .profile-form input[type="email"],
+  .profile-form input[type="password"],
+  .profile-form input[type="file"] {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .profile-form button {
+    font-size: 1rem;
+    padding: 12px 0;
+    box-shadow: 0 2px 10px rgba(63, 81, 181, 0.4);
+  }
+}
+
+
+
+.bio:hover {
+  background-color: #dbe4f7;
+}
+
+/* تیترهای bio اگر لازم شد */
+.bio h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* ریسپانسیو برای موبایل */
+@media (max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+  .bio {
+    font-size: 0.9rem;
+    padding: 12px 15px;
+  }
+}
+
 
 /* استایل هدر و نوار ناوبری */
 header {
@@ -1076,6 +1133,14 @@ button.btn-primary:hover {
   justify-content: center; /* وسط‌چین افقی */
   z-index: 1000; /* روی بقیه عناصر */
 }
+@media (max-width: 600px) {
+  .modal {
+    width: 70%;      /* تقریبا کل عرض صفحه */
+    margin: 10px auto;
+    padding: 15px;
+    font-size: 14px; /* فونت کوچکتر */
+  }
+}
 
 .avatar-placeholder {
   display: flex;
@@ -1093,37 +1158,168 @@ button.btn-primary:hover {
   user-select: none; /* جلوگیری از انتخاب شدن متن */
 }
 
-
-/* دکمه Cancel قرمز */
-.btn-cancel {
-  background-color: #e74c3c; /* قرمز روشن */
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+/* استایل کلی برای همه p های فرم */
+form p {
+  margin-bottom: 1rem;
 }
 
-.btn-cancel:hover {
-  background-color: #c0392b; /* قرمز تیره‌تر */
+/* استایل برای لِیبل‌ها */
+form p label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* استایل برای فیلدهای ورودی و textarea */
+form p textarea,
+form p input[type="text"],
+form p input[type="email"],
+form p input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+/* استایل هنگام فوکوس */
+form p textarea:focus,
+form p input[type="text"]:focus,
+form p input[type="email"]:focus,
+form p input[type="password"]:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 4px #4a90e2;
+}
+
+/* اختصاصی برای bio که textarea است */
+form p textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+
+.auth-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.auth-title {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.auth-button:hover {
+  background-color: #357abd;
+}
+
+.auth-links {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.resend-note {
+  color: red;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+
+.buttons-container {
+  display: flex;
+  justify-content: center; /* وسط‌چین افقی */
+  gap: 12px;               /* فاصله بین دکمه‌ها */
+  margin-top: 20px;        /* فاصله از بالا (اختیاری) */
+}
+
+.link-cancel {
+  display: inline-block;
+  padding: 8px 16px;
+  min-width: 100px;
+  font-size: 14px;
+  line-height: 1.5;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  background-color: #e53935;
+  text-align: center;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+}
+
+.link-cancel:hover {
+  background-color: #b71c1c;
   box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
 }
 
-/* دکمه Save آبی */
 .btn-save {
-  background-color: #3498db; /* آبی متوسط */
-  color: white;
-  border: none;
+  display: inline-block;
   padding: 8px 16px;
+  min-width: 100px;
+  font-size: 14px;
+  line-height: 1.5;
   border-radius: 6px;
-  cursor: pointer;
   font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  background-color: #3f51b5;
+  text-align: center;
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  box-sizing: border-box;
 }
 
 .btn-save:hover {
-  background-color: #2980b9; /* آبی تیره‌تر */
-  box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+  background-color: #0011ff;
+  box-shadow: 0 0 8px rgba(18, 122, 190, 0.6);
 }
+
+
