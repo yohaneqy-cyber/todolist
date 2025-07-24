@@ -19,7 +19,7 @@ def get_user_friends(user):
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('name', 'email', 'avatar', 'password1', 'password2')
+        fields = ('name', 'email', 'avatar','bio','password1', 'password2')
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -52,7 +52,7 @@ class RecurringTaskForm(forms.ModelForm):
 class ChengeForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ('avatar', 'name', 'email')
+        fields = ('avatar', 'name', 'email','bio')
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.get('instance')

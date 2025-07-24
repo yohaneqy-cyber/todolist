@@ -735,13 +735,55 @@
 }
 
 /* تنظیمات کلی صفحه */
+/* تنظیم فونت کلی سایت */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  color: #333;
+  line-height: 1.6;
   background-color: #f9f9f9;
   margin: 0;
-  padding: 0 20px;
-  color: #333;
+  padding: 0 15px;
 }
+
+/* استایل بخش bio */
+.bio {
+  background-color: #eef2f7;
+  border-left: 4px solid #4a90e2;
+  padding: 15px 20px;
+  margin: 15px 0;
+  border-radius: 6px;
+  color: #555;
+  font-style: italic;
+  font-size: 1rem;
+  max-width: 700px;
+  word-wrap: break-word;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: background-color 0.3s ease;
+}
+
+.bio:hover {
+  background-color: #dbe4f7;
+}
+
+/* تیترهای bio اگر لازم شد */
+.bio h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* ریسپانسیو برای موبایل */
+@media (max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+  .bio {
+    font-size: 0.9rem;
+    padding: 12px 15px;
+  }
+}
+
 
 /* استایل هدر و نوار ناوبری */
 header {
@@ -1143,4 +1185,115 @@ button.btn-primary:hover {
   font-size: 4rem; /* سایز متن دلخواه */
   color: #444; /* رنگ متن */
   user-select: none; /* جلوگیری از انتخاب شدن متن */
+}
+
+/* استایل کلی برای همه p های فرم */
+form p {
+  margin-bottom: 1rem;
+}
+
+/* استایل برای لِیبل‌ها */
+form p label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* استایل برای فیلدهای ورودی و textarea */
+form p textarea,
+form p input[type="text"],
+form p input[type="email"],
+form p input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+/* استایل هنگام فوکوس */
+form p textarea:focus,
+form p input[type="text"]:focus,
+form p input[type="email"]:focus,
+form p input[type="password"]:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 4px #4a90e2;
+}
+
+/* اختصاصی برای bio که textarea است */
+form p textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+
+.auth-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.auth-title {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.auth-button:hover {
+  background-color: #357abd;
+}
+
+.auth-links {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.resend-note {
+  color: red;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
 }

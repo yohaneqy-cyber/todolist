@@ -171,3 +171,8 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'todolist-4-stxk.onrender.com']
 
 # برای استفاده از استاتیک فشرده و کش شده:
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
