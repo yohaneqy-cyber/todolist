@@ -600,36 +600,17 @@
 }
 
 @media (max-width: 600px) {
-  .navbar-container {
-    padding: 6px 10px;
-    font-size: 12px;
-    height: auto; /* اجازه بده ارتفاع اتوماتیک باشه */
-    flex-wrap: wrap; /* اجازه بده فرزندان اگر جا نشدند، خط بشکنند */
-    align-items: flex-start; /* در صورت شکست خط، بالا تراز شوند */
+  .navbar-links a {
+    font-size: 10px; /* فونت موبایل کوچکتر */
+    padding: 3px 5px;
   }
 
   .navbar-logo-text {
-    font-size: 16px;
-    max-width: 120px;
+    font-size: 14px; /* فونت لوگو کمی کوچکتر */
+    max-width: 100px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .navbar-links {
-    width: 100%;
-    margin-top: 6px;
-    gap: 8px;
-    flex-wrap: wrap; /* این خط اضافه شده */
-    overflow-x: visible; /* چون می‌خواهیم شکست خط داشته باشیم */
-  }
-
-  .navbar-links a {
-    font-size: 14px;
-    padding: 6px 8px;
-    white-space: normal; /* به جای nowrap اجازه شکست خط */
-    flex: 1 1 auto; /* لینک‌ها انعطاف پذیر باشند */
-    text-align: center; /* برای بهتر دیده شدن */
   }
 }
 
