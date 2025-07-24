@@ -1188,7 +1188,7 @@ button.btn-primary:hover {
 }
 @media (max-width: 600px) {
   .modal {
-    width: 95%;      /* تقریبا کل عرض صفحه */
+    width: 70%;      /* تقریبا کل عرض صفحه */
     margin: 10px auto;
     padding: 15px;
     font-size: 14px; /* فونت کوچکتر */
@@ -1374,4 +1374,5 @@ form p textarea {
   background-color: #0011ff;
   box-shadow: 0 0 8px rgba(18, 122, 190, 0.6);
 }
+
 

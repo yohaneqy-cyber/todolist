@@ -10,6 +10,7 @@
   
 
 
+
   <style>
   /* ====== MODAL STYLES ====== */
   .modal {
@@ -27,13 +28,13 @@
   }
 
   @media (max-width: 600px) {
-  .modal {
-    width: 95%;      /* تقریبا کل عرض صفحه */
-    margin: 10px auto;
-    padding: 15px;
-    font-size: 14px; /* فونت کوچکتر */
+    .modal {
+      width: 70%;      /* تقریبا کل عرض صفحه */
+      margin: 10px auto;
+      padding: 15px;
+      font-size: 14px; /* فونت کوچکتر */
+    }
   }
-}
 
   /* MODAL CONTENT */
   .modal-content {
@@ -402,12 +403,19 @@
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    @media (max-width: 768px) {
+    .hide-on-mobile {
+    display: none !important;
+      }
+    }
+
   </style>
 </head>
 
 <body>
   <header class="navbar-container">
-    <a href="/" class="navbar-logo">
+    <a href="/" class="navbar-logo hide-on-mobile">
       <h1 class="navbar-logo-text">MySite</h1>
     </a>
 
@@ -518,6 +526,7 @@
     return cookieValue;
   }
 
+
   // Modal elements
   const openBtn = document.getElementById("openFriendsModal");
   const modal = document.getElementById("friendsModal");
@@ -563,6 +572,7 @@
     userList.innerHTML = "";
     searchInput.focus();
   });
+
 
   // Close friends modal
   closeBtn.addEventListener("click", function() {
