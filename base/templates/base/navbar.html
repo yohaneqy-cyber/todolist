@@ -487,16 +487,14 @@
 
     <div class="navbar-links-container">
       {% if user.is_authenticated %}
-        <div class="navbar-avatar-topright">
+        <a href="{% url 'profile' %}" class="navbar-avatar-topright">
           {% if user.avatar %}
-            <img src="{{ user.avatar.url }}" alt="Avatar" class="navbar-avatar-img">
+              <img src="{{ user.avatar.url }}" alt="Avatar" class="navbar-avatar-img" />
           {% else %}
-            <div class="navbar-avatar-placeholder">
-              {{ user.name|slice:":1"|upper }}
-            </div>
+            <div class="navbar-avatar-placeholder">{{ user.name|slice:":1"|upper }}</div>
           {% endif %}
-        </div>
- 
+        </a>
+
         <a href="#" id="openFriendsModal" class="navbar-link">Friends</a>
         <a href="{% url 'dashbord' %}" class="navbar-link">Dashboard</a>
         <a href="#" id="openLogoutModal" class="navbar-link">Logout</a>
