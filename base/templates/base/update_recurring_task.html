@@ -17,7 +17,10 @@
         {% endfor %}
       </div>
     {% endfor %}
-    <button type="submit" class="btn btn-primary w-100">Save</button>
+    <div class="buttons-container">
+      <a href="{% url 'home' %}" class="link-cancel">Cancel</a>
+      <button class="btn-save">Save</button>
+    </div>
   </form>
 </div>
 

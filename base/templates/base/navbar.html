@@ -26,6 +26,15 @@
     backdrop-filter: blur(2px);
   }
 
+  @media (max-width: 600px) {
+  .modal {
+    width: 95%;      /* تقریبا کل عرض صفحه */
+    margin: 10px auto;
+    padding: 15px;
+    font-size: 14px; /* فونت کوچکتر */
+  }
+}
+
   /* MODAL CONTENT */
   .modal-content {
     background-color: #fff;
@@ -137,6 +146,15 @@
       overflow-y: auto;
       background-color: rgba(0, 0, 0, 0.6);
     }
+
+    @media (max-width: 600px) {
+  .modal {
+    width: 95%;      /* تقریبا کل عرض صفحه */
+    margin: 10px auto;
+    padding: 15px;
+    font-size: 14px; /* فونت کوچکتر */
+  }
+}
 
     .modal-content {
       background: #fff;
@@ -932,7 +950,6 @@
       logoutModal.style.display = "none";
     }
   };
-
 
 
 </script>

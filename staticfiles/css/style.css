@@ -1144,3 +1144,38 @@ button.btn-primary:hover {
   color: #444; /* رنگ متن */
   user-select: none; /* جلوگیری از انتخاب شدن متن */
 }
+
+
+/* دکمه Cancel قرمز */
+.btn-cancel {
+  background-color: #e74c3c; /* قرمز روشن */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-cancel:hover {
+  background-color: #c0392b; /* قرمز تیره‌تر */
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+}
+
+/* دکمه Save آبی */
+.btn-save {
+  background-color: #3498db; /* آبی متوسط */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-save:hover {
+  background-color: #2980b9; /* آبی تیره‌تر */
+  box-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+}

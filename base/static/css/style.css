@@ -577,6 +577,22 @@
   background-color: transparent;
   box-shadow: none;
 }
+  @media (max-width: 600px) {
+    .navbar-container {
+      padding: 6px 10px;
+      font-size: 12px;
+      height: 45px;
+    }
+
+    .navbar-logo-text {
+      font-size: 18px;
+    }
+
+    .navbar-links a {
+      font-size: 14px;
+      padding: 6px 8px;
+    }
+  }
 
 /* لوگو */
 .navbar-logo {
@@ -1170,6 +1186,14 @@ button.btn-primary:hover {
   justify-content: center; /* وسط‌چین افقی */
   z-index: 1000; /* روی بقیه عناصر */
 }
+@media (max-width: 600px) {
+  .modal {
+    width: 95%;      /* تقریبا کل عرض صفحه */
+    margin: 10px auto;
+    padding: 15px;
+    font-size: 14px; /* فونت کوچکتر */
+  }
+}
 
 .avatar-placeholder {
   display: flex;
@@ -1297,3 +1321,57 @@ form p textarea {
   font-size: 0.9rem;
   text-align: center;
 }
+
+
+.buttons-container {
+  display: flex;
+  justify-content: center; /* وسط‌چین افقی */
+  gap: 12px;               /* فاصله بین دکمه‌ها */
+  margin-top: 20px;        /* فاصله از بالا (اختیاری) */
+}
+
+.link-cancel {
+  display: inline-block;
+  padding: 8px 16px;
+  min-width: 100px;
+  font-size: 14px;
+  line-height: 1.5;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  background-color: #e53935;
+  text-align: center;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+}
+
+.link-cancel:hover {
+  background-color: #b71c1c;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+}
+
+.btn-save {
+  display: inline-block;
+  padding: 8px 16px;
+  min-width: 100px;
+  font-size: 14px;
+  line-height: 1.5;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  background-color: #3f51b5;
+  text-align: center;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  box-sizing: border-box;
+}
+
+.btn-save:hover {
+  background-color: #0011ff;
+  box-shadow: 0 0 8px rgba(18, 122, 190, 0.6);
+}
+

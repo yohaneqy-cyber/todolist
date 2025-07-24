@@ -47,6 +47,7 @@ def task_detail(request, pk):
     serializer = TaskSerializer(task)
     return Response(serializer.data)
 
+
 @api_view(['GET'])
 def api(request):
     return Response('Welcome to api')
@@ -59,6 +60,7 @@ def task_list(request):
     tasks = Task.objects.all()
     serializer = TaskSerializer(tasks, many=True)
     return Response(serializer.data)
+
 
 @api_view(['POST'])
 def task_create(request):
@@ -78,10 +80,10 @@ from django.shortcuts import render
 def home(request):
     filter_type = request.GET.get('filter', 'all')
     category_id = request.GET.get('category')
-    query = request.GET.get('q') or ""
+    query = request.GET.get('q', '').strip()
     today = now().date()
     categories = Category.objects.all()
-    
+
     if request.user.is_authenticated:
         user = request.user
         own_tasks = Task.objects.filter(user=user)
@@ -101,52 +103,55 @@ def home(request):
         if priority:
             tasks = tasks.filter(priority=priority)
 
-        if filter_type == 'category' and category_id:
-            try:
-                category_id_int = int(category_id)
-                tasks = tasks.filter(category_id=category_id_int)
-            except (ValueError, TypeError):
-                pass
-            show_only = 'category'
-
-        elif filter_type == 'today':
-            tasks = tasks.filter(due_date__date=today)
-            show_only = 'today'
-
-        elif filter_type == 'week':
-            start_week = today - timedelta(days=iranian_weekday(today))
-            end_week = start_week + timedelta(days=6)
-            tasks = tasks.filter(due_date__date__range=[start_week, end_week])
-            show_only = 'week'
-
-        elif filter_type == 'tomorrow':
-            tomorrow = today + timedelta(days=1)
-            tasks = tasks.filter(due_date__date=tomorrow)
-            show_only = 'tomorrow'
-
-        elif filter_type == 'done':
-            tasks = tasks.filter(completed=True, parent=None)
-            show_only = 'done'
-
-        elif filter_type == 'pending':
-            tasks = tasks.filter(completed=False, parent=None)
-            show_only = 'pending'
-
-        elif query:
-            tasks = tasks.filter(
-                Q(title__icontains=query) | Q(bio__icontains=query)
-            )
+        if query:
+            tasks = tasks.filter(Q(title__icontains=query) | Q(bio__icontains=query))
             show_only = 'search'
-
         else:
-            show_only = 'all'
+            if filter_type == 'category' and category_id:
+                try:
+                    category_id_int = int(category_id)
+                    tasks = tasks.filter(category_id=category_id_int)
+                except (ValueError, TypeError):
+                    pass
+                show_only = 'category'
+
+            elif filter_type == 'today':
+                tasks = tasks.filter(due_date__date=today)
+                show_only = 'today'
+
+            elif filter_type == 'week':
+                start_week = today - timedelta(days=iranian_weekday(today))
+                end_week = start_week + timedelta(days=6)
+                tasks = tasks.filter(due_date__date__range=[start_week, end_week])
+                show_only = 'week'
+
+            elif filter_type == 'tomorrow':
+                tomorrow = today + timedelta(days=1)
+                tasks = tasks.filter(due_date__date=tomorrow)
+                show_only = 'tomorrow'
+
+            elif filter_type == 'done':
+                tasks = tasks.filter(completed=True, parent=None)
+                show_only = 'done'
+
+            elif filter_type == 'pending':
+                tasks = tasks.filter(completed=False, parent=None)
+                show_only = 'pending'
+
+            else:
+                show_only = 'all'
 
         tasks = tasks.annotate(priority_int=Cast('priority', IntegerField())).order_by('-priority_int', '-created')
 
+        # Recurring tasks
         if priority:
             recurring_tasks = RecurringTask.objects.none()
         else:
-            recurring_tasks = RecurringTask.objects.filter(user=user, active=True, title__icontains=query)
+            recurring_tasks = RecurringTask.objects.filter(user=user, active=True)
+
+            if query:
+                recurring_tasks = recurring_tasks.filter(title__icontains=query)
+
             if filter_type == 'today':
                 recurring_tasks = recurring_tasks.filter(start_date__date=today)
             elif filter_type == 'tomorrow':
