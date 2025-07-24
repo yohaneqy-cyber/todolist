@@ -17,7 +17,6 @@
     display: none; /* Hidden by default */
     position: fixed;
     z-index: 1000;
-    padding-top: 100px;
     left: 0;
     top: 0;
     width: 100%;
@@ -25,16 +24,25 @@
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
+    padding-top: 100px;
+    box-sizing: border-box;
   }
 
   @media (max-width: 600px) {
     .modal {
-      width: 70%;      /* تقریبا کل عرض صفحه */
-      margin: 10px auto;
-      padding: 15px;
-      font-size: 14px; /* فونت کوچکتر */
+      width: 90%;           /* عرض کمتر */
+      max-width: 400px;     /* حداکثر عرض ثابت */
+      height: auto;         /* ارتفاع خودکار */
+      max-height: 80vh;     /* حداکثر ارتفاع ۸۰٪ ارتفاع صفحه */
+      margin: 50px auto;    /* حاشیه بالا و پایین */
+      padding: 20px;
+      font-size: 14px;
+      border-radius: 10px;  /* گوشه‌های گرد */
+      overflow-y: auto;     /* اسکرول عمودی داخل مودال */
+      background-color: white; /* رنگ زمینه برای بهتر دیده شدن */
     }
   }
+
 
   /* MODAL CONTENT */
   .modal-content {
@@ -148,14 +156,6 @@
       background-color: rgba(0, 0, 0, 0.6);
     }
 
-    @media (max-width: 600px) {
-  .modal {
-    width: 95%;      /* تقریبا کل عرض صفحه */
-    margin: 10px auto;
-    padding: 15px;
-    font-size: 14px; /* فونت کوچکتر */
-  }
-}
 
     .modal-content {
       background: #fff;
