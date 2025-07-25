@@ -84,16 +84,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'todolist.wsgi.application'
 
 
-import os
-import dj_database_url
-
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL'),  # به جای os.getenv از config استفاده کن
+        default=config('DATABASE_URL'),
         conn_max_age=600,
         ssl_require=True
     )
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
