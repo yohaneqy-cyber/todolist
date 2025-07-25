@@ -17,6 +17,9 @@ from decouple import config
 
 
 
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -85,6 +88,8 @@ WSGI_APPLICATION = 'todolist.wsgi.application'
 
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+import sys
+print("DATABASE_URL:", DATABASE_URL, file=sys.stderr)
 
 if not DATABASE_URL:
     raise Exception("DATABASE_URL environment variable is not set!")
