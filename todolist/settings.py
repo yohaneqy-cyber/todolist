@@ -85,6 +85,9 @@ WSGI_APPLICATION = 'todolist.wsgi.application'
 
 
 
+import os
+import dj_database_url
+
 DATABASES = {
     'default': dj_database_url.config(
         default=os.getenv('DATABASE_URL'),
@@ -92,6 +95,7 @@ DATABASES = {
         ssl_require=True
     )
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
