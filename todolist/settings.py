@@ -86,12 +86,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'todolist.wsgi.application'
 
+import os
+import dj_database_url
+
+database_url = os.getenv('DATABASE_URL', '')
+
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
 DATABASES = {
-    'default': dj_database_url.config(
-        conn_max_age=600,
-        ssl_require=True,
-    )
+    'default': dj_database_url.parse(database_url, conn_max_age=600, ssl_require=True)
 }
 
 

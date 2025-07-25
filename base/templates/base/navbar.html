@@ -12,177 +12,104 @@
 
 
   <style>
-  /* ====== MODAL STYLES ====== */
-  .modal {
-    display: none; /* Hidden by default */
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(2px);
-    padding-top: 100px;
-    box-sizing: border-box;
-  }
-
-  @media (max-width: 600px) {
+/* ===== MODAL STYLES ===== */
     .modal {
-      width: 90%;           /* عرض کمتر */
-      max-width: 400px;     /* حداکثر عرض ثابت */
-      height: auto;         /* ارتفاع خودکار */
-      max-height: 80vh;     /* حداکثر ارتفاع ۸۰٪ ارتفاع صفحه */
-      margin: 50px auto;    /* حاشیه بالا و پایین */
-      padding: 20px;
-      font-size: 14px;
-      border-radius: 10px;  /* گوشه‌های گرد */
-      overflow-y: auto;     /* اسکرول عمودی داخل مودال */
-      background-color: white; /* رنگ زمینه برای بهتر دیده شدن */
-    }
-  }
-
-
-  /* MODAL CONTENT */
-  .modal-content {
-    background-color: #fff;
-    margin: auto;
-    padding: 30px 25px;
-    border: 1px solid #888;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 0.3s ease;
-  }
-
-  /* CLOSE BUTTON */
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  .close:hover,
-  .close:focus {
-    color: #000;
-  }
-
-  /* MODAL TITLE */
-  .modal-content h2 {
-    font-size: 20px;
-    margin-top: 0;
-    color: #333;
-  }
-
-  /* ====== BUTTONS ====== */
-  .confirm-btn {
-    background-color: #e53935;
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    font-size: 15px;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background-color 0.2s ease;
-  }
-
-  .confirm-btn:hover {
-    background-color: #c62828;
-  }
-
-  .cancel-btn {
-    background-color: #f1f1f1;
-    color: #333;
-    border: none;
-    padding: 10px 18px;
-    font-size: 15px;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: background-color 0.2s ease;
-  }
-
-  .cancel-btn:hover {
-    background-color: #e0e0e0;
-  }
-
-  @keyframes slideFade {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-.modal-content {
-  animation: slideFade 0.25s ease-out;
-}
-
-
-  .modal-content {
-    animation: fadeScaleIn 0.3s ease-out;
-  }
-
-
-  /* ====== RESPONSIVE ====== */
-  @media screen and (max-width: 480px) {
-    .modal-content {
-      width: 90%;
-      padding: 20px 15px;
-    }
-
-    .confirm-btn,
-    .cancel-btn {
-      width: 100%;
-      margin-top: 10px;
-    }
-  }
-
-
-    /* Modal Base */
-    .modal {
-      display: none;
       position: fixed;
       z-index: 1000;
       left: 0; top: 0;
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      box-sizing: border-box;
       overflow-y: auto;
-      background-color: rgba(0, 0, 0, 0.6);
     }
 
     .modal-content {
-      background: #fff;
-      margin: 5% auto;
-      padding: 24px;
+      background: white;
       border-radius: 12px;
-      width: 90%;
-      max-width: 600px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      padding: 20px 25px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
       position: relative;
-      animation: fadeIn 0.3s ease-in-out;
+      animation: slideFade 0.3s ease-out;
     }
 
     .close {
-      color: #888;
       position: absolute;
       top: 12px;
       right: 16px;
       font-size: 28px;
       font-weight: bold;
+      color: #888;
       cursor: pointer;
+      background: transparent;
+      border: none;
     }
 
     .close:hover {
       color: #000;
     }
 
-    /* Tabs Buttons */
+    .confirm-btn,
+    .cancel-btn {
+      width: 100%;
+      padding: 10px 18px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.2s ease;
+    }
+
+    .confirm-btn {
+      background-color: #e53935;
+      color: white;
+    }
+
+    .confirm-btn:hover {
+      background-color: #c62828;
+    }
+
+    .cancel-btn {
+      background-color: #f1f1f1;
+      color: #333;
+    }
+
+    .cancel-btn:hover {
+      background-color: #e0e0e0;
+    }
+
+    /* Modal Animation */
+    @keyframes slideFade {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Modal Mobile Optimizations */
+    @media (max-width: 600px) {
+      .modal-content {
+        max-width: 95%;
+        padding: 15px;
+        font-size: 14px;
+      }
+    }
+
+    /* ===== TABS ===== */
     #searchTabBtn, #requestsTabBtn, #friendsTabBtn {
       background-color: #f0f0f0;
       border: 1px solid #ddd;
@@ -208,7 +135,7 @@
       background-color: #dbefff;
     }
 
-    /* Input */
+    /* ===== SEARCH INPUT ===== */
     #userSearchInput {
       width: 100%;
       padding: 10px;
@@ -218,7 +145,7 @@
       font-size: 15px;
     }
 
-    /* Lists */
+    /* ===== USER LISTS ===== */
     #userList, #friendRequestsList, #friendsList {
       list-style: none;
       padding: 0;
@@ -226,7 +153,6 @@
       overflow-y: auto;
     }
 
-    /* List items */
     #friendRequestsList li,
     #userList li,
     #friendsList li {
@@ -245,7 +171,7 @@
       background-color: #f9f9f9;
     }
 
-    /* Friend request buttons */
+    /* ===== FRIEND BUTTONS ===== */
     .friend-request-btn {
       padding: 6px 12px;
       font-size: 14px;
@@ -275,7 +201,6 @@
       background-color: #d32f2f;
     }
 
-    /* Add Friend Button */
     .add-friend-btn {
       padding: 4px 10px;
       font-size: 13px;
@@ -293,7 +218,7 @@
       background-color: #1976d2;
     }
 
-    /* Error message */
+    /* ===== ERROR MESSAGE ===== */
     #errorMessage {
       display: none;
       background-color: #f44336;
@@ -316,6 +241,7 @@
       cursor: pointer;
     }
 
+    /* ===== NAVBAR ===== */
     .navbar-container {
       width: 100%;
       height: 60px;
@@ -324,8 +250,8 @@
       justify-content: space-between;
       padding: 0 10px;
       box-sizing: border-box;
-      background-color: transparent; /* بدون پس‌زمینه */
-      box-shadow: none;              /* بدون سایه */
+      background-color: transparent;
+      box-shadow: none;
       position: relative;
       z-index: 10;
     }
@@ -366,21 +292,26 @@
       color: white;
       font-weight: bold;
       font-size: 18px;
-    } 
+    }
 
+    /* ===== NAVBAR MOBILE ===== */
     @media (max-width: 768px) {
       .navbar-avatar-topright {
         top: 10px;
-        left: 10px;     /* برای موبایل بیا گوشه چپ بالا */
+        left: 10px;
         right: auto;
       }
 
       .navbar-logo-text {
-        display: none;  /* مخفی کردن لوگو در موبایل */
+        display: none;
+      }
+
+      .hide-on-mobile {
+        display: none !important;
       }
     }
 
-    /* Confirmation Modal */
+    /* ===== CONFIRMATION MODAL ===== */
     #confirmUnfriendModal .modal-content {
       max-width: 400px;
       text-align: center;
@@ -414,15 +345,10 @@
       background-color: #999;
     }
 
+    /* ===== ANIMATIONS ===== */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 768px) {
-    .hide-on-mobile {
-    display: none !important;
-      }
     }
 
   </style>
@@ -976,6 +902,45 @@
     }
   };
 
+  function openModal() {
+  document.getElementById("yourModalId").style.display = "flex";
+  document.body.style.overflow = "hidden"; // ⛔ جلوگیری از اسکرول
+}
+
+function closeModal() {
+  document.getElementById("yourModalId").style.display = "none";
+  document.body.style.overflow = ""; // ✅ بازگرداندن اسکرول
+}
+
+
+function openModal() {
+  const modal = document.querySelector(".modal");
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden"; // جلوگیری از اسکرول پس‌زمینه
+}
+
+function closeModal() {
+  const modal = document.querySelector(".modal");
+  modal.style.display = "none";
+  document.body.style.overflow = ""; // بازگرداندن اسکرول
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const modal = document.querySelector(".modal");
+  const closeBtn = document.querySelector(".close");
+
+  // بستن با کلیک روی ضربدر
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeModal);
+  }
+
+  // بستن با کلیک بیرون از modal-content
+  window.addEventListener("click", function (e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+});
 
 </script>
 </body>
