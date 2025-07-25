@@ -86,10 +86,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'todolist.wsgi.application'
 
-import os
-import dj_database_url
-
 database_url = os.getenv('DATABASE_URL', '')
+
+if database_url == '':
+    raise Exception("DATABASE_URL environment variable is not set!")
 
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
