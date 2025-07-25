@@ -86,17 +86,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'todolist.wsgi.application'
 
-database_url = os.getenv('DATABASE_URL', '')
-
-if database_url == '':
-    raise Exception("DATABASE_URL environment variable is not set!")
-
-if database_url.startswith('postgres://'):
-    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+import dj_database_url
+import os
 
 DATABASES = {
-    'default': dj_database_url.parse(database_url, conn_max_age=600, ssl_require=True)
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True,
+    )
 }
+
 
 
 # Password validation
