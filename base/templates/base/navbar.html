@@ -12,35 +12,149 @@
 
 
   <style>
-  /* ====== MODAL STYLES ====== */
-.modal {
-  position: fixed;
-  z-index: 1000;
-  left: 0; top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  box-sizing: border-box;
+
+.modal-content {
+  width: 55vw;          /* عرض ۷۵ درصد صفحه */
+  height: 55vh;         /* ارتفاع ۷۵ درصد صفحه */
+  max-width: none;      /* بدون محدودیت حداکثر عرض */
+  max-height: none;     /* بدون محدودیت حداکثر ارتفاع */
+  border-radius: 20px;
+  padding: 24px;
+  background: white;
+  max-height: 80vh;
   overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  padding: 20px 25px;
+
+/* نسخه موبایل */
+@media (max-width: 600px) {
+  .navbar-link {
+    font-size: 18px;
+    padding: 12px 16px;
+    background-color: #2196f3; /* پس‌زمینه آبی */
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+  }
+
+  .navbar-link:hover {
+    background-color: #1976d2;
+    color: #fff;
+  }
+}
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 600px) {
+  .modal-content {
+    padding: 16px;
+    font-size: 14px;
+    max-width: 95%;
+  }
+}
+
+/* استایل کلی مودال */
+#confirmUnfriendModal .modal-content {
   max-width: 400px;
-  width: 100%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+  width: 90vw;
+  padding: 24px 20px;
+  border-radius: 16px;
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   position: relative;
-  animation: slideFade 0.3s ease-out;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* دکمه‌ها */
+#confirmUnfriendModal .confirm-btn,
+#confirmUnfriendModal .cancel-btn {
+  padding: 12px 0;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  min-width: 120px;
+  transition: background-color 0.3s ease;
+  flex: 1;
+}
+
+/* رنگ دکمه حذف */
+#confirmUnfriendModal .confirm-btn {
+  background-color: #e53935; /* قرمز */
+  color: white;
+  margin-right: 10px;
+}
+
+#confirmUnfriendModal .confirm-btn:hover {
+  background-color: #c62828;
+}
+
+/* رنگ دکمه لغو */
+#confirmUnfriendModal .cancel-btn {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+#confirmUnfriendModal .cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* بستن مودال */
+#closeConfirmUnfriendModal {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+}
+
+#closeConfirmUnfriendModal:hover {
+  color: #000;
+}
+
+/* چینش دکمه‌ها کنار هم */
+#confirmUnfriendModal .modal-content > div.buttons-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* ریسپانسیو برای موبایل */
+@media (max-width: 480px) {
+  #confirmUnfriendModal .modal-content {
+    padding: 20px 16px;
+    width: 95vw;
+    max-width: none;
+  }
+
+  #confirmUnfriendModal .modal-content > div.buttons-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #confirmUnfriendModal .confirm-btn,
+  #confirmUnfriendModal .cancel-btn {
+    width: 100%;
+    min-width: auto;
+    margin-right: 0;
+  }
 }
 
 .close {
@@ -100,48 +214,27 @@
   }
 }
 
-@media (max-width: 480px) {
-  /* تنظیم عرض مودال برای موبایل‌های خیلی کوچک */
+@media (max-width: 600px) {
   .modal-content {
-    width: 95vw;           /* تقریبا کل عرض صفحه */
-    max-width: none;       /* بدون محدودیت عرض */
-    max-height: 85vh;      /* ارتفاع کمتر با اسکرول */
-    padding: 15px 20px;    /* پدینگ مناسب لمس */
-    font-size: 14px;       /* خوانایی بهتر */
-    border-radius: 10px;   /* گوشه‌های گرد */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  }
-
-  /* دکمه‌ها برای لمس راحت */
-  .confirm-btn,
-  .cancel-btn {
-    font-size: 16px;
-    padding: 14px 0;
-    width: 100%;
-    border-radius: 8px;
-  }
-
-  /* فاصله بین دکمه‌ها */
-  .confirm-btn {
-    margin-top: 12px;
-  }
-
-  /* متن داخل مودال */
-  .modal-content p,
-  .modal-content h2 {
-    line-height: 1.4;
-  }
-
-  /* حذف افکت بک‌درآپ سنگین برای کاهش مصرف پردازنده موبایل */
-  .modal {
-    background-color: rgba(0,0,0,0.6);
-    backdrop-filter: none; /* غیرفعال کردن blur برای بهبود عملکرد */
+    max-width: 95%;
+    padding: 15px;
+    font-size: 14px;
   }
 }
 
+    .close {
+      color: #888;
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-
-
+    .close:hover {
+      color: #000;
+    }
 
     /* Tabs Buttons */
     #searchTabBtn, #requestsTabBtn, #friendsTabBtn {
@@ -169,15 +262,17 @@
       background-color: #dbefff;
     }
 
-    /* Input */
-    #userSearchInput {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      margin-bottom: 12px;
-      font-size: 15px;
-    }
+#userSearchInput {
+  width: 340px;          /* بزرگ‌تر از قبل */
+  max-width: 90vw;       /* برای واکنش‌گرایی */
+  padding: 10px 14px;    /* کمی padding بیشتر */
+  font-size: 16px;       /* فونت کمی بزرگ‌تر */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
 
     /* Lists */
     #userList, #friendRequestsList, #friendsList {
@@ -375,6 +470,225 @@
       background-color: #999;
     }
 
+    /* بکگراند تاریک و کل فضای صفحه */
+  #userProfileModal {
+    display: none; /* پیش‌فرض مخفی */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* وسط چین کردن محتوا با Flexbox */
+    display: flex; /* توجه: وقتی می‌خوای وسط چین کنی باید display: flex باشه */
+    justify-content: center; /* افقی وسط */
+    align-items: center;    /* عمودی وسط */
+    z-index: 1000;
+  }
+
+  /* محتوای مودال */
+#userProfileModal > .modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;      /* حداکثر عرض */
+  width: 90vw;           /* حداکثر 90 درصد عرض صفحه */
+  max-height: 80vh;      /* حداکثر ارتفاع 80 درصد ارتفاع صفحه */
+  overflow-y: auto;      /* اگر محتوا زیاد بود اسکرول عمودی داشته باشه */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+/* وقتی مودال باز است، صفحه اصلی اسکرول نکند */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* استایل مودال (پس‌زمینه تاریک و وسط چین) */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  inset: 0; /* معادل top:0; right:0; bottom:0; left:0; */
+  background-color: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden; /* جلوگیری از اسکرول صفحه */
+}
+
+/* محتوای مودال با ارتفاع و عرض محدود و اسکرول داخلی */
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  max-width: 600px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto; /* اسکرول فقط داخل مودال */
+  box-sizing: border-box;
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* وقتی مودال باز است، صفحه پشت آن اسکرول نشود */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* استایل کلی مودال (بک‌گراند تاریک و وسط چین) */
+.modal {
+  display: none;  /* پیش‌فرض مخفی */
+  position: fixed;
+  inset: 0; /* top:0; right:0; bottom:0; left:0 */
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+  display: flex; /* برای وسط چین */
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden; /* مهم: صفحه زیر مودال اسکرول نکند */
+}
+
+/* محتوای مودال با محدودیت ابعاد و اسکرول داخلی */
+.modal-content {
+  background-color: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  max-width: 600px;  /* یا 55vw */
+  width: 90vw;
+  max-height: 80vh;  /* مهم: محدود کردن ارتفاع */
+  overflow-y: auto;  /* اسکرول عمودی فقط داخل محتوا */
+  box-sizing: border-box;
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+
+.logout-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.logout-modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  max-width: 600px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.logout-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.logout-close:hover {
+  color: #000;
+}
+
+.logout-confirm-btn {
+  background-color: #e53935;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 15px;
+  display: inline-block;
+}
+
+.logout-confirm-btn:hover {
+  background-color: #c62828;
+}
+
+.logout-cancel-btn {
+  background-color: #f1f1f1;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.logout-cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* وقتی مودال باز است، صفحه اسکرول نکند */
+body.logout-modal-open {
+  overflow: hidden;
+}
+
+
+@media (max-width: 480px) {
+  .logout-modal-content {
+    width: 95vw;         /* تقریباً کل عرض صفحه موبایل */
+    max-width: none;     /* حذف محدودیت عرض */
+    max-height: 90vh;    /* کمی بیشتر ارتفاع */
+    padding: 20px 16px;  /* فاصله داخلی کمتر و جمع‌وجورتر */
+    border-radius: 16px; /* کمی گردتر */
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    font-size: 16px;     /* متن کمی بزرگتر برای خوانایی */
+  }
+
+  .logout-close {
+    top: 10px;
+    right: 12px;
+    font-size: 24px;     /* آیکون بستن کمی کوچکتر */
+  }
+
+  .logout-confirm-btn,
+  .logout-cancel-btn {
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  .logout-confirm-btn {
+    width: 48%;
+  }
+
+  .logout-cancel-btn {
+    width: 48%;
+  }
+
+  .logout-buttons {
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+}
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -385,6 +699,9 @@
     display: none !important;
       }
     }
+
+    
+
   </style>
 </head>
 
@@ -395,17 +712,20 @@
     </a>
 
     <!-- Logout Confirmation Modal -->
-    <div id="logoutModal" class="modal" style="display: none;" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
-      <div class="modal-content">
-        <span id="closeLogoutModal" class="close" role="button" aria-label="Close">&times;</span>
-        <h2 id="logoutTitle">Confirm Logout</h2>
-        <p>Are you sure you want to log out?</p>
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-          <button class="cancel-btn" id="cancelLogoutBtn">Cancel</button>
-          <a href="{% url 'logout' %}" class="confirm-btn">Yes, Logout</a>
+<!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="logout-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="logoutTitle" style="display: none;">
+      <div class="logout-modal-content">
+        <button id="closeLogoutModal" class="logout-close" aria-label="Close">&times;</button>
+        <h2 id="logoutTitle" class="logout-title">Confirm Logout</h2>
+        <p class="logout-text">Are you sure you want to log out?</p>
+        <div class="logout-buttons" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button class="logout-cancel-btn" id="cancelLogoutBtn">Cancel</button>
+          <a href="{% url 'logout' %}" class="logout-confirm-btn">Yes, Logout</a>
         </div>
       </div>
     </div>
+
+
 
 
     <div class="navbar-links-container">
@@ -461,14 +781,15 @@
     </div>
   </div>
 
-  <!-- Confirmation modal for unfriend -->
   <div id="confirmUnfriendModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="confirmUnfriendTitle" style="display:none;">
     <div class="modal-content">
       <span id="closeConfirmUnfriendModal" class="close" role="button" aria-label="Close">&times;</span>
       <h2 id="confirmUnfriendTitle">Confirm Unfriend</h2>
-      <p>Are you sure you want to remove  {{ user.name }} from friend list?</p>
-      <button class="confirm-btn" id="confirmUnfriendBtn">Yes, Remove</button>
-      <button class="cancel-btn" id="cancelUnfriendBtn">Cancel</button>
+      <p>Are you sure you want to remove {{ user.name }} from friend list?</p>
+      <div class="buttons-container">
+        <button class="confirm-btn" id="confirmUnfriendBtn">Yes, Remove</button>
+        <button class="cancel-btn" id="cancelUnfriendBtn">Cancel</button>
+      </div>
     </div>
   </div>
 
@@ -568,7 +889,7 @@
       confirmUnfriendModal.setAttribute('aria-hidden', 'true');
     }
     if (event.target === userProfileModal) {
-      userProfileModal.style.display = "none";
+      userProfileModal.style.display = "flex";
       userProfileModal.setAttribute('aria-hidden', 'true');
     }
   });
@@ -585,7 +906,7 @@
         confirmUnfriendModal.setAttribute('aria-hidden', 'true');
       }
       if (userProfileModal.style.display === "block") {
-        userProfileModal.style.display = "none";
+        userProfileModal.style.display = "flex";
         userProfileModal.setAttribute('aria-hidden', 'true');
       }
     }
@@ -669,7 +990,7 @@
             .then(res => res.text())
             .then(html => {
               document.getElementById("userProfileContent").innerHTML = html;
-              userProfileModal.style.display = "block";
+              userProfileModal.style.display = "flex";
               userProfileModal.setAttribute('aria-hidden', 'false');
             })
             .catch(() => alert("خطا در بارگذاری پروفایل"));
@@ -900,7 +1221,7 @@
 
   // Close user profile modal
   closeUserProfileModal.addEventListener("click", () => {
-    userProfileModal.style.display = "none";
+    userProfileModal.style.display = "flex";
     userProfileModal.setAttribute('aria-hidden', 'true');
   });
 
@@ -936,45 +1257,142 @@
     }
   };
 
-  function openModal() {
-  document.getElementById("yourModalId").style.display = "flex";
-  document.body.style.overflow = "hidden"; // ⛔ جلوگیری از اسکرول
-}
+document.addEventListener('DOMContentLoaded', () => {
+  // لیست مودال‌ها و دکمه‌هاشون
+  const modals = {
+    logout: {
+      modal: document.getElementById('logoutModal'),
+      openBtn: document.getElementById('openLogoutModal'),
+      closeBtn: document.getElementById('closeLogoutModal'),
+      cancelBtn: document.getElementById('cancelLogoutBtn')
+    },
+    friends: {
+      modal: document.getElementById('friendsModal'),
+      openBtn: document.getElementById('openFriendsModal'),
+      closeBtn: document.getElementById('closeFriendsModal')
+    },
+    confirmUnfriend: {
+      modal: document.getElementById('confirmUnfriendModal'),
+      closeBtn: document.getElementById('closeConfirmUnfriendModal'),
+      cancelBtn: document.getElementById('cancelUnfriendBtn'),
+      confirmBtn: document.getElementById('confirmUnfriendBtn')
+    },
+    userProfile: {
+      modal: document.getElementById('userProfileModal'),
+      closeBtn: document.getElementById('closeUserProfileModal')
+    }
+  };
 
-function closeModal() {
-  document.getElementById("yourModalId").style.display = "none";
-  document.body.style.overflow = ""; // ✅ بازگرداندن اسکرول
-}
-
-
-function openModal() {
-  const modal = document.querySelector(".modal");
-  modal.style.display = "flex";
-  document.body.style.overflow = "hidden"; // جلوگیری از اسکرول پس‌زمینه
-}
-
-function closeModal() {
-  const modal = document.querySelector(".modal");
-  modal.style.display = "none";
-  document.body.style.overflow = ""; // بازگرداندن اسکرول
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  const modal = document.querySelector(".modal");
-  const closeBtn = document.querySelector(".close");
-
-  // بستن با کلیک روی ضربدر
-  if (closeBtn) {
-    closeBtn.addEventListener("click", closeModal);
+  // تابع باز کردن مودال
+  function openModal(modal) {
+    if (!modal) return;
+    modal.style.display = 'flex'; // چون CSS شما از flex استفاده می‌کند برای وسط چین
+    modal.setAttribute('aria-hidden', 'false');
   }
 
-  // بستن با کلیک بیرون از modal-content
-  window.addEventListener("click", function (e) {
-    if (e.target === modal) {
-      closeModal();
+  // تابع بستن مودال
+  function closeModal(modal) {
+    if (!modal) return;
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  // اضافه کردن event listeners به هر مودال برای بستن با کلیک روی دکمه بستن و فضای بیرون modal-content
+  Object.values(modals).forEach(({modal, closeBtn}) => {
+    if (!modal) return;
+
+    // کلیک روی دکمه بستن
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => closeModal(modal));
+    }
+
+    // کلیک بیرون محتوا (روی بک‌گراند تاریک)
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal(modal);
+      }
+    });
+  });
+
+  // مودال logout: دکمه cancel هم بستن مودال است
+  if (modals.logout.cancelBtn) {
+    modals.logout.cancelBtn.addEventListener('click', () => closeModal(modals.logout.modal));
+  }
+
+  // مودال confirmUnfriend: دکمه cancel بستن مودال
+  if (modals.confirmUnfriend.cancelBtn) {
+    modals.confirmUnfriend.cancelBtn.addEventListener('click', () => closeModal(modals.confirmUnfriend.modal));
+  }
+
+  // باز کردن مودال‌ها با کلیک روی دکمه‌ها
+  if (modals.logout.openBtn) {
+    modals.logout.openBtn.addEventListener('click', (e) => {
+      e.preventDefault(); // جلوگیری از رفتار لینک
+      openModal(modals.logout.modal);
+    });
+  }
+
+  if (modals.friends.openBtn) {
+    modals.friends.openBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal(modals.friends.modal);
+    });
+  }
+
+  // اگر دکمه confirm در confirmUnfriend نیاز به عملکرد داره، اونجا اضافه کنید
+  // مثلا:
+  if (modals.confirmUnfriend.confirmBtn) {
+    modals.confirmUnfriend.confirmBtn.addEventListener('click', () => {
+      // اینجا کد حذف دوست رو بزارید یا فرم رو submit کنید
+      alert('دوست حذف شد (این فقط نمونه است)');
+      closeModal(modals.confirmUnfriend.modal);
+    });
+  }
+
+  // بستن مودال‌ها با دکمه Esc
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      Object.values(modals).forEach(({modal}) => {
+        if (modal && modal.style.display === 'flex') {
+          closeModal(modal);
+        }
+      });
     }
   });
 });
+
+const openModal = (modal) => {
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+};
+
+const closeModal = (modal) => {
+  modal.style.display = "none";
+  modal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+};
+
+
+
+document.getElementById('openLogoutModal').addEventListener('click', function(e) {
+  e.preventDefault();
+  const modal = document.querySelector('.logout-modal');
+  modal.style.display = 'flex';
+  document.body.classList.add('logout-modal-open');
+  modal.setAttribute('aria-hidden', 'false');
+});
+
+document.getElementById('closeLogoutModal').addEventListener('click', closeLogoutModal);
+document.getElementById('cancelLogoutBtn').addEventListener('click', closeLogoutModal);
+
+function closeLogoutModal() {
+  const modal = document.querySelector('.logout-modal');
+  modal.style.display = 'none';
+  document.body.classList.remove('logout-modal-open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
 
 </script>
 </body>

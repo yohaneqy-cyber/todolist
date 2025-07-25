@@ -608,13 +608,13 @@
 {% endif %}
 {% endif %}
 
-<div id="deleteModal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <h2>Are You Sure To Delete "<span id="modalTaskTitle"></span>"</h2>
-    <form id="deleteForm" method="POST" action="">
+<div id="deleteModal" class="myapp-delete-modal" style="display:none;">
+  <div class="myapp-delete-modal-content">
+    <h2>Are You Sure To Delete "<span id="modalTaskTitle" class="myapp-task-title"></span>"</h2>
+    <form id="deleteForm" method="POST" action="" class="myapp-delete-form">
       {% csrf_token %}
-      <button type="submit" class="btn btn-danger">Yes</button>
-      <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+      <button type="submit" class="myapp-btn myapp-btn-danger">Yes</button>
+      <button type="button" class="myapp-btn myapp-btn-secondary" id="cancelBtn">Cancel</button>
     </form>
   </div>
 </div>
