@@ -1119,28 +1119,71 @@ button.btn-primary:hover {
   }
 }
 
-
-/* پس‌زمینه نیمه شفاف کل صفحه */
-#deleteModal {
-  position: fixed; /* روی کل صفحه */
-  top: 0;
-  left: 0;
+.myapp-delete-modal {
+  position: fixed;
+  top: 0; left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0,0,0,0.5); /* پس‌زمینه تار */
-  display: none; /* ابتدا مخفی */
-  align-items: center; /* وسط‌چین عمودی */
-  justify-content: center; /* وسط‌چین افقی */
-  z-index: 1000; /* روی بقیه عناصر */
+  background-color: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  display: flex; /* وقتی نمایش میدی باید flex باشه */
 }
+
+.myapp-delete-modal-content {
+  background-color: white;
+  padding: 20px 25px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90vw;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+.myapp-btn {
+  padding: 8px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.myapp-btn-danger {
+  background-color: #d9534f;
+  color: white;
+}
+
+.myapp-btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.myapp-btn:hover {
+  opacity: 0.85;
+}
+
+
+
+.modal-content {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 400px;
+  width: 90%;
+  box-sizing: border-box;
+}
+
 @media (max-width: 600px) {
-  .modal {
-    width: 70%;      /* تقریبا کل عرض صفحه */
-    margin: 10px auto;
+  .modal-content {
+    width: 95%;
     padding: 15px;
-    font-size: 14px; /* فونت کوچکتر */
+    font-size: 14px;
   }
 }
+
 
 .avatar-placeholder {
   display: flex;
