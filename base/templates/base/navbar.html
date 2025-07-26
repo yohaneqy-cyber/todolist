@@ -41,13 +41,35 @@
 
 @media (max-width: 480px) {
   .modal-content1 {
-    width: 90%;
-    max-width: 400px;
-    max-height: 80vh;
-    padding: 12px 14px;
-    font-size: 13px;
-    border-radius: 10px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    width: 95vw;         /* تقریباً کل عرض صفحه موبایل */
+    max-width: none;     /* حذف محدودیت عرض */
+    max-height: 90vh;    /* کمی بیشتر ارتفاع */
+    padding: 20px 16px;  /* فاصله داخلی کمتر و جمع‌وجورتر */
+    border-radius: 16px; /* کمی گردتر */
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    font-size: 16px;     /* متن کمی بزرگتر برای خوانایی */
+  }
+
+
+  .modal1-confirm-btn,
+  .modal1-cancel-btn {
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  .modal1-confirm-btn {
+    width: 48%;
+  }
+
+  .modal1-cancel-btn {
+    width: 48%;
+  }
+
+  .modal1-buttons {
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
   }
 }
 
