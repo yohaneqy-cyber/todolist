@@ -175,8 +175,7 @@ ALLOWED_HOSTS = ['todolist-5-ae2p.onrender.com', 'localhost', '127.0.0.1']
 # برای استفاده از استاتیک فشرده و کش شده:
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
-DEBUG = False
-SECURE_SSL_REDIRECT = False
-
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SESSION_COOKIE_SECURE = True   # فقط روی HTTPS فعال باشد
+CSRF_COOKIE_SECURE = True  
