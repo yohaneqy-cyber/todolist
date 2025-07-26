@@ -12,43 +12,68 @@
 
 
   <style>
-
-/* CSS */
 .modal1 {
-  display: none; /* ابتدا مخفی */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
-  width: 108%;
-  height: 108%;
-  background-color: rgba(0,0,0,0.5); /* بک‌گراند تار */
+
+  width: 100vw;
+  height: 100vh;
+
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
   
-  display: flex;
-  justify-content: center; /* وسط افقی */
-  align-items: center;    /* وسط عمودی */
-  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 
 .modal-content1 {
   background-color: white;
   padding: 20px;
-  border-radius: 8px;
-  max-width: 90%;
-  max-height: 90%;
+  border-radius: 12px;
+  max-width: 100%;
+  max-height: 100vh;
   overflow-y: auto;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
 }
 
-@media (max-width: 480px) {
-  .modal-content1 {
-    width: 95vw;         /* تقریباً کل عرض صفحه موبایل */
-    max-width: none;     /* حذف محدودیت عرض */
-    max-height: 90vh;    /* کمی بیشتر ارتفاع */
-    padding: 20px 16px;  /* فاصله داخلی کمتر و جمع‌وجورتر */
-    border-radius: 16px; /* کمی گردتر */
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    font-size: 16px;     /* متن کمی بزرگتر برای خوانایی */
-  }
+/* دکمه بستن */
+.close1 {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* دکمه‌ها */
+.buttons-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.confirm-btn, .cancel-btn {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.confirm-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+}
 
 
   .modal1-confirm-btn,
@@ -71,7 +96,29 @@
     gap: 12px;
     justify-content: center;
   }
+
+  @media (max-width: 480px) {
+  .modal-content1 {
+    width: 90vw;           /* تقریباً ۹۰ درصد عرض صفحه موبایل */
+    max-width: 400px;      /* حداکثر عرض معقول */
+    max-height: 70vh;      /* ارتفاع کمتر برای موبایل */
+    padding: 15px 12px;    /* پدینگ کمی کمتر */
+    border-radius: 10px;   /* گردتر */
+    font-size: 14px;       /* فونت کوچکتر */
+  }
+
+  .buttons-container {
+    flex-direction: column; /* دکمه‌ها زیر هم قرار بگیرند */
+    gap: 12px;              /* فاصله عمودی بیشتر */
+  }
+
+  .confirm-btn, .cancel-btn {
+    width: 100%;            /* دکمه‌ها پهنای کامل */
+    font-size: 16px;        /* فونت کمی بزرگتر برای کلیک راحت‌تر */
+    padding: 12px 0;
+  }
 }
+
 
 /* استایل پایه تب‌ها */
 #searchTabBtn, #requestsTabBtn, #friendsTabBtn {
@@ -1654,7 +1701,33 @@ links.forEach(link => {
   });
 });
 
+document.addEventListener("DOMContentLoaded", function() {
+  const modal = document.getElementById("confirmUnfriendModal1");
+  const closeBtn = document.getElementById("closeConfirmUnfriendModal");
+  const cancelBtn = document.getElementById("cancelUnfriendBtn1");
+  const openBtns = document.querySelectorAll('[data-open-unfriend-modal]');
 
+  // باز کردن مودال
+  openBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      modal.style.display = "flex";
+    });
+  });
+
+  // بستن مودال
+  function closeModal() {
+    modal.style.display = "none";
+  }
+
+  closeBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", closeModal);
+
+  window.addEventListener("click", function(e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+});
 </script>
 </body>
 
