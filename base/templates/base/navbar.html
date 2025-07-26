@@ -97,25 +97,39 @@
     justify-content: center;
   }
 
-  @media (max-width: 480px) {
+@media (max-width: 480px) {
   .modal-content1 {
-    width: 90vw;           /* تقریباً ۹۰ درصد عرض صفحه موبایل */
-    max-width: 400px;      /* حداکثر عرض معقول */
-    max-height: 70vh;      /* ارتفاع کمتر برای موبایل */
-    padding: 15px 12px;    /* پدینگ کمی کمتر */
-    border-radius: 10px;   /* گردتر */
-    font-size: 14px;       /* فونت کوچکتر */
+    width: 90%;
+    max-height: 80vh;
+    padding: 15px 10px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .modal-content1 h2 {
+    font-size: 18px;
+  }
+
+  .modal-content1 p {
+    font-size: 14px;
   }
 
   .buttons-container {
-    flex-direction: column; /* دکمه‌ها زیر هم قرار بگیرند */
-    gap: 12px;              /* فاصله عمودی بیشتر */
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .confirm-btn, .cancel-btn {
-    width: 100%;            /* دکمه‌ها پهنای کامل */
-    font-size: 16px;        /* فونت کمی بزرگتر برای کلیک راحت‌تر */
-    padding: 12px 0;
+  .confirm-btn,
+  .cancel-btn {
+    width: 100%;
+    font-size: 15px;
+    padding: 10px;
+  }
+
+  .close1 {
+    top: 8px;
+    right: 12px;
+    font-size: 22px;
   }
 }
 
