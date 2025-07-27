@@ -402,17 +402,16 @@
 }
 
 @media (max-width: 600px) {
-  .task-title {
-    max-width: 100%;
+  .task-card {
+    flex-basis: 48%;
+    max-width: 48%;
   }
-
-  .task-actions {
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .all-task-card {
-    padding: 12px 14px;
+  
+  .task-actions a.btn,
+  .task-actions button.btn,
+  .task-actions form button.btn {
+    flex-basis: 48%;
+    max-width: 48%;
   }
 }
 
