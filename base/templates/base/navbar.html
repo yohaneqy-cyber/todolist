@@ -14,6 +14,7 @@
   <style>
 
 
+
 #userSearchInput {
   width: 100%;
   padding: 8px 12px;
@@ -471,20 +472,6 @@ body.logout-modal-open {
 
 
 
-.modal-content {
-  width: 55vw;          /* عرض ۷۵ درصد صفحه */
-  height: 55vh;         /* ارتفاع ۷۵ درصد صفحه */
-  max-width: none;      /* بدون محدودیت حداکثر عرض */
-  max-height: none;     /* بدون محدودیت حداکثر ارتفاع */
-  border-radius: 20px;
-  padding: 24px;
-  background: white;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  position: relative;
-  animation: fadeIn 0.3s ease-in-out;
-}
 
 
 
@@ -548,17 +535,6 @@ body.logout-modal-open {
 }
 
 /* استایل کلی مودال */
- .modal-content {
-  max-width: 400px;
-  width: 90vw;
-  padding: 24px 20px;
-  border-radius: 16px;
-  background-color: #fff;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  position: relative;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
 
 /* دکمه‌ها */
  .confirm-btn,
@@ -877,102 +853,64 @@ body.logout-modal-open {
 
     /* بکگراند تاریک و کل فضای صفحه */
   #userProfileModal {
-    display: none; /* پیش‌فرض مخفی */
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
-    /* وسط چین کردن محتوا با Flexbox */
-    display: flex; /* توجه: وقتی می‌خوای وسط چین کنی باید display: flex باشه */
-    justify-content: center; /* افقی وسط */
-    align-items: center;    /* عمودی وسط */
-    z-index: 1000;
+    display: none; /* فقط یک بار و درست استفاده کن */
+    justify-content: center;
+    align-items: center;
+    z-index: 100000; /* کمتر از modal-content ولی بیشتر از بقیه */
+    animation: fadeIn 0.3s ease-out forwards;  }
+
+  #userProfileModal.show {
+    display: flex;
   }
 
-  /* محتوای مودال */
-#userProfileModal > .modal-content {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 400px;      /* حداکثر عرض */
-  width: 90vw;           /* حداکثر 90 درصد عرض صفحه */
-  max-height: 80vh;      /* حداکثر ارتفاع 80 درصد ارتفاع صفحه */
-  overflow-y: auto;      /* اگر محتوا زیاد بود اسکرول عمودی داشته باشه */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-}
+
+  #userProfileModal > .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    z-index: 100000;
+    position: relative;
+  }
 
 /* وقتی مودال باز است، صفحه اصلی اسکرول نکند */
 body.modal-open {
   overflow: hidden;
 }
 
-/* استایل مودال (پس‌زمینه تاریک و وسط چین) */
 .modal {
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   display: none;
-  position: fixed;
-  z-index: 1000;
-  inset: 0; /* معادل top:0; right:0; bottom:0; left:0; */
-  background-color: rgba(0,0,0,0.5);
-  backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 16px;
-  box-sizing: border-box;
-  overflow: hidden; /* جلوگیری از اسکرول صفحه */
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* محتوای مودال با ارتفاع و عرض محدود و اسکرول داخلی */
 .modal-content {
-  background: white;
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-  max-width: 600px;
   width: 90vw;
-  max-height: 80vh;
-  overflow-y: auto; /* اسکرول فقط داخل مودال */
-  box-sizing: border-box;
-  position: relative;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-/* وقتی مودال باز است، صفحه پشت آن اسکرول نشود */
-body.modal-open {
-  overflow: hidden;
-}
-
-/* استایل کلی مودال (بک‌گراند تاریک و وسط چین) */
-.modal {
-  display: none;  /* پیش‌فرض مخفی */
-  position: fixed;
-  inset: 0; /* top:0; right:0; bottom:0; left:0 */
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(2px);
-  z-index: 1000;
-  display: flex; /* برای وسط چین */
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  box-sizing: border-box;
-  overflow: hidden; /* مهم: صفحه زیر مودال اسکرول نکند */
-}
-
-/* محتوای مودال با محدودیت ابعاد و اسکرول داخلی */
-.modal-content {
+  height: 55vh;
   background-color: white;
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  max-width: 600px;  /* یا 55vw */
-  width: 90vw;
-  max-height: 80vh;  /* مهم: محدود کردن ارتفاع */
-  overflow-y: auto;  /* اسکرول عمودی فقط داخل محتوا */
-  box-sizing: border-box;
-  position: relative;
-  animation: fadeIn 0.3s ease-in-out;
+  border-radius: 16px;
+  padding: 20px;
+  transform: scale(1);   /* مهم */
+  font-size: 14px;
 }
 
 
@@ -989,6 +927,7 @@ body.modal-open {
   padding: 16px;
   box-sizing: border-box;
   overflow: hidden;
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
 .logout-modal-content {
@@ -1094,10 +1033,18 @@ body.logout-modal-open {
   }
 }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(7.1px);
     }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+
 
     @media (max-width: 768px) {
     .hide-on-mobile {
@@ -1119,13 +1066,12 @@ body.logout-modal-open {
   transition: color 0.3s ease;
 }
 
-.navbar-logo .home-icon {
+.navbar-logo .home-icon1 {
   width: 24px;
   height: 24px;
-  background: url('https://cdn-icons-png.flaticon.com/512/25/25694.png') no-repeat center;
   background-size: contain;
   flex-shrink: 0;
-  margin-top: 3px; /* کمی پایین‌تر از متن */
+  margin-top: 1.2px; /* کمی پایین‌تر از متن */
 }
 
 .navbar-logo .logo-text {
@@ -1166,9 +1112,15 @@ body.logout-modal-open {
 <body>
   <header class="navbar-container">
     <a href="/" class="navbar-logo" title="Home">
-      <span class="home-icon" aria-hidden="true"></span>
+      <svg class="home-icon1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#1e88e5" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
       <span class="logo-text">ToDoList</span>
     </a>
+
+
+
+
 
 
     <!-- Logout Confirmation Modal -->
@@ -1735,5 +1687,4 @@ body.logout-modal-open {
 </script>
 
 </body>
-
 </html>
