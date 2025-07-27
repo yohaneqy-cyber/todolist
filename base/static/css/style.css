@@ -152,7 +152,6 @@
     padding: 12px 14px;
   }
 }
-
 .filters-container {
   display: flex;
   gap: 20px;
@@ -161,19 +160,43 @@
   margin-bottom: 20px;
 }
 
+/* فرم‌ها در حالت پیش‌فرض (دسکتاپ) */
 .filters-container form {
   margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.profile-container {
-  max-width: 500px !important;
-  margin: 30px auto !important;
-  padding: 20px 16px !important;
-  background-color: #f9f9f9 !important;
-  border-radius: 16px !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
-  text-align: center !important;
-  font-family: sans-serif !important;
+
+/* موبایل: چینش عمودی و فول‌عرض */
+@media (max-width: 768px) {
+  .filters-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-container form {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100% !important;
+  }
+
+  .filters-container select,
+  .filters-container label {
+    width: 100%;
+    font-size: 15px;
+  }
+
+  .filters-container select {
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .filters-container input[type="hidden"] {
+    display: none;
+  }
 }
+
 
 .profile-form .form-group input[type="text"],
 .profile-form .form-group input[type="email"],
