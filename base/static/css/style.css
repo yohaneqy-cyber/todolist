@@ -164,6 +164,33 @@
 .filters-container form {
   margin-bottom: 0;
 }
+.profile-container {
+  max-width: 500px !important;
+  margin: 30px auto !important;
+  padding: 20px 16px !important;
+  background-color: #f9f9f9 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+  text-align: center !important;
+  font-family: sans-serif !important;
+}
+
+.profile-form .form-group input[type="text"],
+.profile-form .form-group input[type="email"],
+.profile-form .form-group input[type="file"],
+.profile-form .form-group input[type="password"],
+.profile-form .form-group select,
+.profile-form .form-group textarea {
+  width: 100% !important;
+  max-width: 400px !important;   /* اندازه یکسان برای همه */
+  padding: 6px 10px !important;  /* کوچکتر و یکنواخت */
+  font-size: 14px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
+  margin: 10px auto !important;  /* فاصله عمودی و وسط‌چین */
+  display: block !important;
+}
 
 
 .all-task-card {
@@ -1183,6 +1210,56 @@ button.btn-primary:hover {
     font-size: 14px;
   }
 }
+
+a.back-to-home {
+  position: relative;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1565c0;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  padding: 4px 2px;
+  margin: 0 auto;
+}
+.container1{
+  text-align: center;
+}
+a.back-to-home::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  height: 2px;
+  background-color: #1565c0;
+  transition: width 0.3s ease;
+}
+
+a.back-to-home:hover::after,
+a.back-to-home:focus::after {
+  width: 100%;
+}
+
+a.back-to-home:hover,
+a.back-to-home:focus {
+  color: #0d47a1;
+  outline: none;
+}
+
+a.back-to-home:focus-visible {
+  outline: 2px solid #90caf9;
+  outline-offset: 2px;
+}
+
+/* موبایل */
+@media (max-width: 480px) {
+  a.back-to-home {
+    font-size: 13px;
+    padding: 3px 1px;
+  }
+}
+
 
 
 .avatar-placeholder {

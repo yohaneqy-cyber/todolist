@@ -13,6 +13,161 @@
 
   <style>
 
+
+#userSearchInput {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1.8px solid #4a90e2;
+  border-radius: 8px;
+  box-sizing: border-box;
+  outline: none;
+  background-color: #f7fbff;
+  color: #1e293b;
+  font-weight: 600;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: inset 0 1px 5px rgba(74, 144, 226, 0.15);
+  transition: 
+    border-color 0.3s ease, 
+    box-shadow 0.3s ease, 
+    background-color 0.3s ease;
+}
+
+#userSearchInput::placeholder {
+  color: #7b8ca1;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+#userSearchInput:focus {
+  border-color: #0053ba;
+  background-color: #ffffff;
+  box-shadow: 0 0 8px rgba(0, 83, 186, 0.4);
+  caret-color: #0053ba;
+  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+
+/* واکنش‌گرا برای موبایل */
+@media (max-width: 480px) {
+  #userSearchInput {
+    max-width: 100%;
+    font-size: 15px;
+    padding: 10px 16px;
+    border-radius: 12px;
+  }
+}
+
+
+/* لیست آیتم‌ها */
+#friendRequestsList li,
+#userList li,
+#friendsList li {
+  padding: 10px 16px;
+  border-bottom: 1px solid #e0e6f1;
+  font-size: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background-color: #fff;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(100, 120, 150, 0.08);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+#friendRequestsList li:hover,
+#userList li:hover,
+#friendsList li:hover {
+  background-color: #f0f5ff;
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
+}
+
+.friend-request-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 110px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  color: #fff;
+  background-color: #4caf50;
+  box-shadow: 0 6px 15px rgba(76, 175, 80, 0.4);
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.15s ease;
+  outline-offset: 3px;
+  outline: none;
+
+  /* Prevent flickering on hover/click */
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.friend-request-btn.accept {
+  background-color: #4caf50;
+  box-shadow: 0 6px 15px rgba(76, 175, 80, 0.45);
+}
+
+.friend-request-btn.decline {
+  background-color: #f44336;
+  box-shadow: 0 6px 15px rgba(244, 67, 54, 0.45);
+}
+
+.friend-request-btn.decline,
+.friend-request-btn.decline:hover,
+.friend-request-btn.decline:focus {
+  color: #fff;
+}
+
+.friend-request-btn:hover,
+.friend-request-btn:focus {
+  background-color: #388e3c;
+  box-shadow: 0 10px 25px rgba(56, 142, 60, 0.55);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.friend-request-btn.decline:hover,
+.friend-request-btn.decline:focus {
+  background-color: #d32f2f;
+  box-shadow: 0 10px 25px rgba(211, 47, 47, 0.55);
+}
+
+.friend-request-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition-duration: 0.1s;
+}
+
+.friend-request-btn:disabled {
+  background-color: #bbb;
+  color: #eee;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  pointer-events: none;
+}
+
+/* ======= Responsive Buttons (Mobile) ======= */
+@media (max-width: 480px) {
+  .friend-request-btn {
+    min-width: 90px;
+    padding: 10px 18px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+}
+
 .unfriend-modal .modal-content {
   max-width: 600px;
   width: 80vw;
@@ -949,17 +1104,72 @@ body.logout-modal-open {
     display: none !important;
       }
     }
+.navbar-logo {
+  display: inline-flex;
+  align-items: flex-start; /* چینش از بالا */
+  gap: 6px;
+  color: #1e88e5;
+  font-weight: 700;
+  font-size: 22px;
+  text-decoration: none;
+  position: relative;
+  padding-bottom: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.3s ease;
+}
 
-    
+.navbar-logo .home-icon {
+  width: 24px;
+  height: 24px;
+  background: url('https://cdn-icons-png.flaticon.com/512/25/25694.png') no-repeat center;
+  background-size: contain;
+  flex-shrink: 0;
+  margin-top: 3px; /* کمی پایین‌تر از متن */
+}
+
+.navbar-logo .logo-text {
+  line-height: 1.1;
+  margin-top: 0;
+}
+
+/* خط زیر کل لینک */
+.navbar-logo::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background-color: #1e88e5;
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease;
+}
+
+/* ظاهر شدن خط هنگام هاور و فوکوس */
+.navbar-logo:hover,
+.navbar-logo:focus {
+  color: #1565c0;
+  outline: none;
+}
+
+.navbar-logo:hover::after,
+.navbar-logo:focus::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
 
   </style>
 </head>
 
 <body>
   <header class="navbar-container">
-    <a href="/" class="navbar-logo hide-on-mobile">
-      <h1 class="navbar-logo-text">MySite</h1>
+    <a href="/" class="navbar-logo" title="Home">
+      <span class="home-icon" aria-hidden="true"></span>
+      <span class="logo-text">ToDoList</span>
     </a>
+
 
     <!-- Logout Confirmation Modal -->
 <!-- Logout Confirmation Modal -->
