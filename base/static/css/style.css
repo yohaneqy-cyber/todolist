@@ -153,65 +153,57 @@
   }
 }
 .filters-container {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-bottom: 20px;
-  overflow-x: auto; /* اگر جای کافی نبود، اسکرول افقی */
-}
-
-.filters-container form {
-  flex-shrink: 0; /* نذار فرم‌ها کوچیک شن */
-  white-space: nowrap;
+  display: flex !important;
+  justify-content: center !important;   /* وسط‌چین در دسکتاپ */
+  flex-wrap: wrap !important;
+  gap: 20px !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
 }
 
 @media (max-width: 600px) {
   .filters-container {
-    display: flex !important;
     flex-wrap: nowrap !important;
-    overflow-x: hidden !important;  /* نذار اسکرول بیاد */
-    padding-bottom: 6px;
-    gap: 6px;                       /* فاصله کمتر */
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    gap: 10px !important;
+    padding: 6px 0 !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #ccc transparent !important;
   }
 
-  .filters-container > * {
-    flex: 0 0 auto;
-    min-width: 75px !important;    /* عرض خیلی کمتر */
+  .filters-container form {
+    flex: 0 0 auto !important;
+    min-width: 120px !important;
+    white-space: nowrap !important;
   }
 
   .filters-container select {
-    font-size: 11px !important;    /* فونت کوچکتر */
-    padding-top: 2px !important;
-    padding-bottom: 2px !important;
-    padding-left: 5px !important;
-    padding-right: 5px !important;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    width: 100%;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease;
-    min-height: 26px !important;   /* ارتفاع کمتر */
-    line-height: 1.1;
-  }
-
-  .filters-container select:focus {
-    outline: none;
-    border-color: #4a90e2;
-    box-shadow: 0 0 6px #4a90e2;
+    font-size: 12px !important;
+    padding: 4px 6px !important;
+    min-height: 28px !important;
+    border-radius: 6px !important;
   }
 
   .filters-container label {
-    font-size: 12px !important;
-    white-space: nowrap;
-    color: #444;
-    display: block;
-    margin-bottom: 2px;
-    line-height: 1.1;
+    font-size: 11px !important;
+    margin-bottom: 2px !important;
+    display: block !important;
+  }
+
+  .filters-container::-webkit-scrollbar {
+    height: 6px !important;
+  }
+
+  .filters-container::-webkit-scrollbar-thumb {
+    background-color: #aaa !important;
+    border-radius: 4px !important;
+  }
+
+  .filters-container::-webkit-scrollbar-track {
+    background: #f0f0f0 !important;
   }
 }
-
 
 
 
@@ -433,26 +425,19 @@
 }
 
 @media (max-width: 600px) {
-  .task-actions {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; /* دو ستون مساوی */
-    gap: 10px !important;                              /* فاصله بین دکمه‌ها */
-    justify-content: center !important;                /* وسط چین کردن کل گرید */
+  .task-title {
+    max-width: 100%;
   }
 
-  .task-actions a.btn,
-  .task-actions button.btn,
-  .task-actions form button.btn {
-    width: 100% !important;      /* دکمه‌ها پر کنندۀ ستون باشن */
-    min-width: 80px !important;
-    padding: 6px 8px !important;
-    font-size: 0.8rem !important;
-    white-space: nowrap !important;
-    box-sizing: border-box !important;
-    text-align: center !important;
+  .task-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .all-task-card {
+    padding: 12px 14px;
   }
 }
-
 
 .task-priority {
   display: inline-block;
