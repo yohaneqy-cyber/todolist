@@ -168,20 +168,51 @@
 
 @media (max-width: 600px) {
   .filters-container {
+    display: flex !important;
     flex-wrap: nowrap !important;
-    overflow-x: auto !important;
+    overflow-x: hidden !important;  /* نذار اسکرول بیاد */
     padding-bottom: 6px;
+    gap: 6px;                       /* فاصله کمتر */
+  }
+
+  .filters-container > * {
+    flex: 0 0 auto;
+    min-width: 75px !important;    /* عرض خیلی کمتر */
   }
 
   .filters-container select {
-    font-size: 13px !important;
-    padding: 4px 8px !important;
+    font-size: 11px !important;    /* فونت کوچکتر */
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+    min-height: 26px !important;   /* ارتفاع کمتر */
+    line-height: 1.1;
+  }
+
+  .filters-container select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 6px #4a90e2;
   }
 
   .filters-container label {
     font-size: 12px !important;
+    white-space: nowrap;
+    color: #444;
+    display: block;
+    margin-bottom: 2px;
+    line-height: 1.1;
   }
 }
+
+
 
 
 .profile-form .form-group input[type="text"],
@@ -402,18 +433,26 @@
 }
 
 @media (max-width: 600px) {
-  .task-card {
-    flex-basis: 48%;
-    max-width: 48%;
+  .task-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* دو ستون مساوی */
+    gap: 10px !important;                              /* فاصله بین دکمه‌ها */
+    justify-content: center !important;                /* وسط چین کردن کل گرید */
   }
-  
+
   .task-actions a.btn,
   .task-actions button.btn,
   .task-actions form button.btn {
-    flex-basis: 48%;
-    max-width: 48%;
+    width: 100% !important;      /* دکمه‌ها پر کنندۀ ستون باشن */
+    min-width: 80px !important;
+    padding: 6px 8px !important;
+    font-size: 0.8rem !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
   }
 }
+
 
 .task-priority {
   display: inline-block;
