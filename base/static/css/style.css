@@ -192,6 +192,20 @@
   display: block !important;
 }
 
+@media (max-width: 480px) {
+  .profile-form .form-group input[type="text"],
+  .profile-form .form-group input[type="email"],
+  .profile-form .form-group input[type="file"],
+  .profile-form .form-group input[type="password"],
+  .profile-form .form-group select,
+  .profile-form .form-group textarea {
+    max-width: 90vw !important;  /* 90 درصد عرض صفحه */
+    padding: 6px 10px !important;
+    margin: 10px auto !important;
+  }
+}
+
+
 
 .all-task-card {
   background: #e1e8ff;
