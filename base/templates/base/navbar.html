@@ -1133,11 +1133,18 @@ body.logout-modal-open {
 }
 
 
-@media (max-width: 768px) {
-  .navbar-logo {
+@media (max-width: 480px) {
+  /* فقط متن لوگو مخفی شود */
+  .navbar-logo .logo-text {
     display: none !important;
   }
+
+  /* آیکون خانه نمایش داده شود */
+  .home-icon1 {
+    display: inline-block !important;
+  }
 }
+
 
   </style>
 </head>
@@ -1189,7 +1196,7 @@ body.logout-modal-open {
       {% else %}
         <a href="{% url 'login' %}" class="navbar-link">Login</a>
       {% endif %}
-      <a href="{% url 'calendar' %}" class="navbar-link">📅</a>
+      <a href="{% url 'calendar' %}" class="navbar-link calendar-link">📅</a>
     </div>
   </header>
 

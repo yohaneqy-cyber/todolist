@@ -373,10 +373,11 @@
 
 
 @media (max-width: 480px) {
-  .navbar-link[href$="calendar"] {
+  .calendar-link {
     display: none !important;
   }
 }
+
 
 @media (max-width: 480px) {
   .home-icon1 {
