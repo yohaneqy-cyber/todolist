@@ -234,11 +234,32 @@
     margin-bottom: 1rem !important;
     border-radius: 8px !important;
   }
-  
+
   .auth-links a {
     font-size: 0.85rem !important;
   }
+
+  /* 🔹 Make h2, h3, h4 bigger on small screens */
+  h2 {
+    font-size: 1.4rem !important;
+  }
+
+  h3 {
+    font-size: 1.2rem !important;
+  }
+
+  h4 {
+    font-size: 1.05rem !important;
+  }
+
+  /* Optional: make general paragraph text a bit larger */
+  p,
+  .auth-container p {
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+  }
 }
+
 
 
 
@@ -348,42 +369,6 @@
   width: 100%;
   left: 50%;
   box-shadow: 0 2px 6px rgba(42, 128, 185, 0.4);
-}
-
-/* ریسپانسیو برای موبایل */
-@media (max-width: 480px) {
-  .auth-container {
-    padding: 2rem 1.5rem !important; /* padding بالا و پایین بزرگتر */
-    max-width: 100% !important; /* عرض کامل صفحه */
-    box-sizing: border-box;
-  }
-
-  .auth-title, /* شامل h4 با کلاس auth-title */
-  h4.auth-title {
-    font-size: 0.75rem !important; /* فونت کوچکتر */
-    white-space: nowrap !important; /* جلوگیری از شکست خط */
-    overflow: hidden !important; /* مخفی کردن اضافی */
-    text-overflow: ellipsis !important; /* نمایش ... در صورت کمبود فضا */
-    margin-bottom: 0.5rem !important;
-    line-height: 1.1 !important;
-  }
-
-  .auth-button {
-    font-size: 0.85rem !important;
-    padding: 10px !important;
-  }
-  
-  .auth-links a,
-  .login-links a {
-    font-size: 0.75rem !important;
-  }
-
-  /* اگر در جایی h2 هم داری */
-  h2 {
-    font-size: 0.7rem !important;
-    line-height: 1.1 !important;
-    margin-bottom: 0.5rem !important;
-  }
 }
 
 
