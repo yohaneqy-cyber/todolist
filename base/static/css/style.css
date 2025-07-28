@@ -227,38 +227,20 @@
   }
 
   .auth-button {
-    font-size: 1rem !important;
-    padding: 12px 0 !important;
+    font-size: 0.9rem !important;
+    padding: 10px 0 !important;
+    width: 80% !important;
     margin-top: 1.5rem !important;
     margin-bottom: 1rem !important;
     border-radius: 8px !important;
   }
-
+  
   .auth-links a {
     font-size: 0.85rem !important;
   }
 }
 
-@media (max-width: 480px) {
-  .auth-container {
-    padding: 1rem !important;
-    max-width: 95% !important;
-  }
 
-  .auth-title {
-    font-size: 1.1rem !important; /* فونت مناسب و خوانا برای موبایل */
-  }
-
-  .auth-button {
-    font-size: 0.9rem !important;
-    padding: 8px !important;
-  }
-
-  .auth-links a,
-  .login-links a {
-    font-size: 0.8rem !important;
-  }
-}
 
 
 /* کانتینر کلی لاگین */
