@@ -3,6 +3,7 @@ from django.forms import ValidationError
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import SetPasswordForm
 from .models import User, RecurringTask, Task, Friendship
 
 User = get_user_model()
@@ -32,9 +33,15 @@ class CustomUserCreationForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
 
+        # چک کردن اینکه آیا کاربر فعال با این ایمیل وجود دارد یا خیر
         if User.objects.filter(email=email, is_active=True).exists():
             raise forms.ValidationError('This Email is Already Taken')
+        
+        # اگر کاربر غیر فعالی با این ایمیل هست، حذفش کن (برای پاکسازی)
+        User.objects.filter(email=email, is_active=False).delete()
+
         return email
+
 
 class RecurringTaskForm(forms.ModelForm):
     class Meta:
@@ -164,3 +171,9 @@ class LoginForm(forms.Form):
 
             cleaned_data['user'] = user
         return cleaned_data
+
+class MySetPasswordForm(SetPasswordForm):
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(user, *args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class':'auth-input'})

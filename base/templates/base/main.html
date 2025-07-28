@@ -23,7 +23,28 @@
     {% endif %}
 
     {% block content %}{% endblock content %}
-    {% block scripts %}{% endblock %}
+
+    {% block scripts %}
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const messages = document.querySelectorAll(".messages li");
+        if (messages.length === 0) return;
+
+        messages.forEach((msg) => {
+          setTimeout(() => {
+            msg.style.opacity = '0';
+            msg.style.transform = 'translateY(-10px)';
+          }, 2600);
+
+          setTimeout(() => {
+            if (msg.parentNode) {
+              msg.parentNode.removeChild(msg);
+            }
+          }, 3000);
+        });
+      });
+    </script>
+    {% endblock %}
 
 </body>
 </html>

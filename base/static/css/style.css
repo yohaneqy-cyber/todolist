@@ -1,3 +1,78 @@
+
+.error-message {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  font-weight: 600;
+  /* خطاها رو کمی فاصله از input میدم */
+  padding-left: 4px;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #2980b9;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auth-button:hover {
+  background-color: #1c5ea8;
+}
+
+
+  .error-message {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+  }
+
+  .auth-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2980b9;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .auth-button:hover {
+    background-color: #1c5ea8;
+  }
+  .error-message {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+  }
+
+  .auth-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2980b9;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .auth-button:hover {
+    background-color: #1c5ea8;
+  }
+
+
+
 .error-message {
   display: inline-flex;
   align-items: center;
@@ -63,32 +138,47 @@
   left: 0;
 }
 
-/* Container and form */
+/* اختصاصی برای bio که textarea است */
+/* Make the form container more compact */
 .auth-container {
-  max-width: 420px;
-  margin: 3rem auto;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 0 10px #ccc;
-  border-radius: 12px;
-  background: #fff;
-  box-sizing: border-box;
+  max-width: 500px !important;
+  width: 90% !important;
+  margin: 1rem auto !important;
+  background: #fff !important;
+  border-radius: 10px !important;
+  padding: 1rem 1rem !important;
+  box-shadow: 0 4px 12px rgba(25, 42, 86, 0.08) !important;
+  display: flex !important;
+  text-align: center;
+  flex-direction: column !important;
+  align-items: center !important;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  color: #2c3e50 !important;
+  box-sizing: border-box !important;
+  transition: box-shadow 0.4s ease !important;
 }
 
 .auth-title {
-  margin-bottom: 1rem;
+  white-space: nowrap !important;   /* جلوگیری از شکستن خط */
+  overflow: hidden;                 /* مخفی کردن اگر خیلی طولانی شد */
+  text-overflow: ellipsis;          /* نمایش ... اگر متن خیلی طولانی شد */
+  font-size: 1.4rem !important;    /* کوچک‌تر کردن فونت */
+  font-weight: 800;
+  color: #34495e;
+  margin-bottom: 1.6rem;
   text-align: center;
-  font-size: 1.3rem; /* کوچکتر */
-  color: #333;
+  letter-spacing: 1.2px;
+  user-select: none;
 }
 
 .auth-button {
-  width: 100%;
+  width: 400px; /* پر کردن کل عرض کانتینر */
   padding: 10px;
   background-color: #2980b9;
   border: none;
   border-radius: 8px;
   color: white;
-  font-size: 1rem; /* کوچکتر */
+  font-size: 1rem;
   cursor: pointer;
   margin-top: 1rem;
   transition: background-color 0.3s ease;
@@ -96,6 +186,14 @@
 
 .auth-button:hover {
   background-color: #1f6391;
+  box-shadow: 0 6px 18px rgba(31, 99, 145, 0.7);
+  transform: translateY(-2px);
+}
+
+.auth-button:active {
+  background-color: #16608b;
+  box-shadow: 0 3px 8px rgba(22, 96, 139, 0.5);
+  transform: translateY(0);
 }
 
 .auth-links {
@@ -105,24 +203,39 @@
 
 .auth-links a {
   color: #2980b9;
-  text-decoration: none;
   font-weight: 600;
-  font-size: 0.9rem; /* کوچکتر */
+  text-decoration: none;
+  font-size: 0.9rem;
 }
 
 .auth-links a:hover {
   text-decoration: underline;
 }
 
-/* Smooth slide + fade in (smaller) */
-@keyframes slideFadeInSmall {
-  0% {
-    opacity: 0;
-    transform: translateY(-8px);
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-container {
+    max-width: 100% !important;
+    margin: 2rem auto !important;
+    padding: 1.5rem 1.5rem !important;
+    border-radius: 0 !important;
   }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
+
+  .auth-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  .auth-button {
+    font-size: 1rem !important;
+    padding: 12px 0 !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 8px !important;
+  }
+
+  .auth-links a {
+    font-size: 0.85rem !important;
   }
 }
 
@@ -255,7 +368,7 @@
   box-shadow: 0 2px 6px rgba(42, 128, 185, 0.4);
 }
 
-/* ریسپانسیو برای موبیل */
+/* ریسپانسیو برای موبایل */
 @media (max-width: 480px) {
   .auth-container {
     padding: 2rem 1.5rem !important; /* padding بالا و پایین بزرگتر */
@@ -263,18 +376,31 @@
     box-sizing: border-box;
   }
 
-  .auth-title {
-    font-size: 0.85rem !important;
+  .auth-title, /* شامل h4 با کلاس auth-title */
+  h4.auth-title {
+    font-size: 0.75rem !important; /* فونت کوچکتر */
+    white-space: nowrap !important; /* جلوگیری از شکست خط */
+    overflow: hidden !important; /* مخفی کردن اضافی */
+    text-overflow: ellipsis !important; /* نمایش ... در صورت کمبود فضا */
+    margin-bottom: 0.5rem !important;
+    line-height: 1.1 !important;
   }
 
   .auth-button {
     font-size: 0.85rem !important;
     padding: 10px !important;
   }
-
+  
   .auth-links a,
   .login-links a {
     font-size: 0.75rem !important;
+  }
+
+  /* اگر در جایی h2 هم داری */
+  h2 {
+    font-size: 0.7rem !important;
+    line-height: 1.1 !important;
+    margin-bottom: 0.5rem !important;
   }
 }
 
@@ -1215,12 +1341,6 @@ ul li a:hover {
   color: #1e4cb8;
 }
 
-.auth-title {
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 26px;
-  color: #333;
-}
 
 .auth-form label {
   display: block;
@@ -1245,22 +1365,7 @@ ul li a:hover {
   outline: none;
 }
 
-.auth-button {
-  width: 100%;
-  background-color: #2a72e5;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
 
-.auth-button:hover {
-  background-color: #174dc5;
-}
 
 .auth-links {
   text-align: center;
@@ -1285,12 +1390,6 @@ ul li a:hover {
 }
 
 
-
-.auth-title {
-  font-size: 22px;
-  margin-bottom: 15px;
-  color: #333;
-}
 
 .auth-email {
   font-weight: bold;
@@ -1605,25 +1704,7 @@ form p input[type="password"]:focus {
   box-shadow: 0 0 4px #4a90e2;
 }
 
-/* اختصاصی برای bio که textarea است */
-/* Make the form container more compact */
-.auth-container {
-  max-width: 500px !important;
-  width: 80% !important;
-  margin: 1rem auto !important;
-  background: #fff !important;
-  border-radius: 10px !important;
-  padding: 1rem 1.2rem !important;
-  box-shadow: 0 4px 12px rgba(25, 42, 86, 0.08) !important;
-  display: flex !important;
-  text-align: center;
-  flex-direction: column !important;
-  align-items: center !important;
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-  color: #2c3e50 !important;
-  box-sizing: border-box !important;
-  transition: box-shadow 0.4s ease !important;
-}
+
 
 /* Make form field blocks tighter */
 .auth-form p {
@@ -1675,31 +1756,12 @@ textarea[name="bio"] {
   max-width: 280px !important;
 }
 
-/* Submit button */
-.auth-button {
-  padding: 8px 14px !important;
-  font-size: 14px !important;
-  border-radius: 6px !important;
-  margin-top: 8px !important;
-  cursor: pointer;
-}
 
 .auth-container:hover {
   box-shadow: 0 20px 60px rgba(25, 42, 86, 0.25);
 }
 
-.auth-title {
-  white-space: nowrap !important;   /* جلوگیری از شکستن خط */
-  overflow: hidden;                 /* مخفی کردن اگر خیلی طولانی شد */
-  text-overflow: ellipsis;          /* نمایش ... اگر متن خیلی طولانی شد */
-  font-size: 1.4rem !important;    /* کوچک‌تر کردن فونت */
-  font-weight: 800;
-  color: #34495e;
-  margin-bottom: 1.6rem;
-  text-align: center;
-  letter-spacing: 1.2px;
-  user-select: none;
-}
+
 
 .auth-label {
   align-self: flex-start;
@@ -1735,27 +1797,9 @@ textarea[name="bio"] {
   box-shadow: 0 0 10px rgba(41, 128, 185, 0.4);
 }
 
-.auth-button {
-  width: 100%;
-  padding: 0.9rem 1rem;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: white;
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  border: none;
-  border-radius: 16px;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(41, 128, 185, 0.6);
-  transition: background 0.4s ease, box-shadow 0.4s ease;
-  user-select: none;
-}
 
-.auth-button:hover,
-.auth-button:focus {
-  background: linear-gradient(135deg, #2980b9, #1c5980);
-  box-shadow: 0 10px 28px rgba(25, 90, 128, 0.8);
-  outline: none;
-}
+
+
 
 .auth-link {
   position: relative !important;
@@ -1824,11 +1868,7 @@ textarea[name="bio"] {
   }
 }
 
-.auth-title {
-  text-align: center;
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-}
+
 
 .auth-form label {
   display: block;
@@ -1850,21 +1890,7 @@ textarea[name="bio"] {
   box-sizing: border-box;
 }
 
-.auth-button {
-  width: 100%;
-  padding: 12px;
-  font-size: 1rem;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
 
-.auth-button:hover {
-  background-color: #357abd;
-}
 
 .auth-links {
   text-align: center;
@@ -2001,3 +2027,53 @@ textarea[name="bio"] {
   }
 }
 
+.auth-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* وسط چین کردن افقی */
+}
+
+.auth-form-fields label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+  text-align: center; /* متن وسط چین */
+  width: 100%;
+  max-width: 320px; /* محدود کردن عرض */
+}
+
+.auth-input {
+  width: 100%;
+  max-width: 320px; /* عرض ورودی */
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.auth-input:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+/* ریسپانسیو موبایل */
+@media (max-width: 480px) {
+  .auth-form-fields label,
+  .auth-input {
+    max-width: 100%;  /* تا عرض کل کانتینر کشیده بشه */
+    font-size: 1rem;
+  }
+
+  .auth-input {
+    padding: 12px 14px;
+  }
+}

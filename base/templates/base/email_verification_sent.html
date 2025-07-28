@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="auth-container">
-  <h2 class="auth-title">
-    Are You Sure This Is Your Email? <br> 
+  <h4 class="auth-title">
+    This Is Your Email? <br> 
     <span class="auth-email">{{ email }}</span><br>
     <a href="{% url 'register' %}" class="auth-link">Update Your Email</a>
-  </h2>
+  </h4>
 <hr class="custom-hr">
 
   <p class="auth-subtitle">
@@ -20,25 +20,4 @@
   </p>
 </div>
 {% endblock content %}
-{% block scripts %}
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const messages = document.querySelectorAll(".messages li");
-    if (messages.length === 0) return;
-
-    messages.forEach((msg) => {
-      setTimeout(() => {
-        msg.style.opacity = '0';
-        msg.style.transform = 'translateY(-10px)';
-      }, 2000);
-
-      setTimeout(() => {
-        if (msg.parentNode) {
-          msg.parentNode.removeChild(msg);
-        }
-      }, 3000);
-    });
-  });
-</script>
-{% endblock %}
 

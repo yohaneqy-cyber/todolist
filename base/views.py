@@ -33,7 +33,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship
 from .serializers import TaskSerializer
-from .forms import CustomUserCreationForm, ReminderForm, ChengeForm, RecurringTaskForm, TaskForm, LoginForm
+from .forms import CustomUserCreationForm, ReminderForm, ChengeForm, RecurringTaskForm, TaskForm, LoginForm, MySetPasswordForm
 
 User = get_user_model()
 
@@ -349,18 +349,20 @@ def LogoutUser(request):
     logout(request)
     return redirect('home')
 
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 def RegisterPage(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             email = form.cleaned_data.get('email')
-
-            inactive_users = User.objects.filter(email=email, is_active=False)
-            if inactive_users.exists():
-                inactive_users.delete()
+            
+            # حذف کاربران غیر فعال با ایمیل مشابه
+            User.objects.filter(email=email, is_active=False).delete()
 
             user = form.save(commit=False)
-            user.is_active = False
+            user.is_active = False  # غیر فعال تا تایید ایمیل
             user.save()
 
             request.session['registered_email'] = user.email  
@@ -489,14 +491,14 @@ def password_reset_confirm(request, uidb64, token):
 
     if user is not None and default_token_generator.check_token(user, token):
         if request.method == 'POST':
-            form = SetPasswordForm(user, request.POST)
+            form = MySetPasswordForm(user, request.POST)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Password Chenged')
                 return redirect('login')
         
         else:
-            form = SetPasswordForm(user)
+            form = MySetPasswordForm(user)
         return render(request, 'base/password_reset_confirm.html', {'form':form})
     
     else:

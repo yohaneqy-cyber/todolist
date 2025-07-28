@@ -38,9 +38,9 @@
       <input type="submit" value="Login" class="login-button">
     </form>
 
-    <div class="login-links">
-      <a href="{% url 'password_reset_request' %}">Forgot password?</a><br>
-      <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+    <div>
+      <a class="auth-link" href="{% url 'password_reset_request' %}">Forgot password?</a><br>
+      <p>Don't have an account? <a class="auth-link" href="{% url 'register' %}">Register</a></p>
     </div>
 
     {% if show_resend_link %}
@@ -120,8 +120,8 @@
       <input type="submit" value="Register" class="login-button">
     </form>
 
-    <div class="login-links">
-      <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+    <div>
+      <p>Already have an account? <a class="auth-link" href="{% url 'login' %}">Login</a></p>
     </div>
 
     {% if show_resend_link %}
