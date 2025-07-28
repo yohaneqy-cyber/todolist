@@ -863,18 +863,20 @@ body.logout-modal-open {
       font-weight: bold;
       font-size: 18px;
     } 
+@media (max-width: 768px) {
+  .navbar-avatar-topright {
+    position: absolute;  /* فقط در موبایل */
+    top: 10px;
+    right: 10px;
+    left: auto;
+  }
 
-    @media (max-width: 768px) {
-      .navbar-avatar-topright {
-        top: 10px;
-        right: 10px;     /* برای موبایل بیا گوشه چپ بالا */
-        left: auto;
-      }
+  .navbar-logo-text {
+    display: none;
+  }
+}
 
-      .navbar-logo-text {
-        display: none;  /* مخفی کردن لوگو در موبایل */
-      }
-    }
+
 
 
     /* بکگراند تاریک و کل فضای صفحه */

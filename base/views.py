@@ -20,15 +20,15 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_str
+from django.db.models import IntegerField
+from django.db.models.functions import Cast
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.urls import reverse
+from django.conf import settings
 from datetime import timedelta
 from rest_framework import status 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from django.db.models import IntegerField
-from django.db.models.functions import Cast
-from django.core.mail import send_mail
-from django.urls import reverse
-from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship
@@ -409,13 +409,19 @@ def send_activation_email(request, user):
         reverse('activate', kwargs={'uidb64':uid, 'token':token})
     )
 
+    html_content = render_to_string('base/activation_email.html', {
+        'user':user,
+        'activation_link':activation_link
+    })
+
     subject = "Activate your account"
     message = f"Click the link below to activate your account\n{activation_link}"
     from_email = settings.EMAIL_HOST_USER
     recipient_list = [user.email]
 
-    send_mail(subject, message, from_email, recipient_list)
-
+    msg = EmailMultiAlternatives(subject, message, from_email, recipient_list)
+    msg.attach_alternative(html_content, 'text/html')
+    msg.send()
 
   
 def resend_activation_email(request):
