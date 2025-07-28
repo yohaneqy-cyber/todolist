@@ -372,7 +372,17 @@
 }
 
 
+@media (max-width: 480px) {
+  .navbar-link[href$="calendar"] {
+    display: none !important;
+  }
+}
 
+@media (max-width: 480px) {
+  .home-icon1 {
+    display: inline-block; /* show only on mobile */
+  }
+}
 
 .task-card {
   background: #e1e8ff;
