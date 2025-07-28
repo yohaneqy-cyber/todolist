@@ -1,3 +1,260 @@
+.error-message {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #fdecea, #fff5f5);
+  color: #a72121;
+  border-left: 3px solid #e53935;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  box-shadow: 0 3px 8px rgba(229, 57, 53, 0.12);
+  cursor: default;
+  user-select: none;
+  transition: opacity 0.4s ease;
+  opacity: 1;
+}
+
+.error-message::before {
+  content: "⛔";
+  font-size: 0.9rem;
+  display: inline-block;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+/* حالت مخفی شدن ساده */
+.error-message.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+.login-links a {
+  text-decoration: none !important;
+  position: relative;
+  color: #2980b9;
+  transition: color 0.3s ease;
+  border-bottom: none !important; /* حذف هر border-bottom احتمالی */
+}
+
+.login-links a:hover {
+  text-decoration: none !important;
+  color: #1c5980;
+  border-bottom: none !important;
+}
+
+.login-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #2980b9;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.login-links a:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+
+  /* Container and form */
+  .auth-container {
+    max-width: 420px;
+    margin: 3rem auto;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 0 10px #ccc;
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  .auth-title {
+    margin-bottom: 1rem;
+    text-align: center;
+    font-size: 1.6rem;
+    color: #333;
+  }
+
+  .auth-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #2980b9;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease;
+  }
+
+  .auth-button:hover {
+    background-color: #1f6391;
+  }
+
+  .auth-links {
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .auth-links a {
+    color: #2980b9;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .auth-links a:hover {
+    text-decoration: underline;
+  }
+
+
+
+
+/* Smooth slide + fade in (smaller) */
+@keyframes slideFadeInSmall {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* کانتینر کلی لاگین */
+.login-container {
+  max-width: 500px !important;
+  width: 90% !important;
+  margin: 2rem auto !important;
+  padding: 1rem 1.5rem !important;
+  background-color: #f0f8ff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  text-align: center !important;  /* وسط‌چین کردن متن‌های داخل کانتینر */
+}
+
+/* عنوان صفحه لاگین */
+.login-title {
+  font-size: 22px !important;
+  font-weight: bold !important;
+  margin-bottom: 1rem !important;
+  text-align: center !important;
+}
+
+/* فرم لاگین */
+.login-form {
+  width: 100% !important;
+  text-align: center !important; /* وسط‌چین کردن محتوای فرم */
+}
+
+/* هر فیلد داخل فرم */
+.login-field {
+  margin-bottom: 15px !important;
+  text-align: center !important;  /* وسط‌چین کردن بلوک هر فیلد */
+}
+
+/* برچسب‌ها */
+.login-label {
+  font-size: 13px !important;
+  margin-bottom: 6px !important;
+  display: block !important;
+  text-align: center !important;  /* وسط‌چین کردن متن برچسب */
+}
+
+/* ورودی‌های فرم */
+.login-input {
+  font-size: 13px !important;
+  padding: 6px 10px !important;
+  height: 30px !important;
+  width: 90% !important;
+  max-width: 320px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  background-color: #fff !important;
+  box-sizing: border-box !important;
+  margin-left: auto !important;  /* وسط‌چین کردن ورودی */
+  margin-right: auto !important;
+  display: block !important;
+}
+
+/* دکمه ارسال فرم */
+.login-button {
+  background-color: #3498db !important;
+  color: #fff !important;
+  padding: 10px 20px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin-top: 20px !important;
+  border: none !important;
+  border-radius: 5px !important;
+  cursor: pointer !important;
+  margin-top: 20px !important; /* فاصله بالای دکمه */
+  transition: background 0.3s ease !important;
+  display: inline-block !important; /* برای وسط‌چین دکمه */
+}
+
+.login-links a {
+  position: relative;
+  color: #2a80b9;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 1rem;
+  padding-bottom: 12px; /* فاصله بیشتر بین متن و خط */
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.login-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 8.8px; /* فاصله بیشتر خط از متن */
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #2a80b9;
+  border-radius: 2px;
+  transition: width 0.35s ease, left 0.35s ease;
+  box-shadow: none;
+  transform: translateX(-50%);
+}
+
+.login-links a:hover {
+  color: #1b4d73;
+}
+
+.login-links a:hover::after {
+  width: 100%;
+  left: 50%;
+  box-shadow: 0 2px 6px rgba(42, 128, 185, 0.4);
+}
+
+/* ریسپانسیو برای موبیل */
+@media (max-width: 480px) {
+  .login-container {
+    width: 95% !important;
+    padding: 1rem !important;
+  }
+
+  .login-input {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .login-button {
+    width: 100% !important;
+    padding: 12px !important;
+    font-size: 18px !important;
+  }
+}
+
+
 .task-card {
   background: #e1e8ff;
   color: #1a237e;
@@ -459,7 +716,7 @@
 }
 
 .profile-container {
-  max-width: 420px;
+  max-width: 480px !important;
   margin: 50px auto;
   padding: 35px 40px;
   background: #f0f4ff; /* روشن ولی نزدیک رنگ قبلی */
@@ -932,16 +1189,6 @@ ul li a:hover {
   color: #1e4cb8;
 }
 
-
-.auth-container {
-  max-width: 400px;
-  margin: 50px auto;
-  background: #ffffff;
-  padding: 30px 35px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07);
-}
-
 .auth-title {
   text-align: center;
   margin-bottom: 25px;
@@ -1011,15 +1258,7 @@ ul li a:hover {
   font-size: 14px;
 }
 
-.auth-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 30px;
-  background-color: #f9f9ff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  text-align: center;
-}
+
 
 .auth-title {
   font-size: 22px;
@@ -1038,30 +1277,6 @@ ul li a:hover {
   margin-top: 10px;
 }
 
-.auth-link {
-  color: #3366cc;
-  text-decoration: none;
-}
-
-.auth-link:hover {
-  text-decoration: underline;
-}
-
-.custom-form {
-  max-width: 600px;
-  margin: auto;
-  background: #f8f9fa;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-.form-heading {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 28px;
-  color: #2c3e50;
-}
 
 .form-group {
   margin-bottom: 15px;
@@ -1365,20 +1580,222 @@ form p input[type="password"]:focus {
 }
 
 /* اختصاصی برای bio که textarea است */
-form p textarea {
-  min-height: 100px;
-  resize: vertical;
+/* Make the form container more compact */
+.auth-container {
+  max-width: 500px !important;
+  width: 80% !important;
+  margin: 1rem auto !important;
+  background: #fff !important;
+  border-radius: 10px !important;
+  padding: 1rem 1.2rem !important;
+  box-shadow: 0 4px 12px rgba(25, 42, 86, 0.08) !important;
+  display: flex !important;
+  text-align: center;
+  flex-direction: column !important;
+  align-items: center !important;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  color: #2c3e50 !important;
+  box-sizing: border-box !important;
+  transition: box-shadow 0.4s ease !important;
 }
 
+/* Make form field blocks tighter */
+.auth-form p {
+  margin-bottom: 6px !important; /* reduce vertical space between fields */
+}
 
-.auth-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-family: 'Segoe UI', sans-serif;
+/* Labels spacing and appearance */
+.auth-form label {
+  font-size: 13px !important;
+  margin-bottom: 2px !important;  /* tight spacing */
+  display: block;
+  line-height: 1.1 !important;
+}
+
+/* Inputs general style */
+.auth-input,
+#id_name,
+#id_email,
+#id_password1,
+#id_password2 {
+  font-size: 13px !important;
+  padding: 4px 6px !important;
+  height: 29px !important;
+  margin-bottom: 2px !important;
+  border-radius: 4px !important;
+  width: 90% !important;
+  max-width: 280px !important;
+}
+
+/* Textarea (bio field) */
+#id_bio,
+textarea[name="bio"] {
+  min-height: 70px !important;
+  max-height: 60px !important;
+  resize: vertical !important;
+  font-size: 13px !important;
+  padding: 4px 6px !important;
+  line-height: 1.2 !important;
+  width: 90% !important;
+  max-width: 280px !important;
+  margin-bottom: 4px !important;
+}
+
+/* File input (avatar) */
+#id_avatar {
+  font-size: 12px !important;
+  margin-bottom: 4px !important;
+  width: 90% !important;
+  max-width: 280px !important;
+}
+
+/* Submit button */
+.auth-button {
+  padding: 8px 14px !important;
+  font-size: 14px !important;
+  border-radius: 6px !important;
+  margin-top: 8px !important;
+  cursor: pointer;
+}
+
+.auth-container:hover {
+  box-shadow: 0 20px 60px rgba(25, 42, 86, 0.25);
+}
+
+.auth-title {
+  white-space: nowrap !important;   /* جلوگیری از شکستن خط */
+  overflow: hidden;                 /* مخفی کردن اگر خیلی طولانی شد */
+  text-overflow: ellipsis;          /* نمایش ... اگر متن خیلی طولانی شد */
+  font-size: 1.4rem !important;    /* کوچک‌تر کردن فونت */
+  font-weight: 800;
+  color: #34495e;
+  margin-bottom: 1.6rem;
+  text-align: center;
+  letter-spacing: 1.2px;
+  user-select: none;
+}
+
+.auth-label {
+  align-self: flex-start;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7f8c8d;
+  margin-bottom: 0.6rem;
+  user-select: none;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  font-size: 1rem;
+  border: 2px solid #bdc3c7;
+  border-radius: 14px;
+  outline-offset: 3px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  color: #34495e;
+  font-family: inherit;
+}
+
+.auth-input::placeholder {
+  color: #95a5a6;
+  font-style: italic;
+}
+
+.auth-input:focus {
+  border-color: #2980b9;
+  box-shadow: 0 0 10px rgba(41, 128, 185, 0.4);
+}
+
+.auth-button {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(41, 128, 185, 0.6);
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+  user-select: none;
+}
+
+.auth-button:hover,
+.auth-button:focus {
+  background: linear-gradient(135deg, #2980b9, #1c5980);
+  box-shadow: 0 10px 28px rgba(25, 90, 128, 0.8);
+  outline: none;
+}
+
+.auth-link {
+  position: relative !important;
+  font-size: 1.2rem !important;
+  color: #1e88e5 !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  user-select: none !important;
+  padding-bottom: 3px !important;
+  transition: color 0.3s ease !important;
+}
+
+.auth-link::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  height: 2px !important;
+  width: 100% !important;
+  background-color: #1e88e5 !important;
+  transform: scaleX(0) !important;
+  transform-origin: center !important;  /* وسط برای شروع و پایان */
+  transition: transform 0.3s ease !important;
+}
+
+.auth-link:hover,
+.auth-link:focus {
+  color: #154a86 !important;
+}
+
+.auth-link:hover::after,
+.auth-link:focus::after {
+  transform: scaleX(1) !important;
+}
+
+/* Responsive: mobile friendly */
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 2rem 2.5rem;
+    max-width: 95%;
+  }
+
+  .auth-title {
+    font-size: 1.2rem !important; /* فونت کوچکتر برای موبایل */
+    margin-bottom: 1.4rem;
+  }
+
+  .auth-input {
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .auth-button {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .auth-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .auth-link {
+    font-size: 0.85rem;
+    margin-top: 1.2rem;
+  }
 }
 
 .auth-title {
@@ -1488,4 +1905,73 @@ form p textarea {
   box-shadow: 0 0 8px rgba(18, 122, 190, 0.6);
 }
 
+
+.messages {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  max-width: 450px;
+  z-index: 9999;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.messages li {
+  background: #d4edda;
+  color: #155724;
+  border-left: 4px solid #28a745;
+  padding: 12px 24px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
+  user-select: none;
+  font-size: 0.85rem;   /* فونت کوچکتر */
+  cursor: default;
+  min-width: 280px;
+  max-width: 440px;
+  box-sizing: border-box;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.messages li.error {
+  background: #f8d7da;
+  color: #721c24;
+  border-left-color: #dc3545;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+}
+
+@keyframes fadeInMessage {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .messages {
+    max-width: 90vw; /* حداکثر عرض روی 90٪ عرض صفحه موبایل */
+    left: 5vw;       /* کمی فاصله از چپ */
+    top: 10px;       /* فاصله از بالا */
+  }
+
+  .messages li {
+    max-width: 100%;  /* اجازه می‌ده جعبه پیام تا عرض پیام‌ها بزرگ شود */
+    min-width: auto;  /* حذف حداقل عرض */
+    padding: 10px 16px;
+    font-size: 0.75rem;  /* فونت کوچکتر برای موبایل */
+    white-space: normal; /* اجازه شکست خط */
+  }
+}
 

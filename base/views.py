@@ -33,7 +33,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship
 from .serializers import TaskSerializer
-from .forms import CustomUserCreationForm, ReminderForm, ChengeForm, RecurringTaskForm, TaskForm
+from .forms import CustomUserCreationForm, ReminderForm, ChengeForm, RecurringTaskForm, TaskForm, LoginForm
 
 User = get_user_model()
 
@@ -325,21 +325,13 @@ def delete_task(request, pk):
 
 def LoginPage(request):
     page = 'login'
-
+    
+    form = LoginForm(request.POST or None)
     if request.method == 'POST':
-        email = request.POST.get('email')  
-        password = request.POST.get('password')
-         
-        user = authenticate(request, email=email, password=password)
-
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                return redirect('home')
-        else:
-            messages.error(request, "Invalid email or password")
-
-    return render(request, 'base/login_register.html', {'page': page})
+        if form.is_valid():
+            login(request, form.cleaned_data['user'])
+            return redirect('home')
+    return render(request, 'base/login_register.html', {'page': page, 'form':form})
 
 @login_required
 def profile_view(request):
@@ -359,39 +351,36 @@ def LogoutUser(request):
 
 def RegisterPage(request):
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             email = form.cleaned_data.get('email')
-            
-            if User.objects.filter(email=email, is_active=True).exists():
-                form.add_error('email', 'This email is already used by an active user.')
-            else:
-                inactive_users = User.objects.filter(email=email, is_active=False)
-                if inactive_users.exists():
-                    inactive_users.delete()
 
-                user = form.save(commit=False)
-                user.is_active = False
-                user.save()
+            inactive_users = User.objects.filter(email=email, is_active=False)
+            if inactive_users.exists():
+                inactive_users.delete()
 
-                request.session['registered_email'] = user.email  
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
 
-                current_site = get_current_site(request)
-                mail_subject = 'Activate Your Account'
-                message = render_to_string('base/activate_account_email.html', {
-                    'user': user, 
-                    'domain': current_site.domain,
-                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                    'token': default_token_generator.make_token(user),
-                })
-                user.email_user(mail_subject, message)
+            request.session['registered_email'] = user.email  
 
-                return redirect('email_verification_sent')
+            current_site = get_current_site(request)
+            mail_subject = 'Activate Your Account'
+            message = render_to_string('base/activate_account_email.html', {
+                'user': user, 
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': default_token_generator.make_token(user),
+            })
+            user.email_user(mail_subject, message)
 
+            return redirect('email_verification_sent')
+        else:
+            return render(request, 'base/login_register.html', {'form': form})
     else:
         form = CustomUserCreationForm()
-
-    return render(request, 'base/login_register.html', {'form': form, 'page': 'register'})
+    return render(request, 'base/login_register.html', {'form': form})
 
 def activate_account(request,uidb64,token):
     try:

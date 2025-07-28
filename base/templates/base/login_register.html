@@ -1,50 +1,196 @@
 {% extends 'base/main.html' %}
 
+{% block extra_css %}
+{% endblock %}
+
 {% block content %}
+<div class="login-container">
+  {% if page == 'login' %}
+    <h2 class="login-title">Login</h2>
+    <form method="POST" class="login-form" novalidate>
+      {% csrf_token %}
 
-{% if page == 'login' %}
-<div class="auth-container">
-    <h2 class="auth-title">Login</h2>
-    <form method="POST" class="auth-form">
-        {% csrf_token %}
-        <label for="email">Email:</label>
-        <input type="text" name="email" placeholder="Enter Email" required class="auth-input" autofocus>
-        
-        <label for="password">Password:</label>
-        <input type="password" name="password" placeholder="Enter Password" required class="auth-input">
+      {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+          <div class="error-message">{{ error }}</div>
+        {% endfor %}
+      {% endif %}
 
-        <input type="submit" value="Login" class="auth-button">
+      <p class="login-field">
+        <label for="email" class="login-label">Email:</label><br>
+        <input type="email" name="email" id="email"
+               value="{{ form.email.value|default_if_none:'' }}"
+               required autofocus class="login-input">
+        {% if form.email.errors %}
+          <div class="error-message">{{ form.email.errors.0 }}</div>
+        {% endif %}
+      </p>
+
+      <p class="login-field">
+        <label for="password" class="login-label" style="margin-top:1rem;">Password:</label><br>
+        <input type="password" name="password" id="password"
+               required class="login-input">
+        {% if form.password.errors %}
+          <div class="error-message">{{ form.password.errors.0 }}</div>
+        {% endif %}
+      </p>
+
+      <input type="submit" value="Login" class="login-button">
     </form>
 
-    <div class="auth-links">
-        <a href="{% url 'password_reset_request' %}">Forgot Your Password?</a>
-        <p>Don't have an account?</p>
-        <a href="{% url 'register' %}">Register</a>
+    <div class="login-links">
+      <a href="{% url 'password_reset_request' %}">Forgot password?</a><br>
+      <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
     </div>
 
     {% if show_resend_link %}
-    <p class="resend-note">Your account is not activated yet. <a href="{% url 'resend_activation' %}">Resend activation email</a></p>
+      <p style="margin-top:1rem; color:#cc1f1a; font-weight:bold; text-align:center;">
+        Your account is not activated.
+        <a href="{% url 'resend_activation' %}">Resend activation email</a>
+      </p>
     {% endif %}
-</div>
 
-{% else %}
-<div class="auth-container">
+  {% else %}
     <h2 class="auth-title">Register</h2>
-    <form method="POST" class="auth-form">
-        {% csrf_token %}S
-        {{ form.as_p }}
-        <input type="submit" value="Register" class="auth-button">
+    <form method="POST" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+          <div class="error-message">{{ error }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <p class="login-field">
+        <label for="{{ form.name.id_for_label }}" class="login-label">Name:</label><br>
+        <input type="text" name="{{ form.name.html_name }}"
+               id="{{ form.name.id_for_label }}"
+               value="{{ form.name.value|default_if_none:'' }}"
+               autofocus class="login-input">
+        {% if form.name.errors %}
+          <div class="error-message">{{ form.name.errors.0 }}</div>
+        {% endif %}
+      </p>
+
+      <p class="login-field">
+        <label for="{{ form.email.id_for_label }}" class="login-label" style="margin-top:1rem;">Email:</label><br>
+        <input type="email" name="{{ form.email.html_name }}"
+               id="{{ form.email.id_for_label }}"
+               value="{{ form.email.value|default_if_none:'' }}"
+               class="login-input">
+        {% if form.email.errors %}
+          <div class="error-message">{{ form.email.errors.0 }}</div>
+        {% endif %}
+      </p>
+
+      <p class="login-field">
+        <label for="{{ form.avatar.id_for_label }}" class="login-label" style="margin-top:1rem;">Avatar:</label><br>
+        {{ form.avatar }}
+        {% if form.avatar.errors %}
+          <div class="error-message">{{ form.avatar.errors.0 }}</div>
+        {% endif %}
+      </p>
+
+      <p class="login-field">
+        <label for="{{ form.bio.id_for_label }}" class="login-label" style="margin-top:1rem;">Bio:</label><br>
+        {{ form.bio }}
+        {% if form.bio.errors %}
+          <div class="error-message">{{ form.bio.errors.0 }}</div>
+        {% endif %}
+      </p>
+
+      <p class="login-field">
+        <label for="{{ form.password1.id_for_label }}" class="login-label" style="margin-top:1rem;">Password:</label><br>
+        <input type="password" name="{{ form.password1.html_name }}"
+               id="{{ form.password1.id_for_label }}" class="login-input">
+        {% if form.password1.errors %}
+          <div class="error-message">{{ form.password1.errors.0 }}</div>
+        {% endif %}
+      </p>
+
+      <p class="login-field">
+        <label for="{{ form.password2.id_for_label }}" class="login-label" style="margin-top:1rem;">Confirm Password:</label><br>
+        <input type="password" name="{{ form.password2.html_name }}"
+               id="{{ form.password2.id_for_label }}" class="login-input">
+        {% if form.password2.errors %}
+          <div class="error-message">{{ form.password2.errors.0 }}</div>
+        {% endif %}
+      </p>
+
+      <input type="submit" value="Register" class="login-button">
     </form>
 
-    <div class="auth-links">
-        <p>Alrea dy have an account?</p>
-        <a href="{% url 'login' %}">Login</a>
+    <div class="login-links">
+      <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
     </div>
 
     {% if show_resend_link %}
-    <p class="resend-note">Your account is not activated yet. <a href="{% url 'resend_activation' %}">Resend activation email</a></p>
+      <p style="margin-top:1rem; color:#cc1f1a; font-weight:bold; text-align:center;">
+        Your account is not activated.
+        <a href="{% url 'resend_activation' %}">Resend activation email</a>
+      </p>
     {% endif %}
+  {% endif %}
 </div>
-{% endif %}
 
+
+<script>
+function hideErrorSmooth(error, duration = 400) {
+  error.classList.add('hide');
+  setTimeout(() => {
+    if (error.parentNode) error.parentNode.removeChild(error);
+  }, duration);
+}
+
+function hideErrorsSequentially(selector, initialDelay = 4000, delayBetween = 300) {
+  const errors = document.querySelectorAll(selector);
+  errors.forEach((error, i) => {
+    setTimeout(() => {
+      hideErrorSmooth(error);
+    }, initialDelay + i * delayBetween);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  hideErrorsSequentially('.error-message', 4000, 350);
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const focusableElements = Array.from(document.querySelectorAll('input, textarea, select, button'));
+
+  focusableElements.forEach((el, i) => {
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+
+        const nextEl = focusableElements[i + 1];
+        if (!nextEl) return;
+
+        const tag = nextEl.tagName.toLowerCase();
+
+        if (tag === 'button' || (tag === 'input' && nextEl.type === 'submit')) {
+          // اگر submit بود فرم رو ارسال کن
+          if (nextEl.type === 'submit') {
+            const form = nextEl.closest('form');
+            if (form) {
+              form.requestSubmit ? form.requestSubmit() : form.submit();
+              return;
+            }
+          }
+
+          // کلیک شبیه‌سازی
+          const event = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true
+          });
+          nextEl.dispatchEvent(event);
+        } else {
+          nextEl.focus();
+        }
+      }
+    });
+  });
+});
+
+</script>
 {% endblock content %}

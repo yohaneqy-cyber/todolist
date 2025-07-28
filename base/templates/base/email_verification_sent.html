@@ -19,4 +19,26 @@
     <a href="{% url 'resend_activation' %}" class="auth-link">Resend Activation Email</a>
   </p>
 </div>
+{% endblock content %}
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const messages = document.querySelectorAll(".messages li");
+    if (messages.length === 0) return;
+
+    messages.forEach((msg) => {
+      setTimeout(() => {
+        msg.style.opacity = '0';
+        msg.style.transform = 'translateY(-10px)';
+      }, 2000);
+
+      setTimeout(() => {
+        if (msg.parentNode) {
+          msg.parentNode.removeChild(msg);
+        }
+      }, 3000);
+    });
+  });
+</script>
 {% endblock %}
+

@@ -14,6 +14,32 @@
   <style>
 
 
+#errorMessage {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px 15px;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  margin-top: 3px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  font-size: 16px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+/* ریسپانسیو برای موبایل */
+@media (max-width: 600px) {
+  #errorMessage {
+    font-size: 14px;
+    padding: 8px 12px;
+    margin-top: 6px;
+    max-width: 90vw; /* حداکثر عرض نزدیک به عرض صفحه موبایل */
+  }
+}
+
 
 #userSearchInput {
   width: 100%;
@@ -1676,16 +1702,38 @@ body.logout-modal-open {
     }
 
     // نمایش و مخفی کردن پیام خطا
-    function showErrorMessage(message) {
-      const errorDiv = document.getElementById("errorMessage");
-      const errorText = document.getElementById("errorText");
-      errorText.textContent = message;
-      errorDiv.style.display = "block";
-    }
-    function hideErrorMessage() {
-      const errorDiv = document.getElementById("errorMessage");
+let errorTimeout;
+
+function showErrorMessage(message) {
+  const errorDiv = document.getElementById("errorMessage");
+  const errorText = document.getElementById("errorText");
+
+  errorText.textContent = message;
+  errorDiv.style.display = "block";
+  errorDiv.style.opacity = 1;
+
+  // اگر تایمر قبلاً فعال بوده، ریستش کن
+  clearTimeout(errorTimeout);
+
+  errorTimeout = setTimeout(() => {
+    errorDiv.style.opacity = 0;
+
+    setTimeout(() => {
       errorDiv.style.display = "none";
-    }
+      errorText.textContent = "";
+    }, 300); // زمان محو شدن (انیمیشن)
+  }, 3000); // ۳ ثانیه نمایش
+}
+
+function hideErrorMessage() {
+  const errorDiv = document.getElementById("errorMessage");
+  const errorText = document.getElementById("errorText");
+
+  clearTimeout(errorTimeout);
+  errorDiv.style.display = "none";
+  errorText.textContent = "";
+}
+
 
     // شروع با نمایش تب سرچ
     showSearchTab();

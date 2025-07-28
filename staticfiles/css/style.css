@@ -860,14 +860,6 @@ ul li a:hover {
 }
 
 
-.auth-container {
-  max-width: 400px;
-  margin: 50px auto;
-  background: #ffffff;
-  padding: 30px 35px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07);
-}
 
 .auth-title {
   text-align: center;
@@ -938,15 +930,7 @@ ul li a:hover {
   font-size: 14px;
 }
 
-.auth-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 30px;
-  background-color: #f9f9ff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  text-align: center;
-}
+
 
 .auth-title {
   font-size: 22px;
@@ -1248,15 +1232,6 @@ form p textarea {
 }
 
 
-.auth-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-family: 'Segoe UI', sans-serif;
-}
 
 .auth-title {
   text-align: center;
