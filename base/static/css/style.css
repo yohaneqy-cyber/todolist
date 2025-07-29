@@ -1120,37 +1120,6 @@ body {
   transition: background-color 0.3s ease;
 }
 
-@media (max-width: 600px) {
-  .navbar-links-container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 10px 0;
-  }
-
-  .navbar-link,
-  .calendar-link {
-    font-size: 14px !important;
-    padding: 6px 10px !important;
-  }
-
-  .navbar-avatar-topright {
-    order: -1; /* آواتار بیاد اول */
-    margin-right: auto;
-  }
-
-  .navbar-avatar-img,
-  .navbar-avatar-placeholder {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-}
-
-
 
 .bio:hover {
   background-color: #dbe4f7;
