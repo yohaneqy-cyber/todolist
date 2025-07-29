@@ -522,26 +522,77 @@ body.logout-modal-open {
 /* نسخه موبایل */
 /* حذف پس‌زمینه و حاشیه دکمه‌ها در موبایل */
 @media (max-width: 600px) {
+  .navbar-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 6px 10px !important;
+    background: transparent !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .navbar-logo {
+    display: flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+  }
+
+  .logo-text {
+    display: none !important; /* مخفی کردن متن ToDoList */
+  }
+
+  .navbar-links-container {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+  }
+
   .navbar-link {
     background-color: transparent !important;
     border: none !important;
     padding: 6px 8px !important;
     font-size: 16px !important;
-    color: #1976d2 !important; /* رنگ آبی ملایم */
+    color: #1976d2 !important;
+    white-space: nowrap !important;
   }
-  
-  .navbar-avatar-topright {
-    order: 999 !important;
-  }
-  /* وقتی هاور یا فعال است */
+
   .navbar-link:hover,
   .navbar-link:focus {
-    background-color: rgba(25, 118, 210, 0.1);
-    border-radius: 6px;
-    text-decoration: none;
-    color: #0d47a1;
+    background-color: rgba(25, 118, 210, 0.1) !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    color: #0d47a1 !important;
+  }
+
+  .navbar-avatar-topright {
+    order: 999 !important; /* بیاد آخر همه آیتم‌ها */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-left: 6px !important;
+  }
+
+  .navbar-avatar-img,
+  .navbar-avatar-placeholder {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    font-size: 14px !important;
+    line-height: 34px !important;
+    text-align: center !important;
+    color: white !important;
+    background-color: #777 !important;
+    font-weight: bold !important;
+  }
+
+  .calendar-link {
+    display: none !important; /* حذف تقویم */
   }
 }
+
 
 
   @keyframes fadeIn {
