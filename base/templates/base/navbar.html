@@ -1075,43 +1075,54 @@ body.logout-modal-open {
   overflow: hidden;
 }
 
+/* دسکتاپ: پروفایل در اول باقی می‌مونه (order: 0 پیش‌فرضه) */
 
-@media (max-width: 480px) {
-  .logout-modal-content {
-    width: 95vw;         /* تقریباً کل عرض صفحه موبایل */
-    max-width: none;     /* حذف محدودیت عرض */
-    max-height: 90vh;    /* کمی بیشتر ارتفاع */
-    padding: 20px 16px;  /* فاصله داخلی کمتر و جمع‌وجورتر */
-    border-radius: 16px; /* کمی گردتر */
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    font-size: 16px;     /* متن کمی بزرگتر برای خوانایی */
+/* موبایل: پروفایل بره آخر */
+@media (max-width: 600px) {
+  .navbar-links-container {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
   }
 
-  .logout-close {
-    top: 10px;
-    right: 12px;
-    font-size: 24px;     /* آیکون بستن کمی کوچکتر */
+  .navbar-avatar-topright {
+    order: 999 !important; /* در موبایل، پروفایل بره آخر */
   }
 
-  .logout-confirm-btn,
-  .logout-cancel-btn {
-    padding: 12px 16px;
-    font-size: 16px;
-    border-radius: 8px;
+  .navbar-link {
+    background: transparent !important;
+    border: none !important;
+    padding: 6px 8px !important;
+    font-size: 16px !important;
+    color: #1976d2 !important;
+    white-space: nowrap;
   }
 
-  .logout-confirm-btn {
-    width: 48%;
+  .navbar-link:hover,
+  .navbar-link:focus {
+    background-color: rgba(25, 118, 210, 0.1) !important;
+    border-radius: 6px !important;
+    color: #0d47a1 !important;
   }
 
-  .logout-cancel-btn {
-    width: 48%;
+  .navbar-avatar-img,
+  .navbar-avatar-placeholder {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    font-size: 14px !important;
+    text-align: center;
+    line-height: 34px;
+    font-weight: bold;
+    background-color: #777;
+    color: white;
   }
 
-  .logout-buttons {
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
+  .calendar-link {
+    display: none !important;
   }
 }
 
@@ -1236,24 +1247,26 @@ body.logout-modal-open {
 
 
 
-    <div class="navbar-links-container">
-      {% if user.is_authenticated %}
-        <a href="{% url 'profile' %}" class="navbar-avatar-topright">
-          {% if user.avatar %}
-              <img src="{{ user.avatar.url }}" alt="Avatar" class="navbar-avatar-img" />
-          {% else %}
-            <div class="navbar-avatar-placeholder">{{ user.name|slice:":1"|upper }}</div>
-          {% endif %}
-        </a>
-
-        <a href="#" id="openFriendsModal" class="navbar-link">Friends</a>
-        <a href="{% url 'dashbord' %}" class="navbar-link">Dashboard</a>
-        <a href="#" id="openLogoutModal" class="navbar-link">Logout</a>
+<div class="navbar-links-container">
+  {% if user.is_authenticated %}
+    <!-- Profile: در اول قرار می‌گیرد -->
+    <a href="{% url 'profile' %}" class="navbar-avatar-topright">
+      {% if user.avatar %}
+        <img src="{{ user.avatar.url }}" alt="Avatar" class="navbar-avatar-img" />
       {% else %}
-        <a href="{% url 'login' %}" class="navbar-link">Login</a>
+        <div class="navbar-avatar-placeholder">{{ user.name|slice:":1"|upper }}</div>
       {% endif %}
-      <a href="{% url 'calendar' %}" class="navbar-link calendar-link">📅</a>
-    </div>
+    </a>
+
+    <a href="#" id="openFriendsModal" class="navbar-link">Friends</a>
+    <a href="{% url 'dashbord' %}" class="navbar-link">Dashboard</a>
+    <a href="#" id="openLogoutModal" class="navbar-link">Logout</a>
+  {% else %}
+    <a href="{% url 'login' %}" class="navbar-link">Login</a>
+  {% endif %}
+  <a href="{% url 'calendar' %}" class="navbar-link calendar-link">📅</a>
+</div>
+
   </header>
 
   <div id="friendsModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="modalTitle" aria-modal="true" style="display:none;">
