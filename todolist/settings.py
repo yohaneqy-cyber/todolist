@@ -172,8 +172,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 ALLOWED_HOSTS = [
-    'todolist-1-e65k.onrender.com',  # قبلی
-    'tododo-aim2.onrender.com',      # سایت جدیدت ✅
+    'tododo-aim2.onrender.com',      
     'localhost',
     '127.0.0.1',
 ]
