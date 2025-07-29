@@ -1058,55 +1058,81 @@ body.logout-modal-open {
 }
 
 
-@media (max-width: 480px) {
-  .logout-modal-content {
-    width: 95vw;         /* تقریباً کل عرض صفحه موبایل */
-    max-width: none;     /* حذف محدودیت عرض */
-    max-height: 90vh;    /* کمی بیشتر ارتفاع */
-    padding: 20px 16px;  /* فاصله داخلی کمتر و جمع‌وجورتر */
-    border-radius: 16px; /* کمی گردتر */
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    font-size: 16px;     /* متن کمی بزرگتر برای خوانایی */
+@media (max-width: 768px) {
+  .navbar-container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 8px 12px !important;
+    background-color: transparent !important;
+    border-bottom: none !important;
   }
 
-  .logout-close {
-    top: 10px;
-    right: 12px;
-    font-size: 24px;     /* آیکون بستن کمی کوچکتر */
+  .navbar-logo {
+    display: flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+    gap: 6px !important;
   }
 
-  .logout-confirm-btn,
-  .logout-cancel-btn {
-    padding: 12px 16px;
-    font-size: 16px;
-    border-radius: 8px;
+  .logo-text {
+    display: none !important;
   }
 
-  .logout-confirm-btn {
-    width: 48%;
+  .navbar-links-container {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
   }
 
-  .logout-cancel-btn {
-    width: 48%;
+  .navbar-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 36px !important;
+    padding: 0 10px !important;
+    font-size: 14px !important;
+    color: #1976d2 !important;
+    text-decoration: none !important;
+    background: none !important;
+    border: none !important;
+    white-space: nowrap !important;
+    border-radius: 6px !important;
   }
 
-  .logout-buttons {
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
+  .navbar-link:hover {
+    background-color: rgba(25, 118, 210, 0.08) !important;
+  }
+
+  .calendar-link {
+    display: none !important;
+  }
+
+  .navbar-avatar-topright {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    order: 999 !important; /* آخر لیست */
+    height: 36px !important;
+    width: 36px !important;
+  }
+
+  .navbar-avatar-img,
+  .navbar-avatar-placeholder {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    font-size: 14px !important;
+    line-height: 36px !important;
+    text-align: center !important;
+    color: white !important;
+    background-color: #777 !important;
+    font-weight: bold !important;
   }
 }
 
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(7.1px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 
 
 
