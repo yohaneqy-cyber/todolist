@@ -910,18 +910,7 @@ body.logout-modal-open {
       font-weight: bold;
       font-size: 18px;
     } 
-@media (max-width: 768px) {
-  .navbar-avatar-topright {
-    position: absolute;  /* فقط در موبایل */
-    top: 10px;
-    right: 10px;
-    left: auto;
-  }
 
-  .navbar-logo-text {
-    display: none;
-  }
-}
 
 
 
@@ -1182,17 +1171,79 @@ body.logout-modal-open {
 }
 
 
-@media (max-width: 480px) {
-  /* فقط متن لوگو مخفی شود */
-  .navbar-logo .logo-text {
-    display: none !important;
+@media (max-width: 768px) {
+  .navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
   }
 
-  /* آیکون خانه نمایش داده شود */
-  .home-icon1 {
-    display: inline-block !important;
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .logo-text {
+    display: none !important; /* Hide "ToDoList" text */
+  }
+
+  .navbar-links-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+  }
+
+  .navbar-link {
+    font-size: 14px;
+    padding: 6px 8px;
+    text-decoration: none;
+    color: #1976d2;
+    background: none;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .navbar-link:hover {
+    background-color: rgba(25, 118, 210, 0.08);
+    border-radius: 6px;
+  }
+
+  .navbar-avatar-topright {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* ✅ Force avatar to the end */
+    order: 999;
+    margin-left: auto;
+  }
+
+  .navbar-avatar-img,
+  .navbar-avatar-placeholder {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    font-size: 14px;
+    line-height: 34px;
+    text-align: center;
+    color: white;
+    background-color: #777;
+    font-weight: bold;
+  }
+
+  /* ✅ Hide calendar in mobile */
+  .calendar-link {
+    display: none !important;
   }
 }
+
 
 
   </style>
@@ -1247,6 +1298,7 @@ body.logout-modal-open {
       {% endif %}
       <a href="{% url 'calendar' %}" class="navbar-link calendar-link">📅</a>
     </div>
+    
   </header>
 
   <div id="friendsModal" class="modal" aria-hidden="true" role="dialog" aria-labelledby="modalTitle" aria-modal="true" style="display:none;">
