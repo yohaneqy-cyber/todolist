@@ -1,13 +1,13 @@
+<!-- base/activation_email.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Activate Your Account</title>
 </head>
-<body style="font-family: Tahoma, sans-serif; direction: ltr; background-color: #f9f9f9; padding: 20px;">
-  <h2 style="color: #1976d2;">Hello Hello {{ user.get_full_name|default:user.email }}
- 👋</h2>
-  
+<body style="font-family: Tahoma, sans-serif; background-color: #f9f9f9; padding: 20px;">
+  <h2 style="color: #1976d2;">Hello {{ user.get_full_name|default:user.email }} 👋</h2>
+
   <p>Please click the button below to activate your account:</p>
 
   <p style="text-align: center; margin: 20px 0;">

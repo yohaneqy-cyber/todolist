@@ -20,6 +20,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_str
+from django.utils.html import strip_tags
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
 from django.core.mail import send_mail, EmailMultiAlternatives
@@ -352,30 +353,46 @@ def LogoutUser(request):
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.sites.shortcuts import get_current_site
+from django.conf import settings
+
 def RegisterPage(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             email = form.cleaned_data.get('email')
-            
-            # حذف کاربران غیر فعال با ایمیل مشابه
             User.objects.filter(email=email, is_active=False).delete()
 
             user = form.save(commit=False)
-            user.is_active = False  # غیر فعال تا تایید ایمیل
+            user.is_active = False
             user.save()
 
-            request.session['registered_email'] = user.email  
+            request.session['registered_email'] = user.email
 
-            current_site = get_current_site(request)
-            mail_subject = 'Activate Your Account'
-            message = render_to_string('base/activate_account_email.html', {
-                'user': user, 
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': default_token_generator.make_token(user),
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            activation_link = request.build_absolute_uri(
+                reverse('activate', kwargs={'uidb64': uid, 'token': token})
+            )
+
+            html_content = render_to_string('base/activate_account_email.html', {
+                'user': user,
+                'activation_link': activation_link,
             })
-            user.email_user(mail_subject, message)
+            text_content = strip_tags(html_content)
+
+            subject = 'Activate Your Account'
+            from_email = settings.EMAIL_HOST_USER
+            recipient_list = [user.email]
+
+            msg = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
+            msg.attach_alternative(html_content, 'text/html')
+            msg.send()
 
             return redirect('email_verification_sent')
         else:
@@ -383,6 +400,7 @@ def RegisterPage(request):
     else:
         form = CustomUserCreationForm()
     return render(request, 'base/login_register.html', {'form': form})
+
 
 def activate_account(request,uidb64,token):
     try:
@@ -401,27 +419,56 @@ def activate_account(request,uidb64,token):
         messages.error(request, "Invalid Activation Link")
         return redirect("login")
     
-def send_activation_email(request, user):
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
 
-    activation_link  = request.build_absolute_uri(
-        reverse('activate', kwargs={'uidb64':uid, 'token':token})
-    )
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+from django.conf import settings
+from django.http import HttpRequest
+from django.contrib.auth.tokens import default_token_generator
 
-    html_content = render_to_string('base/activation_email.html', {
-        'user':user,
-        'activation_link':activation_link
-    })
 
-    subject = "Activate your account"
-    message = f"Click the link below to activate your account\n{activation_link}"
-    from_email = settings.EMAIL_HOST_USER
-    recipient_list = [user.email]
+def send_activation_email(request: HttpRequest, user):
+    try:
+        # ایجاد uid و توکن فعال‌سازی
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
 
-    msg = EmailMultiAlternatives(subject, message, from_email, recipient_list)
-    msg.attach_alternative(html_content, 'text/html')
-    msg.send()
+        # ساخت لینک فعال‌سازی
+        url_path = reverse('activate', kwargs={'uidb64': uid, 'token': token})
+        activation_link = request.build_absolute_uri(url_path)
+
+        print('[DEBUG] Activation link:', activation_link)
+
+        # بارگذاری و رندر قالب HTML
+        html_content = render_to_string('base/activate_account_email.html', {
+            'user': user,
+            'activation_link': activation_link,
+        })
+
+        # تبدیل HTML به متن ساده
+        text_content = strip_tags(html_content)
+
+        # اطلاعات ایمیل
+        subject = "Activate your account"
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [user.email]
+
+        # ایجاد و ارسال ایمیل
+        msg = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
+        msg.attach_alternative(html_content, 'text/html')
+        msg.send()
+
+        print("[✅] Activation email sent successfully to:", user.email)
+
+    except Exception as e:
+        print("[❌ ERROR] Failed to send activation email:", str(e))
+
+
+
 
   
 def resend_activation_email(request):
