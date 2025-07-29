@@ -522,21 +522,68 @@ body.logout-modal-open {
 /* نسخه موبایل */
 /* حذف پس‌زمینه و حاشیه دکمه‌ها در موبایل */
 @media (max-width: 600px) {
+  /* کانتینر لینک‌های navbar */
+  .navbar-links-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 0 10px;
+    overflow-x: auto;
+  }
+
+  /* لینک‌های نوار ناوبری */
   .navbar-link {
     background-color: transparent !important;
     border: none !important;
-    padding: 6px 8px !important;
-    font-size: 16px !important;
-    color: #1976d2 !important; /* رنگ آبی ملایم */
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+    color: #1976d2 !important;
+    white-space: nowrap;
   }
-  
-  /* وقتی هاور یا فعال است */
+
   .navbar-link:hover,
   .navbar-link:focus {
     background-color: rgba(25, 118, 210, 0.1);
     border-radius: 6px;
-    text-decoration: none;
     color: #0d47a1;
+  }
+
+  /* آواتار کاربر */
+  .navbar-avatar-topright {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+
+  .navbar-avatar-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .navbar-avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    background-color: #1976d2;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 32px;
+  }
+
+  /* مخفی کردن تقویم در موبایل */
+  .calendar-link {
+    display: none !important;
+  }
+
+  /* حذف اسکرول بار افقی */
+  body {
+    overflow-x: hidden;
   }
 }
 
