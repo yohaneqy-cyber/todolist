@@ -634,9 +634,9 @@ def search_users(request):
     query = request.GET.get('q', '').strip()
     
     if query:
-        users = User.objects.exclude(id=request.user.id).filter(name__icontains=query)
+        users = User.objects.exclude(id=request.user.id).filter(name__icontains=query, is_active=True)
     else:
-        users = User.objects.exclude(id=request.user.id)[:20]  
+        users = User.objects.exclude(id=request.user.id).filter(is_active=True)[:5]  
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         users_data = [
@@ -651,13 +651,6 @@ def search_users(request):
     }
     return render(request, 'base/search_users.html', context)
     
-
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
-from django.db.models import Q
-from .models import User, Friendship, FriendRequest
 
 @login_required
 @require_POST
