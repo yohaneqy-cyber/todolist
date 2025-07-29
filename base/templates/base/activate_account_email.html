@@ -5,7 +5,8 @@
   <title>Activate Your Account</title>
 </head>
 <body style="font-family: Tahoma, sans-serif; direction: ltr; background-color: #f9f9f9; padding: 20px;">
-  <h2 style="color: #1976d2;">Hello {{ user.get_full_name|default:user.username }} 👋</h2>
+  <h2 style="color: #1976d2;">Hello {{ user.get_full_name|default_if_none:user.username|default:user.username }}
+ 👋</h2>
   
   <p>Please click the button below to activate your account:</p>
 
