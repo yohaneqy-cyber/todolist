@@ -519,92 +519,30 @@ body.logout-modal-open {
 }
 
 
-/* نسخه موبایل */
-/* حذف پس‌زمینه و حاشیه دکمه‌ها در موبایل */
 @media (max-width: 600px) {
-  .navbar-container {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 6px 10px !important;
-    background: transparent !important;
-    flex-wrap: nowrap !important;
-  }
-
-  .navbar-logo {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .navbar-logo svg {
-    display: block !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .logo-text {
-    display: none !important;
-    width: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: hidden !important;
-  }
-
   .navbar-links-container {
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
   }
 
-  .navbar-link {
-    background-color: transparent !important;
-    border: none !important;
-    padding: 6px 8px !important;
-    font-size: 16px !important;
-    color: #1976d2 !important;
-    white-space: nowrap !important;
-  }
-
-  .navbar-link:hover,
-  .navbar-link:focus {
-    background-color: rgba(25, 118, 210, 0.1) !important;
-    border-radius: 6px !important;
-    text-decoration: none !important;
-    color: #0d47a1 !important;
-  }
-
-  .navbar-avatar-topright {
-    order: 999 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin-left: 6px !important;
+  .navbar-link,
+  .calendar-link {
+    font-size: 1rem;
+    padding: 0.6rem 0.9rem !important;
   }
 
   .navbar-avatar-img,
   .navbar-avatar-placeholder {
-    width: 34px !important;
-    height: 34px !important;
-    border-radius: 50% !important;
-    object-fit: cover !important;
-    font-size: 14px !important;
-    line-height: 34px !important;
-    text-align: center !important;
-    color: white !important;
-    background-color: #777 !important;
-    font-weight: bold !important;
+    width: 32px;
+    height: 32px;
   }
-
-  .calendar-link {
-    display: none !important; /* hide calendar */
-  }
+  
+  .logo-text {
+  display: none;
 }
 
+}
 
 
   @keyframes fadeIn {
@@ -896,7 +834,7 @@ body.logout-modal-open {
 .navbar-links-container {
   display: flex;
   align-items: center;
-  gap: 14px; /* فاصله یکنواخت بین آیتم‌ها */
+  gap: 28px; /* فاصله یکنواخت بین آیتم‌ها */
 }
 
 .navbar-link {
@@ -1102,14 +1040,15 @@ body.logout-modal-open {
 .navbar-logo .home-icon1 {
   width: 24px;
   height: 24px;
-  background-size: contain;
-  flex-shrink: 0;
-  margin-top: 1.2px; /* کمی پایین‌تر از متن */
+  margin: 0;
 }
-
-.navbar-logo .logo-text {
-  line-height: 1.1;
-  margin-top: 0;
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  margin: 0;
+  height: 100%;
+  text-decoration: none;
 }
 
 /* خط زیر کل لینک */
@@ -1139,6 +1078,31 @@ body.logout-modal-open {
   transform-origin: bottom left;
 }
 
+/* Hide by default */
+.mobile-only {
+  display: none !important;
+}
+
+/* Show only on mobile (screens <= 768px) */
+@media (max-width: 768px) {
+  .mobile-only {
+    display: flex !important; /* or block, depending on layout */
+    align-items: center;
+  }
+}
+
+/* Default: show on desktop */
+.desktop-only {
+  display: flex;
+  align-items: center;
+}
+
+/* Hide on screens smaller than or equal to 768px */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
 
 
 
@@ -1147,14 +1111,12 @@ body.logout-modal-open {
 
 <body>
   <header class="navbar-container">
-    <a href="/" class="navbar-logo" title="Home">
+    <a href="/" class="navbar-logo desktop-only" title="Home">
       <svg class="home-icon1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#1e88e5" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
       </svg>
       <span class="logo-text">ToDoList</span>
     </a>
-
-
 
 
 
@@ -1175,9 +1137,21 @@ body.logout-modal-open {
 
 
 
-
     <div class="navbar-links-container">
+      <a href="/" class="navbar-logo mobile-only" title="Home">
+        <svg class="home-icon1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#1e88e5" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+        </svg>
+      </a>
+
+
+
       {% if user.is_authenticated %}
+        <a href="#" id="openFriendsModal" class="navbar-link">Friends</a>
+        <a href="{% url 'dashbord' %}" class="navbar-link">Dashboard</a>
+        
+        <a href="#" id="openLogoutModal" class="navbar-link">Logout</a>
+
         <a href="{% url 'profile' %}" class="navbar-avatar-topright">
           {% if user.avatar %}
             <img src="{{ user.avatar.url }}" alt="Avatar" class="navbar-avatar-img" />
@@ -1185,14 +1159,11 @@ body.logout-modal-open {
             <div class="navbar-avatar-placeholder">{{ user.name|slice:":1"|upper }}</div>
           {% endif %}
         </a>
-        <a href="#" id="openFriendsModal" class="navbar-link">Friends</a>
-        <a href="{% url 'dashbord' %}" class="navbar-link">Dashboard</a>
-        <a href="#" id="openLogoutModal" class="navbar-link">Logout</a>
       {% else %}
         <a href="{% url 'login' %}" class="navbar-link">Login</a>
       {% endif %}
-      <a href="{% url 'calendar' %}" class="navbar-link calendar-link">📅</a>
     </div>
+
 
 
   </header>
