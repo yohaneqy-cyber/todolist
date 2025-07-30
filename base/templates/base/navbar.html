@@ -520,24 +520,6 @@ body.logout-modal-open {
 
 
 @media (max-width: 600px) {
-  .navbar-links-container {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-
-  .navbar-link,
-  .calendar-link {
-    font-size: 1rem;
-    padding: 0.6rem 0.9rem !important;
-  }
-
-  .navbar-avatar-img,
-  .navbar-avatar-placeholder {
-    width: 32px;
-    height: 32px;
-  }
-  
   .logo-text {
   display: none;
 }
@@ -834,7 +816,16 @@ body.logout-modal-open {
 .navbar-links-container {
   display: flex;
   align-items: center;
-  gap: 35px; /* فاصله یکنواخت بین آیتم‌ها */
+  gap: 12px; /* فاصله پیش‌فرض برای دسکتاپ */
+  flex-wrap: wrap; /* اجازه بده آیتم‌ها در صورت نیاز به خط بعدی برن */
+  justify-content: center;
+}
+
+/* برای صفحه‌های موبایل (زیر ۴۸۰ پیکسل) */
+@media (max-width: 480px) {
+  .navbar-links-container {
+    gap: 12px; /* فاصله کمتر برای موبایل */
+  }
 }
 
 .navbar-link {
