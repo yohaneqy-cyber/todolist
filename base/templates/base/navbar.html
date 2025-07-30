@@ -834,7 +834,7 @@ body.logout-modal-open {
 .navbar-links-container {
   display: flex;
   align-items: center;
-  gap: 9px; /* فاصله یکنواخت بین آیتم‌ها */
+  gap: 35px; /* فاصله یکنواخت بین آیتم‌ها */
 }
 
 .navbar-link {
@@ -1111,7 +1111,7 @@ body.logout-modal-open {
 
 <body>
   <header class="navbar-container">
-    <a href="/" class="navbar-logo desktop-only" title="Home">
+    <a href="/" class="navbar-logo" title="Home">
       <svg class="home-icon1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#1e88e5" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
       </svg>
@@ -1138,12 +1138,6 @@ body.logout-modal-open {
 
 
     <div class="navbar-links-container">
-      <a href="/" class="navbar-logo mobile-only" title="Home">
-        <svg class="home-icon1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#1e88e5" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-        </svg>
-      </a>
-
 
 
       {% if user.is_authenticated %}
