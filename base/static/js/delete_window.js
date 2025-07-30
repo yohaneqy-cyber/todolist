@@ -1,33 +1,33 @@
-document.addEventListener("DOMContentLoaded", function() {
-  const deleteButtons = document.querySelectorAll(".delete-btn");
-  const deleteModal = document.getElementById("deleteModal");
-  const modalTaskTitle = document.getElementById("modalTaskTitle");
-  const deleteForm = document.getElementById("deleteForm");
-  const cancelBtn = document.getElementById("cancelBtn");
+const deleteModal = document.getElementById('deleteModal');
+const cancelDeleteBtn = document.getElementById('cancelBtn');
 
-  deleteButtons.forEach(btn => {
-    btn.addEventListener("click", function() {
-      const taskTitle = btn.getAttribute("data-title");
-      const actionUrl = btn.getAttribute("data-url");
+// باز کردن مودال (مثلاً از یه دکمه خارجی)
+function openDeleteModal(taskTitle, formActionUrl) {
+  const modalTitle = document.getElementById('modalTaskTitle');
+  const form = document.getElementById('deleteForm');
 
-      if (!actionUrl) {
-        alert("آدرس حذف تعیین نشده است!");
-        return;
-      }
+  modalTitle.textContent = taskTitle;
+  form.setAttribute('action', formActionUrl);
 
-      modalTaskTitle.textContent = taskTitle;
-      deleteForm.action = actionUrl;
-      deleteModal.style.display = "flex";  // چون در CSS از display:flex برای مرکزچین کردن استفاده کردی
-    });
-  });
+  deleteModal.classList.remove('hide');
+  deleteModal.classList.add('show');
+  deleteModal.style.display = 'flex';
+  document.body.classList.add('modal-open');
+}
 
-  cancelBtn.addEventListener("click", function() {
-    deleteModal.style.display = "none";
-  });
+// بستن مودال
+function closeDeleteModal() {
+  deleteModal.classList.remove('show');
+  deleteModal.classList.add('hide');
+  document.body.classList.remove('modal-open');
 
-  window.addEventListener("click", function(event) {
-    if (event.target === deleteModal) {
-      deleteModal.style.display = "none";
+  deleteModal.addEventListener('animationend', () => {
+    if (deleteModal.classList.contains('hide')) {
+      deleteModal.style.display = 'none';
+      deleteModal.classList.remove('hide');
     }
-  });
-});
+  }, { once: true });
+}
+
+// دکمه کنسل
+cancelDeleteBtn.addEventListener('click', closeDeleteModal);

@@ -69,12 +69,21 @@
     <div class="form-group">
         <label>{{ form.share_with.label }}</label>
         {% if form.share_with.field.queryset|length > 0 %}
-            {{ form.share_with }}
+            <ul class="share-with-checkboxes">
+                {% for checkbox in form.share_with %}
+                    <li class="custom-checkbox">
+                        {{ checkbox.tag }}
+                        <label for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+                    </li>
+                {% endfor %}
+            </ul>
         {% else %}
             <p>No friend to share with.</p>
         {% endif %}
         {{ form.share_with.errors }}
     </div>
+
+
 
 
     <div class="buttons-container">

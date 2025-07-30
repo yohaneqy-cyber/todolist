@@ -126,7 +126,7 @@
                 <span class="pending">⏳</span>
                 <form method="POST" action="{% url 'complete_subtask' subtask.id %}" style="display:inline;">
                   {% csrf_token %}
-                  <button type="submit" class="btn btn-success btn-sm">Mark Done</button>
+                  <button type="submit" class="btn btn-success btn-sm">Done</button>
                 </form>
               {% endif %}
             </li>
@@ -192,7 +192,7 @@
               <span class="pending">⏳</span>
               <form method="POST" action="{% url 'complete_subtask' subtask.id %}" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-sm">Mark Done</button>
+                <button type="submit" class="btn btn-success btn-sm">Done</button>
               </form>
             {% endif %}
           </li>
@@ -228,7 +228,7 @@
         </div>
 
         <div class="task-actions">
-          <a href="{% url 'update_task' task.id %}" class="btn">Update</a>
+          <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
           <button
             class="btn btn-danger delete-btn"
             data-title="{{ task.title }}"
@@ -238,7 +238,7 @@
           {% if not task.completed %}
             <form action="{% url 'complete_task' task.id %}" method="POST" style="display:inline;">
               {% csrf_token %}
-              <button type="submit" class="btn btn-success">Mark Done</button>
+              <button type="submit" class="btn btn-success">Done</button>
             </form>
           {% endif %}
         </div>
@@ -254,7 +254,7 @@
                   <span class="pending">⏳</span>
                   <form method="POST" action="{% url 'complete_subtask' subtask.id %}" style="display:inline;">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-success btn-sm">Mark Done</button>
+                    <button type="submit" class="btn btn-success btn-sm">Done</button>
                   </form>
                 {% endif %}
               </li>
@@ -294,7 +294,7 @@
           {% if not task.completed %}
             <form action="{% url 'complete_task' task.id %}" method="POST" style="display:inline;">
               {% csrf_token %}
-              <button type="submit" class="btn btn-success">Mark Done</button>
+              <button type="submit" class="btn btn-success">Done</button>
             </form>
           {% endif %}
           {% if not task.parent %}
@@ -360,7 +360,7 @@
         <span class="task-date">{{ task.created|date:"Y-m-d H:i" }}</span>
       </div>
       <div class="task-actions">
-        <a href="{% url 'update_task' task.id %}" class="btn">Update</a>
+        <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
         <button class="btn btn-danger delete-btn"
       data-url="{% url 'delete_task' task.id %}"
       data-title="{{ task.title }}">
@@ -369,7 +369,7 @@
         {% if not task.completed %}
           <form method="POST" action="{% url 'complete_task' task.id %}" style="display:inline;">
             {% csrf_token %}
-            <button type="submit" class="btn btn-success">Mark Done</button>
+            <button type="submit" class="btn btn-success">Done</button>
           </form>
         {% endif %}
         {% if not task.parent %}
@@ -416,7 +416,7 @@
         Every {{ rec.interval }} {{ rec.interval_type }}
       </div>
       <div class="task-actions">
-        <a href="{% url 'update_recurring_task' rec.id %}" class="btn">update</a>
+        <a href="{% url 'update_recurring_task' rec.id %}" class="btn">Edit</a>
         <button class="btn btn-danger delete-btn"
                 data-url="{% url 'delete_recurring_task' rec.id %}"
                 data-title="{{ rec.title }}">
@@ -445,7 +445,7 @@
 
       <div class="task-actions">
         <div class="task-buttons-grid">
-          <a href="{% url 'update_task' task.id %}" class="btn">Update</a>
+          <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
           <button class="btn btn-danger delete-btn"
                   data-url="{% url 'delete_task' task.id %}"
                   data-title="{{ task.title }}">
@@ -493,7 +493,7 @@
       </div>
 
       <div class="task-actions">
-        <a href="{% url 'update_recurring_task' rec.id %}" class="btn">update</a>
+        <a href="{% url 'update_recurring_task' rec.id %}" class="btn">Edit</a>
         <button class="btn btn-danger delete-btn"
                 data-url="{% url 'delete_recurring_task' rec.id %}"
                 data-title="{{ rec.title }}">
@@ -526,7 +526,7 @@
 </button>
           <form action="{% url 'complete_task' task.id %}" method="POST" style="display:inline;">
             {% csrf_token %}
-            <button type="submit" class="btn btn-success">Mark Done</button>
+            <button type="submit" class="btn btn-success">Done</button>
           </form>
         </div>
         {% if task.subtasks.exists %}
@@ -590,7 +590,7 @@
       </div>
       <br>
       <div class="task-actions">
-        <a href="{% url 'update_recurring_task' rec.id %}" class="btn">update</a>
+        <a href="{% url 'update_recurring_task' rec.id %}" class="btn">Edit</a>
         <button class="btn btn-danger delete-btn"
                 data-url="{% url 'delete_recurring_task' rec.id %}"
                 data-title="{{ rec.title }}">
@@ -613,8 +613,8 @@
     <h2>Are You Sure To Delete "<span id="modalTaskTitle" class="myapp-task-title"></span>"</h2>
     <form id="deleteForm" method="POST" action="" class="myapp-delete-form">
       {% csrf_token %}
-      <button type="submit" class="myapp-btn myapp-btn-danger">Yes</button>
       <button type="button" class="myapp-btn myapp-btn-secondary" id="cancelBtn">Cancel</button>
+      <button type="submit" class="myapp-btn myapp-btn-danger">Yes</button>
     </form>
   </div>
 </div>

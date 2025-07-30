@@ -12,6 +12,148 @@
 
 
   <style>
+/* انیمیشن باز شدن مودال */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* انیمیشن بسته شدن مودال */
+@keyframes fadeOutScale {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* پس‌زمینه مودال */
+.logout-modal {
+  display: none; /* پیش‌فرض مخفی */
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+/* نمایش مودال با انیمیشن باز شدن */
+.logout-modal.show {
+  display: flex;
+  animation: fadeInScale 0.3s ease forwards;
+}
+
+/* انیمیشن بسته شدن مودال */
+.logout-modal.hide {
+  animation: fadeOutScale 0.25s ease forwards;
+}
+
+/* کادر سفید داخلی مودال */
+.logout-modal-content {
+  background-color: #fff;
+  border-radius: 20px;
+  padding: 30px 24px 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  max-width: 480px;
+  width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+}
+
+/* دکمه بستن (×) */
+.logout-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #666;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.logout-close:hover {
+  color: #111;
+}
+
+/* عنوان مودال */
+.logout-title {
+  margin: 0 0 12px 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #222;
+}
+
+/* متن مودال */
+.logout-text {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #444;
+  margin-bottom: 24px;
+}
+
+/* کانتینر دکمه‌ها */
+.logout-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* دکمه لغو */
+.logout-cancel-btn {
+  background-color: #f5f5f5;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.logout-cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* دکمه تایید خروج */
+.logout-confirm-btn {
+  background-color: #d32f2f;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-confirm-btn:hover {
+  background-color: #b71c1c;
+}
 
 
 #errorMessage {
@@ -816,7 +958,7 @@ body.logout-modal-open {
 .navbar-links-container {
   display: flex;
   align-items: center;
-  gap: 12px; /* فاصله پیش‌فرض برای دسکتاپ */
+  gap: 14px; /* فاصله پیش‌فرض برای دسکتاپ */
   flex-wrap: wrap; /* اجازه بده آیتم‌ها در صورت نیاز به خط بعدی برن */
   justify-content: center;
 }
@@ -824,7 +966,7 @@ body.logout-modal-open {
 /* برای صفحه‌های موبایل (زیر ۴۸۰ پیکسل) */
 @media (max-width: 480px) {
   .navbar-links-container {
-    gap: 12px; /* فاصله کمتر برای موبایل */
+    gap: 14px; /* فاصله کمتر برای موبایل */
   }
 }
 
@@ -877,7 +1019,7 @@ body.logout-modal-open {
     justify-content: center;
     align-items: center;
     z-index: 100000; /* کمتر از modal-content ولی بیشتر از بقیه */
-    animation: fadeIn 0.3s ease-out forwards;  }
+}
 
   #userProfileModal.show {
     display: flex;
@@ -914,7 +1056,6 @@ body.modal-open {
   align-items: center;
   background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(2px);
-  animation: fadeIn 0.3s ease-out forwards;
 }
 
 .modal-content {
@@ -941,7 +1082,6 @@ body.modal-open {
   padding: 16px;
   box-sizing: border-box;
   overflow: hidden;
-  animation: fadeIn 0.3s ease-out forwards;
 }
 
 .logout-modal-content {
@@ -1094,6 +1234,7 @@ body.logout-modal-open {
     display: none !important;
   }
 }
+
 
 
 
@@ -1699,6 +1840,40 @@ function hideErrorMessage() {
     showSearchTab();
 
   }); // end DOMContentLoaded
+  const logoutModal = document.getElementById('logoutModal');
+const closeBtn = document.getElementById('closeLogoutModal');
+const cancelBtn = document.getElementById('cancelLogoutBtn');
+const openBtn = document.getElementById('openLogoutModal'); // اگر دکمه بازکردن داری
+
+function openLogoutModal() {
+  logoutModal.classList.remove('hide');
+  logoutModal.style.display = 'flex';  // اول نمایش میدیم
+  requestAnimationFrame(() => {
+    logoutModal.classList.add('show'); // بعد کلاس انیمیشن رو میزنیم
+  });
+}
+
+function closeLogoutModal() {
+  logoutModal.classList.remove('show');
+  logoutModal.classList.add('hide');   // کلاس انیمیشن خروج
+
+  // وقتی انیمیشن خروج تموم شد، مودال رو مخفی می‌کنیم
+  logoutModal.addEventListener('animationend', () => {
+    if (logoutModal.classList.contains('hide')) {
+      logoutModal.style.display = 'none';
+      logoutModal.classList.remove('hide');
+    }
+  }, { once: true });
+}
+
+// اگر دکمه باز کردن داری، وصلش کن
+if (openBtn) openBtn.addEventListener('click', openLogoutModal);
+
+// دکمه بستن و لغو مودال رو وصل کن
+closeBtn.addEventListener('click', closeLogoutModal);
+cancelBtn.addEventListener('click', closeLogoutModal);
+
+
 </script>
 
 </body>

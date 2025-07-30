@@ -107,8 +107,8 @@ class RecurringTask(models.Model):
         ('yearly', 'yearly')
     ])
     interval = models.PositiveIntegerField(default=1, help_text='How many days/weeks/months/years/ should be repeated')
-    start_date = models.DateTimeField(help_text='Enter when interval start')
-    end_date = models.DateTimeField(null=True, blank=True, help_text='Enter when interval end')
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField(null=True, blank=True)
     last_generated = models.DateTimeField(null=True, blank=True, help_text=('Last task created date'))
     active = models.BooleanField(default=True)
 

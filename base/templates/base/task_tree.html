@@ -10,7 +10,7 @@
     {% if not task.completed %}
       <form action="{% url 'complete_task' task.id %}" method="POST" style="display:inline;">
         {% csrf_token %}
-        <button type="submit">Mark Done</button>
+        <button type="submit">Done</button>
       </form>
     {% endif %}
 

@@ -1,16 +1,49 @@
 {% extends 'base/main.html' %}
+{% load static %}
+{% load form_tags %}
 
 {% block content %}
-<h2 class="form-heading">Add Recurring Task</h2>
 
-<form method="post" enctype="multipart/form-data" class="custom-form">
+<h2 class="form-heading">Recurring Task Form</h2>
+<form method="post" class="custom-form">
     {% csrf_token %}
     {{ form.non_field_errors }}
-    {{ form.as_p }}
-    
+
+    <div class="form-group">
+        {{ form.title.label_tag }}
+        {{ form.title.errors }}
+        {{ form.title|add_class:"form-input" }}
+    </div>
+
+    <div class="form-group">
+        {{ form.interval_type.label_tag }}
+        {{ form.interval_type.errors }}
+        {{ form.interval_type|add_class:"form-select" }}
+    </div>
+
+    <div class="form-group">
+        {{ form.interval.label_tag }}
+        {{ form.interval.errors }}
+        {{ form.interval|add_class:"form-input" }}
+    </div>
+
+    <div class="form-group">
+        {{ form.start_date.label_tag }}
+        {{ form.start_date.errors }}
+        {{ form.start_date|add_class:"form-input" }}
+    </div>
+
+    <div class="form-group">
+        {{ form.end_date.label_tag }}
+        {{ form.end_date.errors }}
+        {{ form.end_date|add_class:"form-input" }}
+    </div>
+
     <div class="buttons-container">
-    <a href="{% url 'home' %}" class="link-cancel">Cancel</a>
-    <button class="btn-save">Save</button>
+        <a href="{% url 'home' %}" class="link-cancel">Cancel</a>
+        <button class="btn-save" type="submit">Save</button>
     </div>
 </form>
+
+
 {% endblock content %}
