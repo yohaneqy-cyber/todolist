@@ -364,12 +364,6 @@
 }
 
 
-@media (max-width: 480px) {
-  .home-icon1 {
-    display: inline-block; /* show only on mobile */
-  }
-}
-
 .task-card {
   background: #e1e8ff;
   color: #1a237e;
