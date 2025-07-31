@@ -11,15 +11,13 @@
   {% block extra_css %}{% endblock %}
 </head>
 
-<body class="{% if request.session.dark_mode %}dark-mode{% endif %}">
+<body>
 
   <!-- Navbar -->
   {% include 'base/navbar.html' %}
 
   <!-- Dark Mode Toggle Button -->
-  <div class="dark-mode-toggle-container">
-    <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
-  </div>
+  <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
 
   <!-- Messages -->
   {% if messages %}
@@ -37,59 +35,36 @@
   {% block scripts %}
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      // Auto-hide Django messages
-      const messages = document.querySelectorAll(".messages li");
-      if (messages.length) {
-        messages.forEach((msg) => {
-          setTimeout(() => {
-            msg.style.opacity = '0';
-            msg.style.transform = 'translateY(-10px)';
-          }, 2600);
-          setTimeout(() => {
-            msg.remove();
-          }, 3000);
-        });
+      const toggleBtn = document.getElementById("darkModeToggle");
+      const body = document.body;
+
+      // 🌙 Load saved mode
+      if (localStorage.getItem("dark-mode") === "true") {
+        body.classList.add("dark-mode");
+        toggleBtn.textContent = "☀️";
+      } else {
+        toggleBtn.textContent = "🌙";
       }
 
-
-      document.addEventListener("DOMContentLoaded", function () {
-        const toggleBtn = document.getElementById("darkModeToggle");
-        const body = document.body;
-
-        // 1️⃣ Load dark mode preference from localStorage
-        if (localStorage.getItem("dark-mode") === "true") {
-          body.classList.add("dark-mode");
-          toggleBtn.textContent = "☀️";
-        } else {
-          toggleBtn.textContent = "🌙";
-        }
-
-        // 2️⃣ Toggle dark mode and save preference
-        toggleBtn.addEventListener("click", () => {
-          body.classList.toggle("dark-mode");
-
-          const isDark = body.classList.contains("dark-mode");
-          localStorage.setItem("dark-mode", isDark);
-
-          toggleBtn.textContent = isDark ? "☀️" : "🌙";
-        });
-
-        // 3️⃣ Optional: Auto-hide messages
-        const messages = document.querySelectorAll(".messages li");
-        if (messages.length) {
-          messages.forEach((msg) => {
-            setTimeout(() => {
-              msg.style.opacity = "0";
-              msg.style.transform = "translateY(-10px)";
-            }, 2600);
-            setTimeout(() => {
-              msg.remove();
-            }, 3000);
-          });
-        }
+      // ☀️ Toggle + save preference
+      toggleBtn.addEventListener("click", () => {
+        body.classList.toggle("dark-mode");
+        const isDark = body.classList.contains("dark-mode");
+        localStorage.setItem("dark-mode", isDark);
+        toggleBtn.textContent = isDark ? "☀️" : "🌙";
       });
 
-
+      // 🧹 Hide Django messages
+      const messages = document.querySelectorAll(".messages li");
+      messages.forEach((msg) => {
+        setTimeout(() => {
+          msg.style.opacity = "0";
+          msg.style.transform = "translateY(-10px)";
+        }, 2600);
+        setTimeout(() => {
+          msg.remove();
+        }, 3000);
+      });
     });
   </script>
   {% endblock %}
