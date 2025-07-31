@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html lang="fa" dir="ltr">
 <head>
-  <!-- 💡 Apply dark mode BEFORE CSS to avoid flicker -->
+  <!-- 💡 Dark Mode: فعال‌سازی قبل از لود CSS برای جلوگیری از فلیکر -->
   <script>
-    (function () {
-      try {
-        if (localStorage.getItem("dark-mode") === "true") {
-          // اگر در CSS شما استایل‌ها روی body.dark-mode تعریف شده
-          document.body ? document.body.classList.add("dark-mode") : document.documentElement.classList.add("dark-mode");
-        }
-      } catch (e) {}
-    })();
+    try {
+      if (localStorage.getItem("dark-mode") === "true") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    } catch (e) {}
   </script>
+
+  <!-- استایل اولیه Dark Mode قبل از لود CSS اصلی -->
+  <style>
+    .dark-mode {
+      background-color: #121212;
+      color: #ffffff;
+    }
+  </style>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MySite</title>
+  <title>{% block title %}MySite{% endblock %}</title>
 
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
@@ -23,16 +28,16 @@
   {% block extra_css %}{% endblock %}
 </head>
 
-<body class="{% if request.session.dark_mode %}dark-mode{% endif %}">
+<body>
   <!-- Navbar -->
   {% include 'base/navbar.html' %}
 
-  <!-- Dark Mode Toggle Button -->
+  <!-- دکمه تغییر حالت تیره -->
   <div class="dark-mode-toggle-container">
     <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
   </div>
 
-  <!-- Messages -->
+  <!-- پیام‌ها -->
   {% if messages %}
     <ul class="messages">
       {% for message in messages %}
@@ -41,7 +46,7 @@
     </ul>
   {% endif %}
 
-  <!-- Page Content -->
+  <!-- محتوای صفحه -->
   {% block content %}{% endblock %}
 
   <!-- Scripts -->
@@ -52,17 +57,17 @@
 
       // Load dark mode state
       if (localStorage.getItem("dark-mode") === "true") {
-        document.body.classList.add("dark-mode");
+        document.documentElement.classList.add("dark-mode");
         toggleBtn.textContent = "☀️";
       } else {
-        document.body.classList.remove("dark-mode");
+        document.documentElement.classList.remove("dark-mode");
         toggleBtn.textContent = "🌙";
       }
 
       // Toggle and save preference
       toggleBtn.addEventListener("click", () => {
-        document.body.classList.toggle("dark-mode");
-        const isDark = document.body.classList.contains("dark-mode");
+        document.documentElement.classList.toggle("dark-mode");
+        const isDark = document.documentElement.classList.contains("dark-mode");
         localStorage.setItem("dark-mode", isDark);
         toggleBtn.textContent = isDark ? "☀️" : "🌙";
       });
