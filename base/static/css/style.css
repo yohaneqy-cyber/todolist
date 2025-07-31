@@ -23,6 +23,7 @@
   transform: scale(1.05);
 }
 
+html.dark-mode .dark-mode-toggle,
 body.dark-mode .dark-mode-toggle {
   background: #333;
   color: #ffeb3b;
@@ -525,6 +526,7 @@ body.dark-mode .auth-link:hover {
 
 
 /* === DARK MODE BASE === */
+html.dark_mode,
 body.dark-mode {
   background-color: #121212;
   color: #f1f1f1;

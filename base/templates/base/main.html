@@ -1,86 +1,78 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="ltr">
 <head>
+<script>
+  (function () {
+    try {
+      if (localStorage.getItem("dark-mode") === "true") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    } catch (e) {}
+  })();
+</script>
+
+
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}MySite{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MySite</title>
 
   {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
-  <!-- Apply dark mode class ASAP to avoid flicker -->
-  <script>
-    (function() {
-      try {
-        if (localStorage.getItem('dark-mode') === 'true') {
-          document.documentElement.classList.add('dark-mode');
-        }
-      } catch(e) {}
-    })();
-  </script>
-
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2" />
-  
   {% block extra_css %}{% endblock %}
-  
-  <style>
-    /* Basic dark mode styling to prevent flicker on load */
-    .dark-mode {
-      background-color: #121212;
-      color: #eee;
-    }
-  </style>
 </head>
+
 <body>
-  <!-- Navbar -->
   {% include 'base/navbar.html' %}
 
-  <!-- Dark mode toggle button -->
-  <button id="darkModeToggle" aria-label="Toggle dark mode" style="position: fixed; bottom: 20px; left: 20px; z-index: 1000; padding: 10px; border-radius: 50%; border: none; background: #1e88e5; color: white; cursor: pointer; font-size: 18px;">
-    🌙
-  </button>
+  <div class="dark-mode-toggle-container">
+    <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
+  </div>
 
-  <!-- Messages -->
   {% if messages %}
-    <ul class="messages" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; list-style: none; padding: 0; margin: 0;">
+    <ul class="messages">
       {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %} style="background: #333; color: #fff; margin-bottom: 5px; padding: 8px 12px; border-radius: 5px;">{{ message }}</li>
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
       {% endfor %}
     </ul>
   {% endif %}
 
-  <!-- Main Content -->
   {% block content %}{% endblock %}
 
-  <!-- Scripts -->
   {% block scripts %}
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const toggleBtn = document.getElementById('darkModeToggle');
-      const html = document.documentElement;
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggleBtn = document.getElementById("darkModeToggle");
+    const root = document.documentElement;
 
-      // Set initial button icon depending on saved dark mode state
-      const isDark = localStorage.getItem('dark-mode') === 'true';
-      toggleBtn.textContent = isDark ? '☀️' : '🌙';
+    if (localStorage.getItem("dark-mode") === "true") {
+      root.classList.add("dark-mode");
+      toggleBtn.textContent = "☀️";
+    } else {
+      root.classList.remove("dark-mode");
+      toggleBtn.textContent = "🌙";
+    }
 
-      toggleBtn.addEventListener('click', () => {
-        html.classList.toggle('dark-mode');
-        const darkModeEnabled = html.classList.contains('dark-mode');
-        localStorage.setItem('dark-mode', darkModeEnabled);
-        toggleBtn.textContent = darkModeEnabled ? '☀️' : '🌙';
-      });
+    toggleBtn.addEventListener("click", () => {
+      root.classList.toggle("dark-mode");
+      const isDark = root.classList.contains("dark-mode");
+      localStorage.setItem("dark-mode", isDark);
+      toggleBtn.textContent = isDark ? "☀️" : "🌙";
+    });
 
-      // Auto-hide messages after 3 seconds with fade
-      const messages = document.querySelectorAll('.messages li');
-      messages.forEach(msg => {
-        setTimeout(() => {
-          msg.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-          msg.style.opacity = '0';
-          msg.style.transform = 'translateY(-10px)';
-        }, 2600);
-        setTimeout(() => {
-          msg.remove();
-        }, 3000);
-      });
+
+      const messages = document.querySelectorAll(".messages li");
+      if (messages.length) {
+        messages.forEach((msg) => {
+          setTimeout(() => {
+            msg.style.opacity = "0";
+            msg.style.transform = "translateY(-10px)";
+          }, 2600);
+          setTimeout(() => {
+            msg.remove();
+          }, 3000);
+        });
+      }
     });
   </script>
   {% endblock %}
