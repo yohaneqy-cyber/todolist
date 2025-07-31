@@ -9,10 +9,7 @@
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   
 
-
-
   <style>
-/* انیمیشن باز شدن مودال */
 @keyframes fadeInScale {
   from {
     opacity: 0;
@@ -24,7 +21,6 @@
   }
 }
 
-/* انیمیشن بسته شدن مودال */
 @keyframes fadeOutScale {
   from {
     opacity: 1;
@@ -36,9 +32,8 @@
   }
 }
 
-/* پس‌زمینه مودال */
 .logout-modal {
-  display: none; /* پیش‌فرض مخفی */
+  display: none; 
   position: fixed;
   inset: 0;
   background-color: rgba(0,0,0,0.5);
@@ -53,13 +48,13 @@
   transform: scale(0.95);
 }
 
-/* نمایش مودال با انیمیشن باز شدن */
+
 .logout-modal.show {
   display: flex;
   animation: fadeInScale 0.3s ease forwards;
 }
 
-/* انیمیشن بسته شدن مودال */
+
 .logout-modal.hide {
   animation: fadeOutScale 0.25s ease forwards;
 }
@@ -1822,8 +1817,8 @@ function showErrorMessage(message) {
     setTimeout(() => {
       errorDiv.style.display = "none";
       errorText.textContent = "";
-    }, 300); // زمان محو شدن (انیمیشن)
-  }, 3000); // ۳ ثانیه نمایش
+    }, 300); 
+  }, 3000); 
 }
 
 function hideErrorMessage() {
@@ -1836,28 +1831,27 @@ function hideErrorMessage() {
 }
 
 
-    // شروع با نمایش تب سرچ
+
     showSearchTab();
 
-  }); // end DOMContentLoaded
+  }); 
   const logoutModal = document.getElementById('logoutModal');
 const closeBtn = document.getElementById('closeLogoutModal');
 const cancelBtn = document.getElementById('cancelLogoutBtn');
-const openBtn = document.getElementById('openLogoutModal'); // اگر دکمه بازکردن داری
+const openBtn = document.getElementById('openLogoutModal'); 
 
 function openLogoutModal() {
   logoutModal.classList.remove('hide');
-  logoutModal.style.display = 'flex';  // اول نمایش میدیم
+  logoutModal.style.display = 'flex';  
   requestAnimationFrame(() => {
-    logoutModal.classList.add('show'); // بعد کلاس انیمیشن رو میزنیم
+    logoutModal.classList.add('show');
   });
 }
 
 function closeLogoutModal() {
   logoutModal.classList.remove('show');
-  logoutModal.classList.add('hide');   // کلاس انیمیشن خروج
+  logoutModal.classList.add('hide');   
 
-  // وقتی انیمیشن خروج تموم شد، مودال رو مخفی می‌کنیم
   logoutModal.addEventListener('animationend', () => {
     if (logoutModal.classList.contains('hide')) {
       logoutModal.style.display = 'none';
@@ -1866,10 +1860,10 @@ function closeLogoutModal() {
   }, { once: true });
 }
 
-// اگر دکمه باز کردن داری، وصلش کن
+
 if (openBtn) openBtn.addEventListener('click', openLogoutModal);
 
-// دکمه بستن و لغو مودال رو وصل کن
+
 closeBtn.addEventListener('click', closeLogoutModal);
 cancelBtn.addEventListener('click', closeLogoutModal);
 

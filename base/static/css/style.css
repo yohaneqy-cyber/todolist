@@ -1,3 +1,24 @@
+/* پایه حالت دارک */
+.dark-mode {
+  background-color: #121212 !important;
+  color: #fff !important;
+}
+
+/* لینک‌ها */
+.dark-mode a {
+  color: #90caf9;
+}
+
+/* باکس‌ها */
+.dark-mode .card,
+.dark-mode .modal-content,
+.dark-mode .logout-modal-content {
+  background-color: #1e1e1e !important;
+  color: #fff !important;
+}
+
+
+
 .dark-mode-toggle {
   position: fixed;
   bottom: 20px;
