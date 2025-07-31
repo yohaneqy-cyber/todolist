@@ -8,17 +8,16 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
-  <!-- اجرای سریع قبل از بارگذاری CSS برای جلوگیری از چشمک -->
   <script>
-    (function () {
-      try {
-        if (localStorage.getItem("dark-mode") === "true") {
-          document.documentElement.classList.add("dark-mode");
-        }
-      } catch (e) {}
-    })();
-  </script>
+  (function () {
+    try {
+      if (localStorage.getItem("dark-mode") === "true") {
+        document.body.classList.add("dark-mode"); // تغییر مهم
+      }
+    } catch (e) {}
+  })();
 
+  </script>
   {% block extra_css %}{% endblock %}
 </head>
 
@@ -41,42 +40,41 @@
 
   {% block scripts %}
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const toggleBtn = document.getElementById("darkModeToggle");
-      const root = document.documentElement;
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggleBtn = document.getElementById("darkModeToggle");
+    const root = document.body; // تغییر مهم
 
-      // تنظیم اولیه وضعیت دکمه
-      if (localStorage.getItem("dark-mode") === "true") {
-        root.classList.add("dark-mode");
-        toggleBtn.textContent = "☀️";
-      } else {
-        root.classList.remove("dark-mode");
-        toggleBtn.textContent = "🌙";
-      }
+    if (localStorage.getItem("dark-mode") === "true") {
+      root.classList.add("dark-mode");
+      toggleBtn.textContent = "☀️";
+    } else {
+      root.classList.remove("dark-mode");
+      toggleBtn.textContent = "🌙";
+    }
 
-      // وقتی دکمه کلیک شد
-      toggleBtn.addEventListener("click", () => {
-        root.classList.toggle("dark-mode");
-        const isDark = root.classList.contains("dark-mode");
-        localStorage.setItem("dark-mode", isDark);
-        toggleBtn.textContent = isDark ? "☀️" : "🌙";
-      });
-
-      // پیام‌ها را پس از چند ثانیه محو کن و حذف کن
-      const messages = document.querySelectorAll(".messages li");
-      if (messages.length) {
-        messages.forEach((msg) => {
-          setTimeout(() => {
-            msg.style.opacity = "0";
-            msg.style.transform = "translateY(-10px)";
-          }, 2600);
-          setTimeout(() => {
-            msg.remove();
-          }, 3000);
-        });
-      }
+    toggleBtn.addEventListener("click", () => {
+      root.classList.toggle("dark-mode");
+      const isDark = root.classList.contains("dark-mode");
+      localStorage.setItem("dark-mode", isDark);
+      toggleBtn.textContent = isDark ? "☀️" : "🌙";
     });
+
+    // پیام‌ها به صورت خودکار محو شوند
+    const messages = document.querySelectorAll(".messages li");
+    if (messages.length) {
+      messages.forEach((msg) => {
+        setTimeout(() => {
+          msg.style.opacity = "0";
+          msg.style.transform = "translateY(-10px)";
+        }, 2600);
+        setTimeout(() => {
+          msg.remove();
+        }, 3000);
+      });
+    }
+  });
   </script>
+
   {% endblock %}
 </body>
 </html>
