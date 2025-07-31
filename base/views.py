@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib import messages
+from django.core.mail import EmailMessage
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import SetPasswordForm
 from django.utils.timezone import now
@@ -505,22 +506,24 @@ def email_verification_sent(request):
     return render(request, 'base/email_verification_sent.html',{'email':email})
 
 
+
+
+
 def password_reset_request(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            messages.error(request, 'NO user with this email')
+            messages.error(request, 'No user with this email')
             return redirect('password_reset_request')
 
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
 
         reset_url = request.build_absolute_uri(
-            reverse('password_reset_confirm', kwargs={'uidb64':uid,'token':token})
-)
-
+            reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+        )
 
         email_subject = 'Reset Your Password'
         message = render_to_string('base/password_reset_email.html', {
@@ -528,10 +531,18 @@ def password_reset_request(request):
             'reset_url': reset_url,
         })
 
-        user.email_user(email_subject,message)
-        messages.success(request, 'Resest password link sent to your email')
+        email_msg = EmailMessage(
+            subject=email_subject,
+            body=message,
+            from_email='no-reply@example.com',
+            to=[user.email],
+        )
+        email_msg.content_subtype = 'html'  # 👈 این خط باعث میشه ایمیل به صورت HTML ارسال بشه
+        email_msg.send()
+
+        messages.success(request, 'Reset password link sent to your email')
         return redirect('login')
-    
+
     return render(request, 'base/password_reset_request.html')
 
 

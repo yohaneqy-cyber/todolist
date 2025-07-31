@@ -58,29 +58,11 @@ class RecurringTaskForm(forms.ModelForm):
         self.fields['interval'].required = True
         self.fields['start_date'].required = True
         
-from django import forms
 
 class ChengeForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('avatar', 'name', 'email', 'bio')
-        widgets = {
-            'name': forms.TextInput(attrs={'autofocus': 'autofocus'}),
-        }
-
-from django import forms
-from .models import User
-
-class ChengeForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ('avatar', 'name', 'email', 'bio')
-        widgets = {
-            'name': forms.TextInput(attrs={'autofocus': 'autofocus'}),
-            'name': forms.TextInput(attrs={'autofocus': True}),
-            'email': forms.EmailInput(attrs={'autofocus': False}),
-            # می‌تونی بقیه ویجت‌ها رو هم اینجا اضافه کنی
-        }
     
     def __init__(self, *args, **kwargs):
         self.user = kwargs.get('instance')
@@ -177,3 +159,4 @@ class MySetPasswordForm(SetPasswordForm):
         super().__init__(user, *args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.update({'class':'auth-input'})
+

@@ -1,33 +1,39 @@
-const deleteModal = document.getElementById('deleteModal');
-const cancelDeleteBtn = document.getElementById('cancelBtn');
+document.addEventListener('DOMContentLoaded', () => {
+  const deleteModal = document.getElementById('deleteModal');
+  const cancelDeleteBtn = document.getElementById('cancelBtn');
+  const modalTaskTitle = document.getElementById('modalTaskTitle');
+  const deleteForm = document.getElementById('deleteForm');
 
-// باز کردن مودال (مثلاً از یه دکمه خارجی)
-function openDeleteModal(taskTitle, formActionUrl) {
-  const modalTitle = document.getElementById('modalTaskTitle');
-  const form = document.getElementById('deleteForm');
+  // Function to open modal with task title and form action URL
+  function openDeleteModal(taskTitle, formActionUrl) {
+    modalTaskTitle.textContent = taskTitle;
+    deleteForm.setAttribute('action', formActionUrl);
+    deleteModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';  // prevent background scroll
+  }
 
-  modalTitle.textContent = taskTitle;
-  form.setAttribute('action', formActionUrl);
+  // Function to close modal
+  function closeDeleteModal() {
+    deleteModal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
 
-  deleteModal.classList.remove('hide');
-  deleteModal.classList.add('show');
-  deleteModal.style.display = 'flex';
-  document.body.classList.add('modal-open');
-}
+  // Cancel button closes modal
+  cancelDeleteBtn.addEventListener('click', closeDeleteModal);
 
-// بستن مودال
-function closeDeleteModal() {
-  deleteModal.classList.remove('show');
-  deleteModal.classList.add('hide');
-  document.body.classList.remove('modal-open');
+  // Attach click to all delete buttons
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const title = btn.getAttribute('data-title');
+      const url = btn.getAttribute('data-url');
+      openDeleteModal(title, url);
+    });
+  });
 
-  deleteModal.addEventListener('animationend', () => {
-    if (deleteModal.classList.contains('hide')) {
-      deleteModal.style.display = 'none';
-      deleteModal.classList.remove('hide');
+  // Optional: close modal if clicking outside modal content
+  deleteModal.addEventListener('click', (e) => {
+    if (e.target === deleteModal) {
+      closeDeleteModal();
     }
-  }, { once: true });
-}
-
-// دکمه کنسل
-cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+  });
+});

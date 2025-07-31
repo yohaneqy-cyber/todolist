@@ -28,12 +28,6 @@
     </div>
 
     <div class="form-group">
-        {{ form.completed.label_tag }}
-        {{ form.completed.errors }}
-        {{ form.completed|add_class:"form-checkbox" }}
-    </div>
-
-    <div class="form-group">
         {{ form.parent.label_tag }}
         {{ form.parent.errors }}
         {{ form.parent|add_class:"form-select" }}
@@ -82,9 +76,6 @@
         {% endif %}
         {{ form.share_with.errors }}
     </div>
-
-
-
 
     <div class="buttons-container">
     <a href="{% url 'home' %}" class="link-cancel">Cancel</a>

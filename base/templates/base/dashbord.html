@@ -1,15 +1,14 @@
 {% extends 'base/main.html' %}
 
 {% block content %}
-<h2>Dashbord</h2>
+<h2>Dashboard</h2>
 <p><strong>Total tasks: {{ total }}</strong></p>
 <p><strong>Today tasks: {{ today_tasks }}</strong></p>
 <p><strong>SubTasks: {{ subtasks_count }}</strong></p>
 <p><strong>Completed tasks: {{done_tasks}}</strong></p>
 
-
 <h2>Normal Tasks</h2>
-<ul>
+<ul class="task-list-normal">
     {% for task in normal_tasks %}
         <li>
             {{ task.title }} - {{ task.created|date:"Y-m-d H:i" }}
@@ -20,11 +19,8 @@
     {% endfor %}
 </ul>
 
-
-
 <h2>🔃 Recurring Tasks</h2>
-
-<ul>
+<ul class="task-list-recurring">
     {% for rec in recurring_tasks %}
         <li>
             {{ rec.title }} - every {{ rec.interval }} {{ rec.interval_type }}
@@ -35,11 +31,8 @@
     {% endfor %}
 </ul>
 
-
-
 <h2>➖ SubTasks</h2>
-
-<ul>
+<ul class="task-list-subtasks">
     {% for subtask in subtasks_list %}
         <li>
             {{ subtask.title }} - {{ subtask.created|date:"Y-m-d H:i" }}
@@ -48,8 +41,8 @@
         <li>No Subtasks</li>
     {% endfor %}
 </ul>
+
 <div class="container1">
   <a href="/" class="back-to-home">Back To Home</a>
 </div>
-
 {% endblock content %}

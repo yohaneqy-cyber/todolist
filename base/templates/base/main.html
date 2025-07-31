@@ -1,50 +1,67 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="ltr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MySite</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MySite</title>
 
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
 
-    {% block extra_css %}{% endblock %}
+  {% block extra_css %}{% endblock %}
 </head>
-<body>
 
-    {% include 'base/navbar.html' %}
+<body class="{% if request.session.dark_mode %}dark-mode{% endif %}">
 
-    {% if messages %}
+  <!-- Navbar -->
+  {% include 'base/navbar.html' %}
+
+  <!-- Dark Mode Toggle Button -->
+  <div class="dark-mode-toggle-container">
+    <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
     <ul class="messages">
-        {% for message in messages %}
+      {% for message in messages %}
         <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
+      {% endfor %}
     </ul>
-    {% endif %}
+  {% endif %}
 
-    {% block content %}{% endblock content %}
+  <!-- Page Content -->
+  {% block content %}{% endblock %}
 
-    {% block scripts %}
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        const messages = document.querySelectorAll(".messages li");
-        if (messages.length === 0) return;
-
+  <!-- Scripts -->
+  {% block scripts %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Auto-hide Django messages
+      const messages = document.querySelectorAll(".messages li");
+      if (messages.length) {
         messages.forEach((msg) => {
           setTimeout(() => {
             msg.style.opacity = '0';
             msg.style.transform = 'translateY(-10px)';
           }, 2600);
-
           setTimeout(() => {
-            if (msg.parentNode) {
-              msg.parentNode.removeChild(msg);
-            }
+            msg.remove();
           }, 3000);
         });
+      }
+
+      // Dark mode toggle
+      const toggleBtn = document.getElementById("darkModeToggle");
+      toggleBtn.addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+
+        // Change emoji
+        toggleBtn.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
       });
-    </script>
-    {% endblock %}
+    });
+  </script>
+  {% endblock %}
 
 </body>
 </html>

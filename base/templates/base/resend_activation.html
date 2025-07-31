@@ -1,7 +1,9 @@
 {% extends 'base/main.html' %}
 
-{% block content %}
+{% block extra_css %}
+{% endblock %}
 
+{% block content %}
 <div class="auth-container">
     <h2 class="auth-title">Resend Activation Link</h2>
     
@@ -12,11 +14,10 @@
         <br>
         <input type="email" name="email" required value="{{ first }}" class="auth-input" autofocus>
         
+        <br><br>
         <button type="submit" class="auth-button">Resend</button>
-        <br>
-        <br>
+        <br><br>
         <a href="{% url 'email_verification_sent' %}" class="auth-link">Cancel</a>
     </form>
 </div>
-
 {% endblock content %}
