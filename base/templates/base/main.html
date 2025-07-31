@@ -6,76 +6,76 @@
   <title>{% block title %}MySite{% endblock %}</title>
 
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}" />
 
-  <!-- Apply dark mode class before page renders to prevent flicker -->
+  <!-- Apply dark mode class ASAP to avoid flicker -->
   <script>
-    (function () {
+    (function() {
       try {
-        if (localStorage.getItem("dark-mode") === "true") {
-          document.documentElement.classList.add("dark-mode");
+        if (localStorage.getItem('dark-mode') === 'true') {
+          document.documentElement.classList.add('dark-mode');
         }
-      } catch (e) {
-        // ignore errors
-      }
+      } catch(e) {}
     })();
   </script>
 
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2" />
+  
   {% block extra_css %}{% endblock %}
+  
+  <style>
+    /* Basic dark mode styling to prevent flicker on load */
+    .dark-mode {
+      background-color: #121212;
+      color: #eee;
+    }
+  </style>
 </head>
-
 <body>
   <!-- Navbar -->
   {% include 'base/navbar.html' %}
 
-  <!-- Dark Mode Toggle Button -->
-  <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
+  <!-- Dark mode toggle button -->
+  <button id="darkModeToggle" aria-label="Toggle dark mode" style="position: fixed; bottom: 20px; left: 20px; z-index: 1000; padding: 10px; border-radius: 50%; border: none; background: #1e88e5; color: white; cursor: pointer; font-size: 18px;">
+    🌙
+  </button>
 
   <!-- Messages -->
   {% if messages %}
-    <ul class="messages">
+    <ul class="messages" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; list-style: none; padding: 0; margin: 0;">
       {% for message in messages %}
-        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %} style="background: #333; color: #fff; margin-bottom: 5px; padding: 8px 12px; border-radius: 5px;">{{ message }}</li>
       {% endfor %}
     </ul>
   {% endif %}
 
   <!-- Main Content -->
-  <main id="main-content" class="content-wrapper">
-    {% block content %}{% endblock %}
-  </main>
+  {% block content %}{% endblock %}
 
   <!-- Scripts -->
   {% block scripts %}
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const toggleBtn = document.getElementById("darkModeToggle");
+    document.addEventListener('DOMContentLoaded', function () {
+      const toggleBtn = document.getElementById('darkModeToggle');
       const html = document.documentElement;
 
-      // Set initial button icon based on dark mode state
-      const isDark = localStorage.getItem("dark-mode") === "true";
-      if (isDark) {
-        html.classList.add("dark-mode");
-        toggleBtn.textContent = "☀️";
-      } else {
-        html.classList.remove("dark-mode");
-        toggleBtn.textContent = "🌙";
-      }
+      // Set initial button icon depending on saved dark mode state
+      const isDark = localStorage.getItem('dark-mode') === 'true';
+      toggleBtn.textContent = isDark ? '☀️' : '🌙';
 
-      // Toggle dark mode on button click
-      toggleBtn.addEventListener("click", () => {
-        html.classList.toggle("dark-mode");
-        const darkActive = html.classList.contains("dark-mode");
-        localStorage.setItem("dark-mode", darkActive);
-        toggleBtn.textContent = darkActive ? "☀️" : "🌙";
+      toggleBtn.addEventListener('click', () => {
+        html.classList.toggle('dark-mode');
+        const darkModeEnabled = html.classList.contains('dark-mode');
+        localStorage.setItem('dark-mode', darkModeEnabled);
+        toggleBtn.textContent = darkModeEnabled ? '☀️' : '🌙';
       });
 
-      // Auto hide messages after 3 seconds
-      const messages = document.querySelectorAll(".messages li");
-      messages.forEach((msg) => {
+      // Auto-hide messages after 3 seconds with fade
+      const messages = document.querySelectorAll('.messages li');
+      messages.forEach(msg => {
         setTimeout(() => {
-          msg.style.opacity = "0";
-          msg.style.transform = "translateY(-10px)";
+          msg.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+          msg.style.opacity = '0';
+          msg.style.transform = 'translateY(-10px)';
         }, 2600);
         setTimeout(() => {
           msg.remove();
