@@ -1,29 +1,25 @@
 <!DOCTYPE html>
-<html lang="fa" dir="ltr">
+<html lang="fa" dir="rtl">
 <head>
-  <!-- 💡 Dark Mode: فعال‌سازی قبل از لود CSS برای جلوگیری از فلیکر -->
-  <script>
-    try {
-      if (localStorage.getItem("dark-mode") === "true") {
-        document.documentElement.classList.add("dark-mode");
-      }
-    } catch (e) {}
-  </script>
-
-  <!-- استایل اولیه Dark Mode قبل از لود CSS اصلی -->
-  <style>
-    .dark-mode {
-      background-color: #121212;
-      color: #ffffff;
-    }
-  </style>
-
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}MySite{% endblock %}</title>
 
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}" />
+
+  <!-- Apply dark mode class before page renders to prevent flicker -->
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("dark-mode") === "true") {
+          document.documentElement.classList.add("dark-mode");
+        }
+      } catch (e) {
+        // ignore errors
+      }
+    })();
+  </script>
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -32,12 +28,10 @@
   <!-- Navbar -->
   {% include 'base/navbar.html' %}
 
-  <!-- دکمه تغییر حالت تیره -->
-  <div class="dark-mode-toggle-container">
-    <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
-  </div>
+  <!-- Dark Mode Toggle Button -->
+  <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
 
-  <!-- پیام‌ها -->
+  <!-- Messages -->
   {% if messages %}
     <ul class="messages">
       {% for message in messages %}
@@ -46,45 +40,47 @@
     </ul>
   {% endif %}
 
-  <!-- محتوای صفحه -->
-  {% block content %}{% endblock %}
+  <!-- Main Content -->
+  <main id="main-content" class="content-wrapper">
+    {% block content %}{% endblock %}
+  </main>
 
   <!-- Scripts -->
   {% block scripts %}
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const toggleBtn = document.getElementById("darkModeToggle");
+      const html = document.documentElement;
 
-      // Load dark mode state
-      if (localStorage.getItem("dark-mode") === "true") {
-        document.documentElement.classList.add("dark-mode");
+      // Set initial button icon based on dark mode state
+      const isDark = localStorage.getItem("dark-mode") === "true";
+      if (isDark) {
+        html.classList.add("dark-mode");
         toggleBtn.textContent = "☀️";
       } else {
-        document.documentElement.classList.remove("dark-mode");
+        html.classList.remove("dark-mode");
         toggleBtn.textContent = "🌙";
       }
 
-      // Toggle and save preference
+      // Toggle dark mode on button click
       toggleBtn.addEventListener("click", () => {
-        document.documentElement.classList.toggle("dark-mode");
-        const isDark = document.documentElement.classList.contains("dark-mode");
-        localStorage.setItem("dark-mode", isDark);
-        toggleBtn.textContent = isDark ? "☀️" : "🌙";
+        html.classList.toggle("dark-mode");
+        const darkActive = html.classList.contains("dark-mode");
+        localStorage.setItem("dark-mode", darkActive);
+        toggleBtn.textContent = darkActive ? "☀️" : "🌙";
       });
 
-      // Hide messages smoothly
+      // Auto hide messages after 3 seconds
       const messages = document.querySelectorAll(".messages li");
-      if (messages.length) {
-        messages.forEach((msg) => {
-          setTimeout(() => {
-            msg.style.opacity = "0";
-            msg.style.transform = "translateY(-10px)";
-          }, 2600);
-          setTimeout(() => {
-            msg.remove();
-          }, 3000);
-        });
-      }
+      messages.forEach((msg) => {
+        setTimeout(() => {
+          msg.style.opacity = "0";
+          msg.style.transform = "translateY(-10px)";
+        }, 2600);
+        setTimeout(() => {
+          msg.remove();
+        }, 3000);
+      });
     });
   </script>
   {% endblock %}
