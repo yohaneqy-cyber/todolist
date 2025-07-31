@@ -1,96 +1,2745 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>صفحه با دارک مود</title>
+.dark-mode-toggle {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 999;
+  font-size: 1.8rem;
+  background: #1e88e5;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s;
+}
 
-  <style>
-    /* استایل پایه */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #fff;
-      color: #000;
-      margin: 0; padding: 20px;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
+.dark-mode-toggle:hover {
+  background: #1565c0;
+  transform: scale(1.05);
+}
 
-    /* استایل دکمه تغییر حالت */
-    #darkModeToggle {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background-color: #1e88e5;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 48px;
-      height: 48px;
-      font-size: 24px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
+html.dark-mode .dark-mode-toggle,
+body.dark-mode .dark-mode-toggle {
+  background: #333;
+  color: #ffeb3b;
+}
 
-    #darkModeToggle:hover {
-      background-color: #1565c0;
-      transform: scale(1.1);
-    }
 
-    /* استایل حالت تاریک */
-    html.dark-mode, body.dark-mode {
-      background-color: #121212;
-      color: #eee;
-    }
+body.dark-mode .logout-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+}
 
-    html.dark-mode #darkModeToggle, body.dark-mode #darkModeToggle {
-      background-color: #333;
-      color: #ffeb3b;
-    }
+body.dark-mode .logout-modal-content {
+  background-color: #121212;
+  color: #eee;
+  padding: 24px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-    html.dark-mode #darkModeToggle:hover, body.dark-mode #darkModeToggle:hover {
-      background-color: #555;
-    }
-  </style>
+body.dark-mode .logout-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 28px;
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
 
-  <script>
-    // اجرای سریع قبل از بارگذاری CSS برای جلوگیری از چشمک زدن
-    (function () {
-      try {
-        if (localStorage.getItem("dark-mode") === "true") {
-          document.documentElement.classList.add("dark-mode");
-        }
-      } catch (e) {}
-    })();
-  </script>
-</head>
+body.dark-mode .logout-close:hover {
+  color: #fff;
+}
 
-<body>
-  <h1>سلام! این صفحه حالت تاریک دارد.</h1>
-  <p>دکمه پایین سمت چپ را بزنید تا حالت تاریک روشن یا خاموش شود.</p>
+body.dark-mode .logout-title {
+  margin-top: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+}
 
-  <button id="darkModeToggle" aria-label="تغییر حالت تاریک">🌙</button>
+body.dark-mode .logout-text {
+  font-size: 16px;
+  margin: 20px 0;
+  color: #ccc;
+}
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const toggleBtn = document.getElementById("darkModeToggle");
-      const root = document.documentElement;
+body.dark-mode .logout-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
 
-      // تنظیم وضعیت اولیه دکمه
-      if (localStorage.getItem("dark-mode") === "true") {
-        toggleBtn.textContent = "☀️";
-      } else {
-        toggleBtn.textContent = "🌙";
-      }
+body.dark-mode .logout-cancel-btn {
+  padding: 10px 20px;
+  background-color: #333;
+  border: none;
+  border-radius: 8px;
+  color: #ddd;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.3s ease;
+}
 
-      // افزودن رویداد کلیک به دکمه
-      toggleBtn.addEventListener("click", () => {
-        root.classList.toggle("dark-mode");
-        const isDark = root.classList.contains("dark-mode");
-        localStorage.setItem("dark-mode", isDark);
-        toggleBtn.textContent = isDark ? "☀️" : "🌙";
-      });
-    });
-  </script>
-</body>
-</html>
+body.dark-mode .logout-cancel-btn:hover {
+  background-color: #555;
+}
+
+body.dark-mode .logout-confirm-btn {
+  padding: 10px 24px;
+  background-color: #e53935;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode .logout-confirm-btn:hover {
+  background-color: #c62828;
+}
+
+
+/* Smaller dark mode checkbox items */
+body.dark-mode .share-with-checkboxes .custom-checkbox {
+    background-color: #1a1a1a; /* dark gray */
+    padding: 4px 8px;          /* smaller padding */
+    border-radius: 4px;        /* smaller radius */
+    display: flex;
+    align-items: center;
+    gap: 6px;                  /* less gap */
+    margin-bottom: 4px;        /* less margin */
+    border: 1px solid #333;
+    font-size: 14px;
+    color: #eee;
+}
+
+
+
+/* DARK MODE FIX — force black background for all task lists */
+body.dark-mode .task-list-normal,
+body.dark-mode .task-list-recurring,
+body.dark-mode .task-list-subtasks {
+  background-color: #000000 !important; /* pure black */
+  color: #ffffff !important; /* pure white text */
+  padding: 12px 18px;
+  border-radius: 10px;
+  list-style: none;
+  margin-bottom: 20px;
+}
+
+
+/* Dark mode - smaller background size */
+body.dark-mode .task-list-normal,
+body.dark-mode .task-list-recurring,
+body.dark-mode .task-list-subtasks {
+  padding: 4px 8px !important; /* was bigger, now smaller */
+}
+
+/* List item styles in dark mode */
+body.dark-mode .task-list-normal li,
+body.dark-mode .task-list-recurring li,
+body.dark-mode .task-list-subtasks li {
+  background-color: transparent !important; /* no white inside */
+  border-bottom: 1px solid #333 !important;
+  padding: 6px 0;
+}
+
+/* Remove last border */
+body.dark-mode .task-list-normal li:last-child,
+body.dark-mode .task-list-recurring li:last-child,
+body.dark-mode .task-list-subtasks li:last-child {
+  border-bottom: none !important;
+}
+
+/* Headings in dark mode */
+body.dark-mode h2 {
+  color: #ffffff !important;
+}
+
+
+/* Dark mode overlay background */
+body.dark-mode .modal {
+  background-color: rgba(0, 0, 0, 0.9) !important; /* darker overlay */
+}
+
+/* Dark mode modal content background and text */
+body.dark-mode .modal .modal-content {
+  background-color: #121212 !important; /* dark background */
+  color: #eee !important; /* light text */
+}
+
+/* Specific for unfriend modal buttons in dark mode */
+body.dark-mode .unfriend-modal .modal-content .confirm-btn,
+body.dark-mode .unfriend-modal .modal-content .cancel-btn {
+  background-color: #333;
+  color: #eee;
+  border: 1px solid #555;
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode .unfriend-modal .modal-content .confirm-btn:hover,
+body.dark-mode .unfriend-modal .modal-content .cancel-btn:hover {
+  background-color: #555;
+}
+
+/* Close button color in dark mode */
+body.dark-mode .modal .close {
+  color: #eee;
+}
+
+/* Error message text and button in dark mode */
+body.dark-mode #errorMessage {
+  background-color: #222;
+  color: #f88;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+body.dark-mode #errorMessage button {
+  background: none;
+  color: #f88;
+  border: none;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Inputs in dark mode */
+body.dark-mode #userSearchInput {
+  background-color: #222;
+  color: #eee;
+  border: 1px solid #555;
+}
+
+/* Tab buttons in dark mode */
+body.dark-mode #searchTabBtn,
+body.dark-mode #requestsTabBtn,
+body.dark-mode #friendsTabBtn {
+  background-color: #333;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode #searchTabBtn:hover,
+body.dark-mode #requestsTabBtn:hover,
+body.dark-mode #friendsTabBtn:hover {
+  background-color: #555;
+  color: #fff;
+}
+
+body.dark-mode .auth-container {
+  background-color: #121212 !important;
+}
+
+/* پروفایل فرم در حالت دارک‌مود */
+body.dark-mode .profile-form {
+  background-color: #121212 !important; /* مشکی تیره */
+  color: #f1f1f1 !important; /* متن سفید */
+  padding: 20px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.6) !important;
+}
+
+/* فیلدهای داخل فرم پروفایل */
+body.dark-mode .profile-form input,
+body.dark-mode .profile-form textarea,
+body.dark-mode .profile-form select {
+  background-color: #1f1f1f !important;
+  color: #f1f1f1 !important;
+  border: 1px solid #444 !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  transition: border-color 0.3s ease !important;
+}
+
+/* placeholder فیلدها */
+body.dark-mode .profile-form input::placeholder,
+body.dark-mode .profile-form textarea::placeholder {
+  color: #bbb !important;
+}
+
+/* فوکوس روی فیلدها */
+body.dark-mode .profile-form input:focus,
+body.dark-mode .profile-form select:focus,
+body.dark-mode .profile-form textarea:focus {
+  border-color: #64b5f6 !important;
+  outline: none !important;
+  box-shadow: 0 0 6px #64b5f6 !important;
+}
+
+/* لیبل‌های داخل فرم */
+body.dark-mode .profile-form label {
+  color: #f1f1f1 !important;
+}
+
+/* دکمه ذخیره تغییرات */
+body.dark-mode .profile-form .profile-submit-btn {
+  background-color: #1976d2 !important; /* آبی متناسب با دارک‌مود */
+  color: white !important;
+  border: none !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: background-color 0.3s ease !important;
+}
+
+body.dark-mode .profile-form .profile-submit-btn:hover {
+  background-color: #1565c0 !important; /* آبی تیره‌تر هنگام هاور */
+}
+
+/* فرم سفارشی (Custom Form) در حالت دارک‌مود */
+body.dark-mode .custom-form {
+  background-color: #121212 !important; /* مشکی تیره */
+  color: #f1f1f1 !important; /* متن سفید */
+  padding: 20px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.6) !important;
+}
+
+/* فیلدهای داخل فرم سفارشی */
+body.dark-mode .custom-form input,
+body.dark-mode .custom-form textarea,
+body.dark-mode .custom-form select {
+  background-color: #1f1f1f !important;
+  color: #f1f1f1 !important;
+  border: 1px solid #444 !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  transition: border-color 0.3s ease !important;
+}
+
+/* placeholder فیلدهای فرم سفارشی */
+body.dark-mode .custom-form input::placeholder,
+body.dark-mode .custom-form textarea::placeholder {
+  color: #bbb !important;
+}
+
+/* فوکوس روی فیلدهای فرم سفارشی */
+body.dark-mode .custom-form input:focus,
+body.dark-mode .custom-form select:focus,
+body.dark-mode .custom-form textarea:focus {
+  border-color: #64b5f6 !important;
+  outline: none !important;
+  box-shadow: 0 0 6px #64b5f6 !important;
+}
+
+/* لیبل‌های داخل فرم سفارشی */
+body.dark-mode .custom-form label {
+  color: #f1f1f1 !important;
+}
+
+/* دکمه‌های فرم سفارشی */
+body.dark-mode .custom-form button,
+body.dark-mode .custom-form .submit-btn {
+  background-color: #1976d2 !important; /* آبی متناسب با دارک‌مود */
+  color: white !important;
+  border: none !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: background-color 0.3s ease !important;
+}
+
+body.dark-mode .custom-form button:hover,
+body.dark-mode .custom-form .submit-btn:hover {
+  background-color: #1565c0 !important; /* آبی تیره‌تر هنگام هاور */
+}
+
+
+/* دکمه ذخیره تغییرات پروفایل */
+body.dark-mode .profile-submit-btn {
+  background-color: #1976d2 !important; /* آبی زیبا */
+  color: white !important;
+  border: none !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: background-color 0.3s ease !important;
+}
+
+body.dark-mode .profile-submit-btn:hover {
+  background-color: #1565c0 !important; /* آبی تیره‌تر */
+}
+
+/* فاصله بین هر گروه label + input */
+.login-field {  margin-bottom: 1.4rem !important; /* فاصله مناسب بین هر فیلد (label + input) */
+}
+
+/* فاصله کمتر بین label و input خودش */
+.login-label {
+  font-size: 13px !important;
+  display: block !important;
+  text-align: center !important;
+  margin-bottom: -15px !important; /* فاصله کم بین لیبل و ورودی خودش */
+}
+
+/* استایل ورودی‌ها */
+.login-input {
+  font-size: 13px !important;
+  padding: 6px 10px !important;
+  height: 30px !important;
+  width: 90% !important;
+  max-width: 320px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 4px !important;
+  background-color: #fff !important;
+  box-sizing: border-box !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: block !important;
+  margin-bottom: 0 !important; /* بدون فاصله اضافی زیر input */
+}
+
+
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background-color: #1f1f1f !important;
+  color: #f1f1f1 !important;
+  border: 1px solid #444 !important;
+}
+
+/* وقتی کاربر فوکوس می‌کند (درحال تایپ) */
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+  background-color: #1f1f1f !important;
+  color: #ffffff !important;
+  border-color: #90caf9 !important;
+  outline: none !important;
+}
+
+/* رنگ placeholder در حالت تاریک */
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #999 !important;
+}
+
+
+body.dark-mode .login-container {
+  background-color: #121212 !important;
+  color: #ffffff !important;
+}
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background-color: #1f1f1f !important;
+  color: #f1f1f1 !important;
+  border: 1px solid #444 !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  transition: border-color 0.3s ease !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #bbb !important;
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+  border-color: #64b5f6 !important;  /* آبی روشن */
+  outline: none !important;
+  box-shadow: 0 0 6px #64b5f6 !important;
+}
+
+
+/* حالت تاریک برای فرم لاگین/ثبت‌نام */
+body.dark-mode .login-container {
+  background-color: #121212;
+  color: #f1f1f1;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+}
+
+/* عنوان‌ها */
+body.dark-mode .login-title,
+body.dark-mode .auth-title {
+  color: #ffffff;
+}
+
+/* فیلدهای ورودی */
+body.dark-mode .login-input {
+  background-color: #1f1f1f;
+  color: #ffffff;
+  border: 1px solid #444;
+}
+
+body.dark-mode .login-input::placeholder {
+  color: #bbb;
+}
+
+/* لیبل‌ها */
+body.dark-mode .login-label {
+  color: #f1f1f1;
+}
+
+/* پیام خطا */
+body.dark-mode .error-message {
+  background: #2c2c2c;
+  color: #ff6b6b;
+  border-left: 4px solid #e53935;
+}
+
+
+body.dark-mode .login-button:hover {
+  background-color: #444;
+}
+
+/* لینک‌های پایین فرم */
+body.dark-mode .auth-link {
+  color: #90caf9;
+  text-decoration: none;
+}
+
+body.dark-mode .auth-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+
+/* === DARK MODE BASE === */
+html.dark_mode,
+body.dark-mode {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+
+/* تیترها */
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3,
+body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
+  color: #ffffff;
+}
+
+/* متن‌های عمومی */
+body.dark-mode p,
+body.dark-mode span,
+body.dark-mode div,
+body.dark-mode li {
+  color: #f1f1f1;
+}
+
+/* لینک‌ها */
+body.dark-mode a {
+  color: #90caf9;
+  text-decoration: none;
+}
+
+/* فیلدهای فرم */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+  background-color: #1f1f1f;
+  color: #f1f1f1;
+  border-color: #444;
+}
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #bbb;
+}
+
+/* دکمه‌ها */
+body.dark-mode .btn,
+body.dark-mode button {
+  background-color: #333;
+  color: white;
+  border-color: #888;
+}
+body.dark-mode .btn:hover,
+body.dark-mode button:hover {
+  background-color: #444;
+}
+
+/* آیتم‌های لیست (لیست دوستان، درخواست‌ها و ...) */
+body.dark-mode #friendRequestsList li,
+body.dark-mode #userList li,
+body.dark-mode #friendsList li {
+  background-color: #1e1e1e;
+  color: #f1f1f1;
+  border-bottom: 1px solid #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* کارت‌های تسک */
+body.dark-mode .task-card {
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+  color: #f1f1f1;
+}
+
+/* باکس‌ها و کانتینرها */
+body.dark-mode .box,
+body.dark-mode .container,
+body.dark-mode .card,
+body.dark-mode .content,
+body.dark-mode .profile-container,
+body.dark-mode .filters-container,
+body.dark-mode .wrapper {
+  background-color: #121212;
+  color: #f1f1f1;
+  border-color: #333;
+
+}
+
+/* برای فایرفاکس */
+input.login-input:-moz-autofill {
+  box-shadow: 0 0 0 1000px #121212 inset !important;
+  -moz-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+}
+
+
+body.dark-mode input.login-input:-moz-autofill {
+  box-shadow: 0 0 0 1000px #1f1f1f inset !important;
+  -moz-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  border: 1px solid #444 !important;
+}
+
+/* مودال‌ها */
+body.dark-mode .myapp-delete-modal-content,
+body.dark-mode .modal-content,
+body.dark-mode .modal-content1 {
+  background-color: #1c1c1c;
+  color: #f1f1f1;
+}
+
+/* پس‌زمینه مودال‌ها */
+body.dark-mode .myapp-delete-modal,
+body.dark-mode .modal,
+body.dark-mode .modal1 {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+/* آیکن بستن مودال */
+body.dark-mode .modal-close,
+body.dark-mode .close1 {
+  color: #ccc;
+}
+body.dark-mode .modal-close:hover,
+body.dark-mode .close1:hover {
+  color: #fff;
+}
+
+/* پیام‌ها */
+body.dark-mode .messages li {
+  background-color: #2c2c2c;
+  color: #fff;
+  border-left-color: #90caf9;
+}
+
+/* Dark Mode Autofill Fix */
+body.dark-mode input:-webkit-autofill,
+body.dark-mode input:-webkit-autofill:focus,
+body.dark-mode input:-webkit-autofill:hover {
+  -webkit-box-shadow: 0 0 0px 1000px #1f1f1f inset !important;
+  -webkit-text-fill-color: #ffffff !important; /* متن سفید */
+  caret-color: #ffffff !important; /* مکان‌نما سفید */
+  border: 1px solid #444 !important;
+}
+
+body.dark-mode textarea:-webkit-autofill,
+body.dark-mode select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0px 1000px #1f1f1f inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  border: 1px solid #444 !important;
+}
+ 
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #eee;
+  }
+
+  .login-container,
+  .auth-container {
+    background-color: #1e1e1e;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+  }
+
+  .login-input,
+  .auth-input {
+    background-color: #2b2b2b;
+    color: #eee;
+    border: 1px solid #444;
+  }
+
+  .login-button,
+  .auth-button {
+    background-color: #2196f3;
+    color: white;
+  }
+
+  .login-button:hover,
+  .auth-button:hover {
+    background-color: #1e88e5;
+  }
+
+  .error-message {
+    color: #ff6b6b;
+  }
+}
+
+/* =========================
+   📱 Responsive Layout
+========================= */
+
+/* Small phones (portrait) */
+@media (max-width: 480px) {
+  .login-container,
+  .auth-container {
+    margin: 1.5rem 1rem;
+    padding: 1.25rem;
+  }
+
+  .login-title,
+  .auth-title {
+    font-size: 1.25rem;
+  }
+
+  .login-button,
+  .auth-button {
+    font-size: 0.95rem;
+  }
+}
+
+/* Phones (landscape) and small tablets */
+@media (max-width: 600px) {
+  .login-container,
+  .auth-container {
+    margin: 2rem 1.2rem;
+  }
+}
+
+/* Tablets (portrait) */
+@media (min-width: 601px) and (max-width: 768px) {
+  .login-container,
+  .auth-container {
+    max-width: 500px;
+    padding: 2.5rem;
+  }
+}
+
+/* Tablets (landscape) and small laptops */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .login-container,
+  .auth-container {
+    max-width: 600px;
+    padding: 3rem;
+  }
+}
+
+/* Laptops and desktops */
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .login-container,
+  .auth-container {
+    max-width: 650px;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1281px) {
+  .login-container,
+  .auth-container {
+    max-width: 700px;
+  }
+}
+
+.auth-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #2980b9;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auth-button:hover {
+  background-color: #1c5ea8;
+}
+
+
+  .auth-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2980b9;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .auth-button:hover {
+    background-color: #1c5ea8;
+  }
+
+  .auth-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2980b9;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .auth-button:hover {
+    background-color: #1c5ea8;
+  }
+
+
+
+/* Base style */
+.error-message {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #fdecea, #fff5f5);
+  color: #a72121;
+  border-left: 3px solid #e53935;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  box-shadow: 0 3px 8px rgba(229, 57, 53, 0.12);
+  margin-top: -100px !important;  /* فاصله کمی بالای ارور */
+  margin-bottom: 0 !important; /* بدون فاصله پایین */
+  cursor: default;
+  user-select: none;
+  opacity: 1;
+  animation: shake 0.4s ease; /* 👈 shake on enter */
+  transition: opacity 0.5s ease;
+}
+
+/* Shake animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+}
+
+/* Fade out when hiding */
+.error-message.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+.login-links a {
+  text-decoration: none !important;
+  position: relative;
+  color: #2980b9;
+  transition: color 0.3s ease;
+  border-bottom: none !important;
+  font-size: 0.9rem !important; /* فونت کوچکتر */
+}
+
+.login-links a:hover {
+  text-decoration: none !important;
+  color: #1c5980;
+  border-bottom: none !important;
+}
+
+.login-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #2980b9;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.login-links a:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* اختصاصی برای bio که textarea است */
+/* Make the form container more compact */
+.auth-container {
+  max-width: 500px !important;
+  width: 90% !important;
+  margin: 1rem auto !important;
+  background: #fff !important;
+  border-radius: 10px !important;
+  padding: 1rem 1rem !important;
+  box-shadow: 0 4px 12px rgba(25, 42, 86, 0.08) !important;
+  display: flex !important;
+  text-align: center;
+  flex-direction: column !important;
+  align-items: center !important;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  color: #2c3e50 !important;
+  box-sizing: border-box !important;
+  transition: box-shadow 0.4s ease !important;
+}
+
+.auth-title {
+  white-space: nowrap !important;   /* جلوگیری از شکستن خط */
+  overflow: hidden;                 /* مخفی کردن اگر خیلی طولانی شد */
+  text-overflow: ellipsis;          /* نمایش ... اگر متن خیلی طولانی شد */
+  font-size: 1.4rem !important;    /* کوچک‌تر کردن فونت */
+  font-weight: 800;
+  color: #34495e;
+  margin-bottom: 1.6rem;
+  text-align: center;
+  letter-spacing: 1.2px;
+  user-select: none;
+}
+
+.auth-button {
+  width: 400px; /* پر کردن کل عرض کانتینر */
+  padding: 10px;
+  background-color: #2980b9;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.auth-button:hover {
+  background-color: #1f6391;
+  box-shadow: 0 6px 18px rgba(31, 99, 145, 0.7);
+  transform: translateY(-2px);
+}
+
+.auth-button:active {
+  background-color: #16608b;
+  box-shadow: 0 3px 8px rgba(22, 96, 139, 0.5);
+  transform: translateY(0);
+}
+
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-container {
+    max-width: 100% !important;
+    margin: 2rem auto !important;
+    padding: 1.5rem 1.5rem !important;
+    border-radius: 0 !important;
+  }
+
+  .auth-title {
+    font-size: 1.1rem !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  .auth-button {
+    font-size: 0.9rem !important;
+    padding: 10px 0 !important;
+    width: 80% !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 8px !important;
+  }
+
+  .auth-link a {
+    font-size: 0.85rem !important;
+  }
+
+  /* 🔹 Make h2, h3, h4 bigger on small screens */
+  h2 {
+    font-size: 1.4rem !important;
+  }
+
+  h3 {
+    font-size: 1.2rem !important;
+  }
+
+  h4 {
+    font-size: 1.05rem !important;
+  }
+
+  /* Optional: make general paragraph text a bit larger */
+  p,
+  .auth-container p {
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+  }
+}
+
+
+
+
+
+/* کانتینر کلی لاگین */
+.login-container {
+  max-width: 500px !important;
+  width: 90% !important;
+  margin: 2rem auto !important;
+  padding: 1rem 1.5rem !important;
+  background-color: #f0f8ff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  text-align: center !important;  /* وسط‌چین کردن متن‌های داخل کانتینر */
+}
+
+/* عنوان صفحه لاگین */
+.login-title {
+  font-size: 22px !important;
+  font-weight: bold !important;
+  margin-bottom: 1rem !important;
+  text-align: center !important;
+}
+
+/* فرم لاگین */
+.login-form {
+  width: 100% !important;
+  text-align: center !important; /* وسط‌چین کردن محتوای فرم */
+}
+
+
+/* دکمه ارسال فرم */
+.login-button {
+  background-color: #3498db !important;
+  color: #fff !important;
+  padding: 10px 20px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin-top: 20px !important;
+  border: none !important;
+  border-radius: 5px !important;
+  cursor: pointer !important;
+  margin-top: 20px !important; /* فاصله بالای دکمه */
+  transition: background 0.3s ease !important;
+  display: inline-block !important; /* برای وسط‌چین دکمه */
+}
+
+.login-links a {
+  position: relative;
+  color: #2a80b9;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 1rem;
+  padding-bottom: 12px; /* فاصله بیشتر بین متن و خط */
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.login-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 8.8px; /* فاصله بیشتر خط از متن */
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: #2a80b9;
+  border-radius: 2px;
+  transition: width 0.35s ease, left 0.35s ease;
+  box-shadow: none;
+  transform: translateX(-50%);
+}
+
+.login-links a:hover {
+  color: #1b4d73;
+}
+
+.login-links a:hover::after {
+  width: 100%;
+  left: 50%;
+  box-shadow: 0 2px 6px rgba(42, 128, 185, 0.4);
+}
+
+
+@media (max-width: 480px) {
+  .calendar-link {
+    display: none !important;
+  }
+}
+
+
+.task-card {
+  background: #e1e8ff;
+  color: #1a237e;
+  padding: 14px 18px;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 60, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  border: 1px solid #c5cae9;
+  cursor: default;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+  position: relative;  /* ⬅ اضافه شد */
+  z-index: 0;           /* ⬅ اضافه شد */
+}
+
+.task-card:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 100, 0.18);
+  transform: translateY(-3px);
+  z-index: 10;          /* ⬅ اضافه شد */
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.task-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0d1450;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+
+.task-date {
+  font-size: 0.85rem;
+  color: #5c6bc0;
+  font-style: italic;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.task-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* دو ستون کنار هم */
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.btn {
+  padding: 3px 8px; /* دکمه کوچک‌تر */
+  font-size: 0.75rem;
+  border-radius: 5px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  text-decoration: none;
+  color: white;
+  background-color: #3f51b5;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.btn-danger {
+  background-color: #e53935;
+}
+.btn-danger:hover {
+  background-color: #b71c1c;
+}
+.btn-success {
+  background-color: #43a047;
+}
+.btn-success:hover {
+  background-color: #2e7d32;
+}
+.btn-secondary {
+  background-color: #757575;
+}
+.btn-secondary:hover {
+  background-color: #494949;
+}
+.btn:hover {
+  filter: brightness(0.9);
+}
+
+.subtasks {
+  padding-top: 8px;
+  margin-top: 6px;
+  border-top: 1px solid #c5cae9;
+}
+.subtasks ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.subtasks li {
+  font-size: 0.9rem;
+  color: #3f51b5;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.done {
+  color: green;
+  font-weight: bold;
+}
+.pending {
+  color: orange;
+  font-weight: bold;
+}
+
+.task-list,
+.all-task-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 260px));
+  gap: 18px;
+  margin: 0 auto;
+  padding: 0 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1a237e;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  justify-content: center;
+  overflow: visible; /* مهم برای جلوگیری از برش سایه‌ها */
+}
+
+
+
+
+@media (max-width: 600px) {
+  .task-title {
+    max-width: 100%;
+  }
+
+  .task-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .task-card {
+    padding: 12px 14px;
+  }
+}
+.filters-container {
+  display: flex !important;
+  justify-content: center !important;   /* وسط‌چین در دسکتاپ */
+  flex-wrap: wrap !important;
+  gap: 20px !important;
+  align-items: center !important;
+  margin-bottom: 20px !important;
+}
+
+@media (max-width: 600px) {
+  .filters-container {
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+    gap: 10px !important;
+    padding: 6px 0 !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #ccc transparent !important;
+  }
+
+  .filters-container form {
+    flex: 0 0 auto !important;
+    min-width: 120px !important;
+    white-space: nowrap !important;
+  }
+
+  .filters-container select {
+    font-size: 12px !important;
+    padding: 4px 6px !important;
+    min-height: 28px !important;
+    border-radius: 6px !important;
+  }
+
+  .filters-container label {
+    font-size: 11px !important;
+    margin-bottom: 2px !important;
+    display: block !important;
+  }
+
+  .filters-container::-webkit-scrollbar {
+    height: 6px !important;
+  }
+
+  .filters-container::-webkit-scrollbar-thumb {
+    background-color: #aaa !important;
+    border-radius: 4px !important;
+  }
+
+  .filters-container::-webkit-scrollbar-track {
+    background: #f0f0f0 !important;
+  }
+}
+
+.custom-form {
+  display: flex;
+  flex-direction: column; /* چینش عمودی */
+  align-items: center;    /* وسط چین افقی */
+  justify-content: center; /* وسط چین عمودی */
+  margin: auto;
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  max-width: 600px; /* عرض حداکثر */
+}
+
+.profile-form .form-group input[type="text"],
+.profile-form .form-group input[type="email"],
+.profile-form .form-group input[type="file"],
+.profile-form .form-group input[type="password"],
+.profile-form .form-group select,
+.profile-form .form-group textarea {
+  width: 100% !important;
+  max-width: 400px !important;   /* اندازه یکسان برای همه */
+  padding: 6px 10px !important;  /* کوچکتر و یکنواخت */
+  font-size: 14px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
+  margin: 10px auto !important;  /* فاصله عمودی و وسط‌چین */
+  display: block !important;
+}
+
+@media (max-width: 480px) {
+  .profile-form .form-group input[type="text"],
+  .profile-form .form-group input[type="email"],
+  .profile-form .form-group input[type="file"],
+  .profile-form .form-group input[type="password"],
+  .profile-form .form-group select,
+  .profile-form .form-group textarea {
+    max-width: 90vw !important;  /* 90 درصد عرض صفحه */
+    padding: 6px 10px !important;
+    margin: 10px auto !important;
+  }
+}
+
+
+
+.all-task-card {
+  background: #e1e8ff;
+  color: #1a237e;
+  padding: 14px 18px;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 60, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  border: 1px solid #c5cae9;
+  cursor: default;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+}
+
+.all-task-card:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 100, 0.12);
+  transform: translateY(-3px);
+}
+
+
+
+.task-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0d1450;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+
+.task-date {
+  font-size: 0.85rem;
+  color: #5c6bc0;
+  font-style: italic;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.task-actions {
+  display: flex;
+  gap: 8px;               
+  justify-content: center; 
+  align-items: center;    
+  flex-wrap: wrap;     
+}
+
+.btn {
+  width: 80px; 
+  height: 30px;
+  padding: 0;
+  font-size: 0.75rem;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(63, 81, 181, 0.2);
+  text-decoration: none;
+  color: white;
+  background: linear-gradient(135deg, #3f51b5, #5c6bc0);
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-actions a.btn,
+.task-actions button.btn {
+  width: 80px;       /* عرض ثابت */
+  height: 30px;      /* ارتفاع ثابت */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  padding: 0;
+  border-radius: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.btn:hover {
+  background: linear-gradient(135deg, #303f9f, #3949ab);
+  box-shadow: 0 6px 14px rgba(48, 63, 159, 0.4);
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* بقیه رنگ‌ها و افکت‌ها مشابه شما */
+.btn-danger {
+  background: linear-gradient(135deg, #e53935, #ef5350);
+  box-shadow: 0 3px 8px rgba(229, 57, 53, 0.3);
+}
+
+.btn-danger:hover {
+  background: linear-gradient(135deg, #b71c1c, #d32f2f);
+  box-shadow: 0 6px 14px rgba(183, 28, 28, 0.6);
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #43a047, #66bb6a);
+  box-shadow: 0 3px 8px rgba(67, 160, 71, 0.3);
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #2e7d32, #388e3c);
+  box-shadow: 0 6px 14px rgba(46, 125, 50, 0.6);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #757575, #9e9e9e);
+  box-shadow: 0 3px 8px rgba(117, 117, 117, 0.3);
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #494949, #616161);
+  box-shadow: 0 6px 14px rgba(73, 73, 73, 0.6);
+  transform: translateY(-2px);
+}
+
+.subtasks {
+  padding-top: 10px;
+  margin-top: 8px;
+  border-top: 2px solid #c5cae9;
+  background: linear-gradient(135deg, #f5f7ff, #e8ecff);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(92, 107, 192, 0.15);
+}
+
+.subtasks ul {
+  list-style: none;
+  padding-left: 12px;
+  margin: 0;
+}
+
+.subtasks li {
+  font-size: 0.85rem;
+  color: #3f51b5;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #e8ecff, #c5cae9);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+  box-shadow: 0 1px 5px rgba(63, 81, 181, 0.1);
+}
+
+.subtasks li:hover {
+  background-color: #d1d9ff;
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.25);
+}
+
+.done {
+  color: #2e7d32;
+  font-weight: 700;
+}
+
+.pending {
+  color: #f57c00;
+  font-weight: 700;
+}
+
+.all-task-list {
+  max-width: 700px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1a237e;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .task-title {
+    max-width: 100%;
+  }
+
+  .task-actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .all-task-card {
+    padding: 12px 14px;
+  }
+}
+
+.task-priority {
+  display: inline-block;
+  font-weight: bold;
+  color: #d32f2f; /* رنگ قرمز ملایم برای تاکید */
+  margin-left: 10px;
+  margin-top: 4px;
+  padding: 3px 10px;
+  background-color: #ffcdd2;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s ease;
+}
+
+.task-priority:hover {
+  background-color: #ffb3b3;
+}
+
+.profile-container {
+  max-width: 480px !important;
+  margin: 50px auto;
+  padding: 35px 40px;
+  background: #f0f4ff; /* روشن ولی نزدیک رنگ قبلی */
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 60, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1a237e;
+  transition: box-shadow 0.3s ease;
+}
+
+.profile-container:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 60, 0.15);
+}
+
+.profile-container h1 {
+  text-align: center;
+  margin-bottom: 28px;
+  font-weight: 700;
+  font-size: 2rem;
+  color: #1a237e;
+}
+
+.profile-avatar {
+  display: block;
+  width: 170px;
+  height: 170px;
+  margin: 0 auto 28px auto;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 6px solid #888888;
+  background-color: #d3d3d3;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+}
+
+.profile-avatar:hover {
+  transform: scale(1.04);
+  box-shadow: 0 7px 25px rgba(0, 0, 0, 0.16);
+}
+
+.profile-form {
+  background: white;
+  padding: 28px 32px;
+  border-radius: 16px;
+  border: 2px solid #888888;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.07);
+  transition: box-shadow 0.3s ease;
+}
+
+.profile-form:hover {
+  box-shadow: 0 7px 28px rgba(0, 0, 0, 0.12);
+}
+
+.profile-form p {
+  margin-bottom: 18px;
+  font-size: 1.05rem;
+  color: #333;
+}
+
+.profile-form input[type="text"],
+.profile-form input[type="email"],
+.profile-form input[type="password"],
+.profile-form input[type="file"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.7px solid #bbb;
+  border-radius: 10px;
+  font-size: 1rem;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.06);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-form input[type="text"]:focus,
+.profile-form input[type="email"]:focus,
+.profile-form input[type="password"]:focus,
+.profile-form input[type="file"]:focus {
+  outline: none;
+  border-color: #3f51b5;
+  box-shadow: 0 0 8px rgba(63,81,181,0.6);
+}
+
+.profile-form button {
+  display: block;
+  width: 100%;
+  padding: 14px 0;
+  background-color: #3f51b5;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  margin-top: 22px;
+  box-shadow: 0 3px 14px rgba(63,81,181,0.45);
+}
+
+.profile-form button:hover {
+  background-color: #303f9f;
+  box-shadow: 0 6px 24px rgba(48,63,159,0.65);
+  
+}
+.search-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.search-form input[type="text"] {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1.2px solid #ccc;
+  font-size: 0.95rem;
+  width: 220px;
+  transition: border-color 0.3s ease;
+}
+
+.search-form input[type="text"]:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
+}
+
+.search-form button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #4a90e2, #007BFF);
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  user-select: none;
+}
+
+.search-form button:hover {
+  background: linear-gradient(135deg, #0056b3, #004080);
+  transform: scale(1.05);
+}
+
+.search-form button:active {
+  transform: scale(0.95);
+}
+
+
+.user-greeting-center {
+  text-align: center;
+  margin: 15px 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.1rem;
+  color: #444;
+}
+
+.user-greeting-center span {
+  margin-right: 6px;
+  font-weight: 500;
+}
+
+.user-greeting-center .profile-link {
+  color: #4a90e2;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.user-greeting-center .profile-link:hover {
+  color: #007BFF;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* کانتینر دکمه‌ها: چینش افقی و وسط‌چین */
+.add-buttons-container {
+  display: flex;
+  justify-content: center; /* وسط‌چین افقی */
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+/* استایل دکمه‌ها */
+.add-btn {
+  display: inline-block;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #4a90e2, #007BFF);
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  white-space: nowrap;
+}
+
+.add-btn:hover {
+  background: linear-gradient(135deg, #0056b3, #003d99);
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+  .add-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+/* خط جداکننده زیبا */
+.custom-hr {
+  border: none;
+  height: 2px;
+  width: 80%;
+  margin: 30px auto;
+  background: linear-gradient(to right, transparent, #007BFF, transparent);
+  border-radius: 2px;
+}
+
+
+.filters-container select {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1.5px solid #ccc;
+  font-size: 15px;
+  cursor: pointer;
+  min-width: 140px;
+  white-space: nowrap;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background-color: #fff;
+  appearance: none; /* حذف استایل پیشفرض مرورگر */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2210%22%20height%3D%227%22%20viewBox%3D%220%200%2010%207%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0%200l5%207%205-7z%22%20fill%3D%22%23666%22/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px 7px;
+}
+
+.filters-container select:focus {
+  border-color: #2a72e5;
+  box-shadow: 0 0 8px rgba(42, 114, 229, 0.6);
+  outline: none;
+  background-color: #f0f7ff;
+}
+
+/* گزینه‌ها در حالت باز شدن */
+.filters-container select option {
+  padding: 8px 12px;
+  font-size: 15px;
+  color: #333;
+  background-color: #fff;
+}
+
+/* وقتی ماوس روی گزینه‌ها میره */
+.filters-container select option:hover {
+  background-color: #d6e4ff;
+  color: #2a72e5;
+}
+
+/* تنظیمات کلی صفحه */
+/* تنظیم فونت کلی سایت */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 16px;
+  color: #333;
+  line-height: 1.6;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0 15px;
+}
+
+/* استایل بخش bio */
+.bio {
+  background-color: #eef2f7;
+  border-left: 4px solid #4a90e2;
+  padding: 15px 20px;
+  margin: 15px 0;
+  border-radius: 6px;
+  color: #555;
+  font-style: italic;
+  font-size: 1rem;
+  max-width: 700px;
+  word-wrap: break-word;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: background-color 0.3s ease;
+}
+
+
+.bio:hover {
+  background-color: #dbe4f7;
+}
+
+/* تیترهای bio اگر لازم شد */
+.bio h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* ریسپانسیو برای موبایل */
+@media (max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+  .bio {
+    font-size: 0.9rem;
+    padding: 12px 15px;
+  }
+}
+
+
+/* استایل هدر و نوار ناوبری */
+header {
+  background-color: #2a72e5;
+  padding: 12px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* کانتینر ناوبری */
+nav {
+  display: flex;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+/* لینک‌های ناوبری */
+nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+/* هاور لینک‌ها */
+nav a:hover {
+  background-color: #1e4cb8;
+}
+
+/* استایل مخصوص دکمه خروج */
+nav a[href$="logout"] {
+  background-color: #e55353;
+  font-weight: 700;
+}
+
+nav a[href$="logout"]:hover {
+  background-color: #b72f2f;
+}
+
+/* محتوای اصلی */
+main {
+  max-width: 700px;
+  margin: 30px auto;
+  background: white;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+/* تیترهای صفحه */
+h1 {
+  color: #2a72e5;
+  margin-bottom: 15px;
+}
+
+h2 {
+  border-bottom: 2px solid #2a72e5;
+  padding-bottom: 6px;
+  margin-bottom: 20px;
+  color: #2a72e5;
+}
+
+/* لینک افزودن کار جدید */
+a[href$="add_task"] {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease;
+}
+
+a[href$="add_task"]:hover {
+  background-color: #3a8b3a;
+}
+
+/* لیست کارها */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  background-color: #f2f7ff;
+  margin-bottom: 12px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* لینک‌های ویرایش و حذف */
+ul li a {
+  color: #2a72e5;
+  margin-left: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+ul li a:hover {
+  color: #1e4cb8;
+}
+
+
+.auth-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #444;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: 0.3s ease;
+}
+
+.auth-input:focus {
+  border-color: #2a72e5;
+  background-color: #fff;
+  outline: none;
+}
+
+
+
+
+
+.resend-note {
+  margin-top: 12px;
+  text-align: center;
+  color: #c0392b;
+  font-size: 14px;
+}
+
+
+
+.auth-email {
+  font-weight: bold;
+  color: #2a3eb1;
+}
+
+.auth-subtitle {
+  font-size: 15px;
+  color: #555;
+  margin-top: 10px;
+}
+
+
+
+
+.form-input,
+.form-select,
+.form-checkbox {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  background-color: #fff;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  border-color: #495057;
+  outline: none;
+}
+
+.form-checkbox {
+  width: auto;
+  transform: scale(1.2);
+}
+
+.form-button {
+  background-color: #4a69bd;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s;
+}
+
+.form-button:hover {
+  background-color: #3b5b9e;
+}
+
+
+/* container فرم */
+.container {
+  background-color: #f8f9fa; /* رنگ پس‌زمینه روشن */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin: 40px auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* تیتر فرم */
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px;
+  font-weight: 600;
+  font-size: 28px;
+}
+
+/* برچسب‌های فرم */
+label.form-label {
+  font-weight: 600;
+  color: #555;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+
+/* ورودی‌ها */
+input.form-control, select.form-control, textarea.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+input.form-control:focus, select.form-control:focus, textarea.form-control:focus {
+  border-color: #0d6efd; /* رنگ آبی بوت‌استرپ */
+  outline: none;
+  box-shadow: 0 0 6px rgba(13, 110, 253, 0.4);
+}
+
+/* متن کمک */
+.form-text {
+  font-size: 14px;
+  color: #6c757d;
+  margin-top: 4px;
+}
+
+/* نمایش خطا */
+.text-danger {
+  color: #dc3545 !important;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* دکمه ذخیره */
+button.btn-primary {
+  background-color: #0d6efd;
+  border: none;
+  padding: 12px 0;
+  width: 100%;
+  border-radius: 6px;
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button.btn-primary:hover {
+  background-color: #084cd9;
+}
+
+/* برای موبایل و صفحه‌های کوچک */
+@media (max-width: 576px) {
+  .container {
+    padding: 20px;
+    margin: 20px 15px;
+  }
+}
+
+.myapp-delete-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  display: flex; /* وقتی نمایش میدی باید flex باشه */
+}
+
+.myapp-delete-modal-content {
+  background-color: white;
+  padding: 20px 25px;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90vw;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+.myapp-btn {
+  padding: 8px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.myapp-btn-danger {
+  background-color: #d9534f;
+  color: white;
+}
+
+.myapp-btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.myapp-btn:hover {
+  opacity: 0.85;
+}
+
+
+
+.modal-content {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 400px;
+  width: 90%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .modal-content {
+    width: 95%;
+    padding: 15px;
+    font-size: 14px;
+  }
+}
+
+a.back-to-home {
+  position: relative;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1565c0;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  padding: 4px 2px;
+  margin: 0 auto;
+}
+.container1{
+  text-align: center;
+}
+a.back-to-home::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  height: 2px;
+  background-color: #1565c0;
+  transition: width 0.3s ease;
+}
+
+a.back-to-home:hover::after,
+a.back-to-home:focus::after {
+  width: 100%;
+}
+
+a.back-to-home:hover,
+a.back-to-home:focus {
+  color: #0d47a1;
+  outline: none;
+}
+
+a.back-to-home:focus-visible {
+  outline: 2px solid #90caf9;
+  outline-offset: 2px;
+}
+
+/* موبایل */
+@media (max-width: 480px) {
+  a.back-to-home {
+    font-size: 13px;
+    padding: 3px 1px;
+  }
+}
+
+
+
+.avatar-placeholder {
+  display: flex;
+  width: 170px;
+  height: 170px;
+  margin: 0 auto 28px auto;
+  border-radius: 50%;
+  background-color: #d3d3d3;
+  
+  align-items: center;
+  justify-content: center;
+
+  font-size: 4rem; /* سایز متن دلخواه */
+  color: #444; /* رنگ متن */
+  user-select: none; /* جلوگیری از انتخاب شدن متن */
+}
+
+/* استایل کلی برای همه p های فرم */
+form p {
+  margin-bottom: 1rem;
+}
+
+/* استایل برای لِیبل‌ها */
+form p label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* استایل برای فیلدهای ورودی و textarea */
+form p textarea,
+form p input[type="text"],
+form p input[type="email"],
+form p input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+/* استایل هنگام فوکوس */
+form p textarea:focus,
+form p input[type="text"]:focus,
+form p input[type="email"]:focus,
+form p input[type="password"]:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 4px #4a90e2;
+}
+
+
+
+/* Make form field blocks tighter */
+.auth-form p {
+  margin-bottom: 6px !important; /* reduce vertical space between fields */
+}
+
+/* Labels spacing and appearance */
+.auth-form label {
+  font-size: 13px !important;
+  margin-bottom: 2px !important;  /* tight spacing */
+  display: block;
+  line-height: 1.1 !important;
+}
+
+/* Inputs general style */
+.auth-input,
+#id_name,
+#id_email,
+#id_password1,
+#id_password2 {
+  font-size: 13px !important;
+  padding: 4px 6px !important;
+  height: 29px !important;
+  margin-bottom: 2px !important;
+  border-radius: 4px !important;
+  width: 90% !important;
+  max-width: 280px !important;
+}
+
+/* Textarea (bio field) */
+#id_bio,
+textarea[name="bio"] {
+  min-height: 70px !important;
+  max-height: 60px !important;
+  resize: vertical !important;
+  font-size: 13px !important;
+  padding: 4px 6px !important;
+  line-height: 1.2 !important;
+  width: 90% !important;
+  max-width: 280px !important;
+  margin-bottom: 4px !important;
+}
+
+/* File input (avatar) */
+#id_avatar {
+  font-size: 12px !important;
+  margin-bottom: 4px !important;
+  width: 90% !important;
+  max-width: 280px !important;
+}
+
+
+.auth-container:hover {
+  box-shadow: 0 20px 60px rgba(25, 42, 86, 0.25);
+}
+
+
+
+.auth-label {
+  align-self: flex-start;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #7f8c8d;
+  margin-bottom: 0.6rem;
+  user-select: none;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  font-size: 1rem;
+  border: 2px solid #bdc3c7;
+  border-radius: 14px;
+  outline-offset: 3px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  color: #34495e;
+  font-family: inherit;
+}
+
+.auth-input::placeholder {
+  color: #95a5a6;
+  font-style: italic;
+}
+
+.auth-input:focus {
+  border-color: #2980b9;
+  box-shadow: 0 0 10px rgba(41, 128, 185, 0.4);
+}
+
+
+
+
+
+.auth-link {
+  position: relative !important;
+  font-size: 1.2rem !important;
+  color: #1e88e5 !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  user-select: none !important;
+  padding-bottom: 3px !important;
+  transition: color 0.3s ease !important;
+}
+
+.auth-link::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  height: 2px !important;
+  width: 100% !important;
+  background-color: #1e88e5 !important;
+  transform: scaleX(0) !important;
+  transform-origin: center !important;  /* وسط برای شروع و پایان */
+  transition: transform 0.3s ease !important;
+}
+
+.auth-link:hover,
+.auth-link:focus {
+  color: #154a86 !important;
+}
+
+.auth-link:hover::after,
+.auth-link:focus::after {
+  transform: scaleX(1) !important;
+}
+
+/* Responsive: mobile friendly */
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 2rem 2.5rem;
+    max-width: 95%;
+  }
+
+  .auth-title {
+    font-size: 1.2rem !important; /* فونت کوچکتر برای موبایل */
+    margin-bottom: 1.4rem;
+  }
+
+  .auth-input {
+    padding: 0.65rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .auth-button {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .auth-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .auth-link {
+    font-size: 0.50rem;
+    margin-top: 1.2rem;
+  }
+}
+
+
+
+.auth-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+
+.resend-note {
+  color: red;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+
+.buttons-container {
+  display: flex;
+  justify-content: center; /* وسط‌چین افقی */
+  gap: 12px;               /* فاصله بین دکمه‌ها */
+  margin-top: 20px;        /* فاصله از بالا (اختیاری) */
+}
+
+.link-cancel {
+  display: inline-block;
+  padding: 8px 16px;
+  min-width: 100px;
+  font-size: 14px;
+  line-height: 1.5;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  background-color: #e53935;
+  text-align: center;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box;
+}
+
+.link-cancel:hover {
+  background-color: #b71c1c;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+}
+
+.btn-save {
+  display: inline-block;
+  padding: 8px 16px;
+  min-width: 100px;
+  font-size: 14px;
+  line-height: 1.5;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  background-color: #3f51b5;
+  text-align: center;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  box-sizing: border-box;
+}
+
+.btn-save:hover {
+  background-color: #0011ff;
+  box-shadow: 0 0 8px rgba(18, 122, 190, 0.6);
+}
+
+
+.messages {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  max-width: 450px;
+  z-index: 9999;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.messages li {
+  background: #d4edda;
+  color: #155724;
+  border-left: 4px solid #28a745;
+  padding: 12px 24px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
+  user-select: none;
+  font-size: 0.85rem;   /* فونت کوچکتر */
+  cursor: default;
+  min-width: 280px;
+  max-width: 440px;
+  box-sizing: border-box;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.messages li.error {
+  background: #f8d7da;
+  color: #721c24;
+  border-left-color: #dc3545;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.2);
+}
+
+@keyframes fadeInMessage {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .messages {
+    max-width: 90vw; /* حداکثر عرض روی 90٪ عرض صفحه موبایل */
+    left: 5vw;       /* کمی فاصله از چپ */
+    top: 10px;       /* فاصله از بالا */
+  }
+
+  .messages li {
+    max-width: 100%;  /* اجازه می‌ده جعبه پیام تا عرض پیام‌ها بزرگ شود */
+    min-width: auto;  /* حذف حداقل عرض */
+    padding: 10px 16px;
+    font-size: 0.75rem;  /* فونت کوچکتر برای موبایل */
+    white-space: normal; /* اجازه شکست خط */
+  }
+}
+
+.auth-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  width: 50%;
+  max-width: 360px;
+  margin: 12px auto;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center;
+  box-sizing: border-box;
+  padding: 8px 0;  /* minimal vertical padding */
+}
+
+.form-group label {
+  width: 100%;
+  margin-bottom: 6px;
+  font-weight: 600;
+  text-align: left;   /* cleaner left align for labels */
+  color: #222;
+  text-align: center;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #005fcc;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 95, 204, 0.5);
+}
+
+@media (max-width: 480px) {
+  .form-group {
+    width: 90%;
+    max-width: none;
+    padding: 6px 0;
+  }
+}
+
+
+.auth-form-fields label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+  text-align: center; /* متن وسط چین */
+  width: 100%;
+  max-width: 320px; /* محدود کردن عرض */
+}
+
+.auth-input {
+  width: 100%;
+  max-width: 320px; /* عرض ورودی */
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.auth-input:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+/* ریسپانسیو موبایل */
+@media (max-width: 480px) {
+  .auth-form-fields label,
+  .auth-input {
+    max-width: 100%;  /* تا عرض کل کانتینر کشیده بشه */
+    font-size: 1rem;
+  }
+
+  .auth-input {
+    padding: 12px 14px;
+  }
+}

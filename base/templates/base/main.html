@@ -1,60 +1,15 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="ltr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>صفحه با دارک مود</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}MySite{% endblock %}</title>
 
-  <style>
-    /* استایل پایه */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #fff;
-      color: #000;
-      margin: 0; padding: 20px;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
-    /* استایل دکمه تغییر حالت */
-    #darkModeToggle {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background-color: #1e88e5;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 48px;
-      height: 48px;
-      font-size: 24px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    #darkModeToggle:hover {
-      background-color: #1565c0;
-      transform: scale(1.1);
-    }
-
-    /* استایل حالت تاریک */
-    html.dark-mode, body.dark-mode {
-      background-color: #121212;
-      color: #eee;
-    }
-
-    html.dark-mode #darkModeToggle, body.dark-mode #darkModeToggle {
-      background-color: #333;
-      color: #ffeb3b;
-    }
-
-    html.dark-mode #darkModeToggle:hover, body.dark-mode #darkModeToggle:hover {
-      background-color: #555;
-    }
-  </style>
-
+  <!-- اجرای سریع قبل از بارگذاری CSS برای جلوگیری از چشمک -->
   <script>
-    // اجرای سریع قبل از بارگذاری CSS برای جلوگیری از چشمک زدن
     (function () {
       try {
         if (localStorage.getItem("dark-mode") === "true") {
@@ -63,34 +18,65 @@
       } catch (e) {}
     })();
   </script>
+
+  {% block extra_css %}{% endblock %}
 </head>
 
 <body>
-  <h1>سلام! این صفحه حالت تاریک دارد.</h1>
-  <p>دکمه پایین سمت چپ را بزنید تا حالت تاریک روشن یا خاموش شود.</p>
+  {% include 'base/navbar.html' %}
 
-  <button id="darkModeToggle" aria-label="تغییر حالت تاریک">🌙</button>
+  <div class="dark-mode-toggle-container">
+    <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
+  </div>
 
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
+  {% block scripts %}
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const toggleBtn = document.getElementById("darkModeToggle");
       const root = document.documentElement;
 
-      // تنظیم وضعیت اولیه دکمه
+      // تنظیم اولیه وضعیت دکمه
       if (localStorage.getItem("dark-mode") === "true") {
+        root.classList.add("dark-mode");
         toggleBtn.textContent = "☀️";
       } else {
+        root.classList.remove("dark-mode");
         toggleBtn.textContent = "🌙";
       }
 
-      // افزودن رویداد کلیک به دکمه
+      // وقتی دکمه کلیک شد
       toggleBtn.addEventListener("click", () => {
         root.classList.toggle("dark-mode");
         const isDark = root.classList.contains("dark-mode");
         localStorage.setItem("dark-mode", isDark);
         toggleBtn.textContent = isDark ? "☀️" : "🌙";
       });
+
+      // پیام‌ها را پس از چند ثانیه محو کن و حذف کن
+      const messages = document.querySelectorAll(".messages li");
+      if (messages.length) {
+        messages.forEach((msg) => {
+          setTimeout(() => {
+            msg.style.opacity = "0";
+            msg.style.transform = "translateY(-10px)";
+          }, 2600);
+          setTimeout(() => {
+            msg.remove();
+          }, 3000);
+        });
+      }
     });
   </script>
+  {% endblock %}
 </body>
 </html>
