@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fa" dir="ltr">
+<html lang="فا" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,16 +8,25 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
+  <!-- استایل برای جلوگیری از چشمک حالت تاریک -->
+  <style>
+    body.dark-mode {
+      background-color: #121212 !important;
+      color: #f1f1f1 !important;
+      transition: none !important; /* غیرفعال کردن ترنزیشن هنگام لود */
+    }
+  </style>
+
   <!-- اجرای حالت تاریک قبل از لود صفحه برای جلوگیری از چشمک -->
-<script>
-  (function () {
-    try {
-      if (localStorage.getItem("dark-mode") === "true") {
-        document.body.classList.add("dark-mode");
-      }
-    } catch (e) {}
-  })();
-</script>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem("dark-mode") === "true") {
+          document.body.classList.add("dark-mode");
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -43,41 +52,41 @@
 
   {% block scripts %}
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const toggleBtn = document.getElementById("darkModeToggle");
-    const root = document.body; // کار روی body
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggleBtn = document.getElementById("darkModeToggle");
+      const root = document.body; // کار روی body
 
-    // حالت اولیه
-    if (localStorage.getItem("dark-mode") === "true") {
-      root.classList.add("dark-mode");
-      toggleBtn.textContent = "☀️";
-    } else {
-      root.classList.remove("dark-mode");
-      toggleBtn.textContent = "🌙";
-    }
+      // حالت اولیه
+      if (localStorage.getItem("dark-mode") === "true") {
+        root.classList.add("dark-mode");
+        toggleBtn.textContent = "☀️";
+      } else {
+        root.classList.remove("dark-mode");
+        toggleBtn.textContent = "🌙";
+      }
 
-    // کلیک روی دکمه
-    toggleBtn.addEventListener("click", () => {
-      root.classList.toggle("dark-mode");
-      const isDark = root.classList.contains("dark-mode");
-      localStorage.setItem("dark-mode", isDark);
-      toggleBtn.textContent = isDark ? "☀️" : "🌙";
-    });
-
-    // پیام‌ها محو شوند
-    const messages = document.querySelectorAll(".messages li");
-    if (messages.length) {
-      messages.forEach((msg) => {
-        setTimeout(() => {
-          msg.style.opacity = "0";
-          msg.style.transform = "translateY(-10px)";
-        }, 2600);
-        setTimeout(() => {
-          msg.remove();
-        }, 3000);
+      // کلیک روی دکمه
+      toggleBtn.addEventListener("click", () => {
+        root.classList.toggle("dark-mode");
+        const isDark = root.classList.contains("dark-mode");
+        localStorage.setItem("dark-mode", isDark);
+        toggleBtn.textContent = isDark ? "☀️" : "🌙";
       });
-    }
-  });
+
+      // پیام‌ها محو شوند
+      const messages = document.querySelectorAll(".messages li");
+      if (messages.length) {
+        messages.forEach((msg) => {
+          setTimeout(() => {
+            msg.style.opacity = "0";
+            msg.style.transform = "translateY(-10px)";
+          }, 2600);
+          setTimeout(() => {
+            msg.remove();
+          }, 3000);
+        });
+      }
+    });
   </script>
   {% endblock %}
 </body>
