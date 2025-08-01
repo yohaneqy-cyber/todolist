@@ -17,17 +17,22 @@
 
   <!-- اجرای حالت تاریک قبل از لود صفحه برای جلوگیری از چشمک -->
   <script>
-    (function () {
-      try {
-        if (localStorage.getItem("dark-mode") === "true") {
-          document.body.classList.add("dark-mode");
-        } else {
-          document.body.classList.remove("dark-mode"); // force light mode
-        }
-      } catch (e) {}
+  (function () {
+    try {
+      if (localStorage.getItem("dark-mode") === "true") {
+        document.documentElement.classList.add("dark-mode");
+      } else {
+        document.documentElement.classList.remove("dark-mode");
+      }
+    } catch (e) {}
+
+    // Wait until body is available
+    document.addEventListener("DOMContentLoaded", function () {
       document.body.style.visibility = "visible";
-    })();
+    });
+  })();
   </script>
+
 
   {% block extra_css %}{% endblock %}
 </head>
