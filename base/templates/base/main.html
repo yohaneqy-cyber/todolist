@@ -6,55 +6,41 @@
   <title>{% block title %}MySite{% endblock %}</title>
 
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
-  <!-- Hide body until mode is set -->
-  <style>
-    body {
-      visibility: hidden;
-      transition: visibility 0.3s ease;
-    }
-  </style>
-
-  <!-- اجرای حالت تاریک قبل از لود صفحه برای جلوگیری از چشمک -->
+  <!-- اجرای فوری حالت تاریک قبل از لود CSS -->
   <script>
     (function () {
       try {
         if (localStorage.getItem("dark-mode") === "true") {
-          document.body.classList.add("dark-mode");
-
-          // فوراً رنگ حاشیه فرم‌ها را برای حالت دارک مود اعمال کن
-          const inputs = document.querySelectorAll("input, textarea, select");
-          inputs.forEach(input => {
-            input.style.borderColor = "#444";  // رنگ حاشیه تیره
-          });
-        } else {
-          document.body.classList.remove("dark-mode");
-
-          // رنگ حاشیه‌ها را پاک کن (بازگشت به CSS اصلی)
-          const inputs = document.querySelectorAll("input, textarea, select");
-          inputs.forEach(input => {
-            input.style.borderColor = "";
-          });
+          document.documentElement.classList.add("dark-mode");
         }
       } catch (e) {}
-
-      function showBody() {
-        if (document.body) {
-          document.body.style.visibility = "visible";
-        } else {
-          setTimeout(showBody, 20);
-        }
-      }
-
-      showBody();
     })();
   </script>
+
+  <!-- CSS فوری برای جلوگیری از چشمک -->
+  <style>
+    html.dark-mode, body.dark-mode {
+      background-color: #121212 !important;
+      color: #f1f1f1 !important;
+    }
+    html.dark-mode input,
+    html.dark-mode textarea,
+    html.dark-mode select {
+      background-color: #1f1f1f !important;
+      color: #f1f1f1 !important;
+      border: 1px solid #444 !important;
+      caret-color: white;
+    }
+  </style>
+
+  <!-- CSS اصلی سایت -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
   {% block extra_css %}{% endblock %}
 </head>
 
-<body>
+<body class="{% if localStorage_dark_mode %}dark-mode{% endif %}">
   {% include 'base/navbar.html' %}
 
   <!-- دکمه تغییر حالت تاریک -->
@@ -79,22 +65,7 @@
       const toggleBtn = document.getElementById("darkModeToggle");
       const root = document.body;
 
-      // تابع اعمال رنگ حاشیه فرم‌ها در حالت دارک مود
-      function applyDarkBorders() {
-        if (root.classList.contains("dark-mode")) {
-          const inputs = document.querySelectorAll("input, textarea, select");
-          inputs.forEach(input => {
-            input.style.borderColor = "#444";  // رنگ حاشیه تیره
-          });
-        } else {
-          const inputs = document.querySelectorAll("input, textarea, select");
-          inputs.forEach(input => {
-            input.style.borderColor = ""; // حذف استایل inline برای برگشت به CSS عادی
-          });
-        }
-      }
-
-      // اعمال حالت اولیه و رنگ حاشیه
+      // اعمال حالت اولیه
       if (localStorage.getItem("dark-mode") === "true") {
         root.classList.add("dark-mode");
         toggleBtn.textContent = "☀️";
@@ -102,17 +73,13 @@
         root.classList.remove("dark-mode");
         toggleBtn.textContent = "🌙";
       }
-      applyDarkBorders();
 
-      // کلیک روی دکمه تغییر حالت تاریک
+      // تغییر حالت با کلیک
       toggleBtn.addEventListener("click", () => {
         root.classList.toggle("dark-mode");
         const isDark = root.classList.contains("dark-mode");
         localStorage.setItem("dark-mode", isDark);
         toggleBtn.textContent = isDark ? "☀️" : "🌙";
-
-        // کمی تأخیر بده تا کلاس تغییر کنه سپس رنگ حاشیه رو اعمال کن
-        setTimeout(applyDarkBorders, 50);
       });
 
       // پیام‌ها محو شوند
