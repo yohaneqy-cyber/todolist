@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fa" dir="ltr">
+<html lang="fa" dir="ltr" >
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,12 +8,19 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
+  <!-- hide body until dark mode is determined -->
+  <style>
+    html:not(.dark-mode) body {
+      visibility: hidden;
+    }
+  </style>
+
   <!-- اجرای حالت تاریک قبل از لود صفحه برای جلوگیری از چشمک -->
   <script>
     (function () {
       try {
         if (localStorage.getItem("dark-mode") === "true") {
-          document.body.classList.add("dark-mode");
+          document.documentElement.classList.add("dark-mode");
         }
       } catch (e) {}
     })();
@@ -45,7 +52,7 @@
   <script>
   document.addEventListener("DOMContentLoaded", function () {
     const toggleBtn = document.getElementById("darkModeToggle");
-    const root = document.body; // کار روی body
+    const root = document.documentElement; // now on html
 
     // حالت اولیه
     if (localStorage.getItem("dark-mode") === "true") {
@@ -77,6 +84,9 @@
         }, 3000);
       });
     }
+
+    // Show body now (remove the visibility:hidden)
+    document.body.style.visibility = "visible";
   });
   </script>
   {% endblock %}
