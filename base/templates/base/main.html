@@ -17,28 +17,29 @@
   </style>
 
   <!-- اجرای حالت تاریک قبل از لود صفحه برای جلوگیری از چشمک -->
-  <script>
-    (function () {
-      try {
-        if (localStorage.getItem("dark-mode") === "true") {
-          document.documentElement.classList.add("dark-mode");
-        } else {
-          document.documentElement.classList.remove("dark-mode");
-        }
-      } catch (e) {}
-
-      function showBody() {
-        if (document.body) {
-          document.body.style.visibility = "visible";
-        } else {
-          // اگر body هنوز آماده نیست، دوباره تلاش کن
-          setTimeout(showBody, 20);
-        }
+<script>
+  (function () {
+    try {
+      if (localStorage.getItem("dark-mode") === "true") {
+        document.body.classList.add("dark-mode");
+      } else {
+        document.body.classList.remove("dark-mode");
       }
+    } catch (e) {}
 
-      showBody();
-    })();
-  </script>
+    // اگر body هنوز آماده نیست، صبر کن و دوباره امتحان کن تا نمایش بدن شروع بشه
+    function showBody() {
+      if (document.body) {
+        document.body.style.visibility = "visible";
+      } else {
+        setTimeout(showBody, 20);
+      }
+    }
+
+    showBody();
+  })();
+</script>
+
 
 
   {% block extra_css %}{% endblock %}
