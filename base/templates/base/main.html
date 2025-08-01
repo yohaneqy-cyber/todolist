@@ -6,17 +6,8 @@
   <title>{% block title %}MySite{% endblock %}</title>
 
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
-
-  <!-- Hide body until mode is set -->
-  <style>
-    body {
-      visibility: hidden;
-      transition: visibility 0.3s ease;
-    }
-  </style>
-
-  <!-- اجرای حالت تاریک قبل از لود صفحه برای جلوگیری از چشمک -->
+  
+  <!-- اجرای سریع استایل تاریک روی input ها قبل از لود CSS اصلی برای جلوگیری از چشمک -->
   <script>
     (function () {
       try {
@@ -33,10 +24,21 @@
             }
           `;
           document.head.appendChild(style);
+          document.body.classList.add("dark-mode");
         }
       } catch(e) {}
     })();
   </script>
+
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
+
+  <!-- برداشتن visibility:hidden چون باعث سیاه شدن صفحه میشه -->
+  <style>
+    body {
+      visibility: visible;
+      transition: visibility 0.3s ease;
+    }
+  </style>
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -66,7 +68,7 @@
       const toggleBtn = document.getElementById("darkModeToggle");
       const root = document.body;
 
-      // تابع اعمال رنگ حاشیه فرم‌ها در حالت دارک مود
+      // اعمال رنگ حاشیه، رنگ متن و پس‌زمینه روی ورودی‌ها در حالت تاریک
       function applyDarkBorders() {
         if (root.classList.contains("dark-mode")) {
           document.querySelectorAll("input, textarea, select").forEach(el => {
@@ -85,7 +87,7 @@
         }
       }
 
-      // حالت اولیه
+      // حالت اولیه حالت تاریک و آیکون دکمه
       if (localStorage.getItem("dark-mode") === "true") {
         root.classList.add("dark-mode");
         toggleBtn.textContent = "☀️";
@@ -95,7 +97,6 @@
       }
       applyDarkBorders();
 
-      // کلیک روی دکمه تغییر حالت تاریک
       toggleBtn.addEventListener("click", () => {
         root.classList.toggle("dark-mode");
         const isDark = root.classList.contains("dark-mode");
@@ -104,7 +105,7 @@
         setTimeout(applyDarkBorders, 50);
       });
 
-      // پیام‌ها محو شوند
+      // پیام‌ها به تدریج محو و حذف شوند
       const messages = document.querySelectorAll(".messages li");
       if (messages.length) {
         messages.forEach((msg) => {
