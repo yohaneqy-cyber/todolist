@@ -13,7 +13,7 @@
     (function () {
       try {
         if (localStorage.getItem("dark-mode") === "true") {
-          document.documentElement.classList.add("dark-mode");
+          document.body.classList.add("dark-mode");
         }
       } catch (e) {}
     })();
@@ -45,7 +45,7 @@
   <script>
   document.addEventListener("DOMContentLoaded", function () {
     const toggleBtn = document.getElementById("darkModeToggle");
-    const root = document.documentElement; // use html element for adding dark-mode class
+    const root = document.body; // کار روی body
 
     // حالت اولیه
     if (localStorage.getItem("dark-mode") === "true") {
