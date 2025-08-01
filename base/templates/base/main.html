@@ -43,39 +43,40 @@
   {% block content %}{% endblock %}
 
   {% block scripts %}
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const toggleBtn = document.getElementById("darkModeToggle");
-      const body = document.body;
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const toggleBtn = document.getElementById("darkModeToggle");
+    const root = document.documentElement; // html element
 
-      // مقدار اولیه دکمه بر اساس localStorage
-      if (body.classList.contains("dark-mode")) {
-        toggleBtn.textContent = "☀️";
-      } else {
-        toggleBtn.textContent = "🌙";
-      }
+    // مقدار اولیه دکمه بر اساس localStorage / کلاس در <html>
+    if (root.classList.contains("dark-mode")) {
+      toggleBtn.textContent = "☀️";
+    } else {
+      toggleBtn.textContent = "🌙";
+    }
 
-      toggleBtn.addEventListener("click", () => {
-        const isDark = body.classList.toggle("dark-mode");
-        localStorage.setItem("dark-mode", isDark);
-        toggleBtn.textContent = isDark ? "☀️" : "🌙";
-      });
-
-      // افکت محو شدن پیام‌ها
-      const messages = document.querySelectorAll(".messages li");
-      if (messages.length) {
-        messages.forEach((msg) => {
-          setTimeout(() => {
-            msg.style.opacity = "0";
-            msg.style.transform = "translateY(-10px)";
-          }, 2600);
-          setTimeout(() => {
-            msg.remove();
-          }, 3000);
-        });
-      }
+    toggleBtn.addEventListener("click", () => {
+      const isDark = root.classList.toggle("dark-mode");
+      localStorage.setItem("dark-mode", isDark);
+      toggleBtn.textContent = isDark ? "☀️" : "🌙";
     });
-  </script>
+
+    // افکت محو شدن پیام‌ها
+    const messages = document.querySelectorAll(".messages li");
+    if (messages.length) {
+      messages.forEach((msg) => {
+        setTimeout(() => {
+          msg.style.opacity = "0";
+          msg.style.transform = "translateY(-10px)";
+        }, 2600);
+        setTimeout(() => {
+          msg.remove();
+        }, 3000);
+      });
+    }
+  });
+</script>
+
   {% endblock %}
 </body>
 </html>
