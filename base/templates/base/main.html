@@ -8,12 +8,12 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
-  <!-- اجرای حالت تاریک قبل از لود صفحه برای جلوگیری از چشمک -->
+  <!-- Dark mode setup before page load (no flash) -->
   <script>
   (function () {
     try {
       if (localStorage.getItem("dark-mode") === "true") {
-        document.body?.classList.add("dark-mode");
+        document.documentElement.classList.add("dark-mode"); // add to <html>
       }
     } catch (e) {}
   })();
@@ -25,12 +25,12 @@
 <body>
   {% include 'base/navbar.html' %}
 
-  <!-- دکمه تغییر حالت تاریک -->
+  <!-- Dark mode toggle button -->
   <div class="dark-mode-toggle-container">
     <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
   </div>
 
-  <!-- پیام‌ها -->
+  <!-- Messages -->
   {% if messages %}
     <ul class="messages">
       {% for message in messages %}
@@ -45,9 +45,9 @@
   <script>
   document.addEventListener("DOMContentLoaded", function () {
     const toggleBtn = document.getElementById("darkModeToggle");
-    const root = document.body; // کار روی body
+    const root = document.documentElement; // use <html>
 
-    // حالت اولیه
+    // Initial state
     if (localStorage.getItem("dark-mode") === "true") {
       root.classList.add("dark-mode");
       toggleBtn.textContent = "☀️";
@@ -56,7 +56,7 @@
       toggleBtn.textContent = "🌙";
     }
 
-    // کلیک روی دکمه
+    // Toggle click
     toggleBtn.addEventListener("click", () => {
       root.classList.toggle("dark-mode");
       const isDark = root.classList.contains("dark-mode");
@@ -64,7 +64,7 @@
       toggleBtn.textContent = isDark ? "☀️" : "🌙";
     });
 
-    // پیام‌ها محو شوند
+    // Fade out messages
     const messages = document.querySelectorAll(".messages li");
     if (messages.length) {
       messages.forEach((msg) => {

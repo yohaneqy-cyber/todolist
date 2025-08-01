@@ -1,3 +1,57 @@
+.buttons-container {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+body.dark-mode .myapp-btn-secondary,
+body.dark-mode .myapp-btn-danger {
+  width: 140px !important;
+  padding: 10px 0 !important;
+  border-radius: 8px !important;
+  font-size: 15px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  border: none !important;
+  font-weight: 600 !important;
+  transition: background-color 0.3s ease !important, transform 0.1s ease !important;
+  transform: scale(1) !important;
+  text-align: center !important;
+  display: inline-block !important;
+}
+
+body.dark-mode .myapp-btn-secondary {
+  background-color: #333 !important;
+  color: #ddd !important;
+}
+
+body.dark-mode .myapp-btn-secondary:hover {
+  background-color: #555 !important;
+}
+
+body.dark-mode .myapp-btn-secondary:active {
+  background-color: #222 !important;
+  transform: scale(0.90) !important;
+  outline: none !important;
+}
+
+body.dark-mode .myapp-btn-danger {
+  background-color: #e53935 !important;
+  color: white !important;
+}
+
+body.dark-mode .myapp-btn-danger:hover {
+  background-color: #c62828 !important;
+}
+
+body.dark-mode .myapp-btn-danger:active {
+  background-color: #b71c1c !important;
+  transform: scale(0.90) !important;
+  outline: none !important;
+}
+
+
 .dark-mode-toggle {
   position: fixed;
   bottom: 20px;
@@ -98,12 +152,18 @@ body.dark-mode .logout-cancel-btn {
   color: #ddd;
   cursor: pointer;
   font-size: 15px;
-  transition: background-color 0.3s ease;
+  transform: scale(1); /* اندازه عادی */
+  transition: transform 0.1s ease, background-color 0.3s ease;
 }
 
 body.dark-mode .logout-cancel-btn:hover {
   background-color: #555;
 }
+
+body.dark-mode .logout-cancel-btn:active {
+  transform: scale(0.90) !important; /* کوچیک شدن هنگام کلیک */
+}
+
 
 body.dark-mode .logout-confirm-btn {
   padding: 10px 24px;
@@ -112,11 +172,21 @@ body.dark-mode .logout-confirm-btn {
   text-decoration: none;
   font-weight: 600;
   border-radius: 8px;
-  transition: background-color 0.3s ease;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  transform: scale(1); /* normal size */
+  border: none;
+  user-select: none;
 }
 
 body.dark-mode .logout-confirm-btn:hover {
   background-color: #c62828;
+}
+
+body.dark-mode .logout-confirm-btn:active {
+  background-color: #b71c1c;
+  transform: scale(0.90); /* shrink on click */
+  outline: none;
 }
 
 
@@ -407,13 +477,16 @@ body.dark-mode .profile-submit-btn:hover {
   max-width: 320px !important;
   border: 1px solid #ccc !important;
   border-radius: 4px !important;
-  background-color: #fff !important;
+  background-color: #fff !important; /* پس‌زمینه سفید */
+  color: #000 !important;            /* رنگ متن سیاه */
+  caret-color: black !important;     /* رنگ کرسر مشکی */
   box-sizing: border-box !important;
   margin-left: auto !important;
   margin-right: auto !important;
   display: block !important;
-  margin-bottom: 0 !important; /* بدون فاصله اضافی زیر input */
+  margin-bottom: 0 !important;
 }
+
 
 
 body.dark-mode input,

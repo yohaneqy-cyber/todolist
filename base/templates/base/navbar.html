@@ -10,6 +10,51 @@
   
 
   <style>
+    body.dark-mode .confirm-btn {
+  padding: 10px 24px;
+  background-color: #e53935 !important;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode .confirm-btn:hover,
+body.dark-mode .confirm-btn:focus {
+  background-color: #c62828 !important;
+}
+
+body.dark-mode .confirm-btn:active {
+  background-color: #b71c1c;
+  box-shadow: none;
+  transform: scale(0.90); /* کوچیک شدن */
+  transition: transform 0.1s ease; /* انیمیشن سریع */
+}
+
+
+
+
+body.dark-mode .cancel-btn {
+  padding: 10px 20px;
+  background-color: #333;
+  border: none;
+  border-radius: 8px;
+  color: #ddd;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode .cancel-btn:active {
+  background-color: #222;
+  box-shadow: none;
+  transform: scale(0.90); /* کوچیک شدن */
+  transition: transform 0.1s ease;
+}
+
+
+
 @keyframes fadeInScale {
   from {
     opacity: 0;
@@ -1323,17 +1368,17 @@ body.logout-modal-open {
     </div>
   </div>
 
-<div id="confirmUnfriendModal" class="modal unfriend-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="confirmUnfriendTitle" style="display:none;">
-  <div class="modal-content">
-    <span id="closeConfirmUnfriendModal" class="close" role="button" aria-label="Close">&times;</span>
-    <h2 id="confirmUnfriendTitle">Confirm Unfriend</h2>
-    <p>Are you sure you want to remove {{ friend.name }} from friend list?</p>
-    <div class="buttons-container">
-      <button class="confirm-btn" id="confirmUnfriendBtn">Yes, Remove</button>
-      <button class="cancel-btn" id="cancelUnfriendBtn">Cancel</button>
+  <div id="confirmUnfriendModal" class="modal unfriend-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="confirmUnfriendTitle" style="display:none;">
+    <div class="modal-content">
+      <span id="closeConfirmUnfriendModal" class="close" role="button" aria-label="Close">&times;</span>
+      <h2 id="confirmUnfriendTitle">Confirm Unfriend</h2>
+      <p id="unfriendModalText">Are you sure you want to remove this friend from your friend list?</p>
+      <div class="buttons-container">
+        <button class="cancel-btn" id="cancelUnfriendBtn">Cancel</button>
+        <button class="confirm-btn" id="confirmUnfriendBtn">Yes, Remove</button>
+      </div>
     </div>
   </div>
-</div>
 
 
   <!-- User profile modal -->
@@ -1349,6 +1394,7 @@ body.logout-modal-open {
   {% block content %}{% endblock %}
 
 <script>
+  
   // گرفتن CSRF Token از کوکی‌ها (برای درخواست‌های POST)
   function getCSRFToken() {
     let cookieValue = null;
