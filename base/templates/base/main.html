@@ -6,41 +6,51 @@
   <title>{% block title %}MySite{% endblock %}</title>
 
   {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
-  <!-- اجرای فوری حالت تاریک قبل از لود CSS -->
+  <!-- Hide body until mode is set -->
+  <style>
+    body {
+      visibility: hidden;
+      transition: visibility 0.3s ease;
+    }
+  </style>
+
+  <!-- اجرای حالت تاریک قبل از لود صفحه برای جلوگیری از چشمک -->
   <script>
     (function () {
       try {
         if (localStorage.getItem("dark-mode") === "true") {
-          document.documentElement.classList.add("dark-mode");
+          document.body.classList.add("dark-mode");
+
+          // اعمال فوری رنگ باکس‌ها و کرسر برای دارک مود
+          document.querySelectorAll("input, textarea, select").forEach(el => {
+            el.style.borderColor = "#444";  // رنگ حاشیه
+            el.style.caretColor = "white";  // رنگ کرسر
+            el.style.backgroundColor = "#1f1f1f"; // پس‌زمینه تیره
+            el.style.color = "#f1f1f1"; // متن سفید
+          });
+        } else {
+          document.body.classList.remove("dark-mode");
         }
       } catch (e) {}
+
+      function showBody() {
+        if (document.body) {
+          document.body.style.visibility = "visible";
+        } else {
+          setTimeout(showBody, 20);
+        }
+      }
+
+      showBody();
     })();
   </script>
-
-  <!-- CSS فوری برای جلوگیری از چشمک -->
-  <style>
-    html.dark-mode, body.dark-mode {
-      background-color: #121212 !important;
-      color: #f1f1f1 !important;
-    }
-    html.dark-mode input,
-    html.dark-mode textarea,
-    html.dark-mode select {
-      background-color: #1f1f1f !important;
-      color: #f1f1f1 !important;
-      border: 1px solid #444 !important;
-      caret-color: white;
-    }
-  </style>
-
-  <!-- CSS اصلی سایت -->
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
   {% block extra_css %}{% endblock %}
 </head>
 
-<body class="{% if localStorage_dark_mode %}dark-mode{% endif %}">
+<body>
   {% include 'base/navbar.html' %}
 
   <!-- دکمه تغییر حالت تاریک -->
@@ -65,7 +75,26 @@
       const toggleBtn = document.getElementById("darkModeToggle");
       const root = document.body;
 
-      // اعمال حالت اولیه
+      // تابع اعمال رنگ حاشیه فرم‌ها در حالت دارک مود
+      function applyDarkBorders() {
+        if (root.classList.contains("dark-mode")) {
+          document.querySelectorAll("input, textarea, select").forEach(el => {
+            el.style.borderColor = "#444";
+            el.style.caretColor = "white";
+            el.style.backgroundColor = "#1f1f1f";
+            el.style.color = "#f1f1f1";
+          });
+        } else {
+          document.querySelectorAll("input, textarea, select").forEach(el => {
+            el.style.borderColor = "";
+            el.style.caretColor = "";
+            el.style.backgroundColor = "";
+            el.style.color = "";
+          });
+        }
+      }
+
+      // حالت اولیه
       if (localStorage.getItem("dark-mode") === "true") {
         root.classList.add("dark-mode");
         toggleBtn.textContent = "☀️";
@@ -73,13 +102,15 @@
         root.classList.remove("dark-mode");
         toggleBtn.textContent = "🌙";
       }
+      applyDarkBorders();
 
-      // تغییر حالت با کلیک
+      // کلیک روی دکمه تغییر حالت تاریک
       toggleBtn.addEventListener("click", () => {
         root.classList.toggle("dark-mode");
         const isDark = root.classList.contains("dark-mode");
         localStorage.setItem("dark-mode", isDark);
         toggleBtn.textContent = isDark ? "☀️" : "🌙";
+        setTimeout(applyDarkBorders, 50);
       });
 
       // پیام‌ها محو شوند
