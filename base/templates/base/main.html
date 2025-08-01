@@ -1,25 +1,24 @@
 <!DOCTYPE html>
-<html lang="fa" dir="ltr" style="visibility: hidden;">
+<html lang="fa" dir="ltr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}MySite{% endblock %}</title>
 
   {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2" />
 
-  <!-- اجرای سریع اسکریپت قبل از لود CSS برای تنظیم حالت تاریک و نمایش صفحه -->
+  <!-- اجرای دارک مود قبل از لود CSS برای جلوگیری از چشمک -->
   <script>
-    (function () {
-      try {
-        if (localStorage.getItem("dark-mode") === "true") {
-          document.documentElement.classList.add("dark-mode");
-        }
-      } catch (e) {}
-      // حالا صفحه را نمایان کن وقتی کلاس تاریک اضافه یا حذف شد
-      document.documentElement.style.visibility = "visible";
-    })();
+  (function () {
+    try {
+      if (localStorage.getItem("dark-mode") === "true") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    } catch (e) {}
+  })();
   </script>
+
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -32,6 +31,7 @@
     <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
   </div>
 
+  <!-- پیام‌ها -->
   {% if messages %}
     <ul class="messages">
       {% for message in messages %}
@@ -43,25 +43,29 @@
   {% block content %}{% endblock %}
 
   {% block scripts %}
-<script>
+  <script>
   document.addEventListener("DOMContentLoaded", function () {
     const toggleBtn = document.getElementById("darkModeToggle");
-    const root = document.documentElement; // html element
+    const root = document.documentElement; // استفاده از <html>
 
-    // مقدار اولیه دکمه بر اساس localStorage / کلاس در <html>
-    if (root.classList.contains("dark-mode")) {
+    // حالت اولیه
+    if (localStorage.getItem("dark-mode") === "true") {
+      root.classList.add("dark-mode");
       toggleBtn.textContent = "☀️";
     } else {
+      root.classList.remove("dark-mode");
       toggleBtn.textContent = "🌙";
     }
 
+    // کلیک روی دکمه
     toggleBtn.addEventListener("click", () => {
-      const isDark = root.classList.toggle("dark-mode");
+      root.classList.toggle("dark-mode");
+      const isDark = root.classList.contains("dark-mode");
       localStorage.setItem("dark-mode", isDark);
       toggleBtn.textContent = isDark ? "☀️" : "🌙";
     });
 
-    // افکت محو شدن پیام‌ها
+    // محو کردن پیام‌ها
     const messages = document.querySelectorAll(".messages li");
     if (messages.length) {
       messages.forEach((msg) => {
@@ -75,8 +79,7 @@
       });
     }
   });
-</script>
-
+  </script>
   {% endblock %}
 </body>
 </html>
