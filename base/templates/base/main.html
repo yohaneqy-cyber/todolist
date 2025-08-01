@@ -20,19 +20,14 @@
     (function () {
       try {
         if (localStorage.getItem("dark-mode") === "true") {
-          document.documentElement.classList.add("dark-mode");
+          document.body.classList.add("dark-mode");
         } else {
-          document.documentElement.classList.remove("dark-mode"); // force light mode
+          document.body.classList.remove("dark-mode"); // force light mode
         }
       } catch (e) {}
-
-      // Show body when DOM ready
-      document.addEventListener("DOMContentLoaded", function () {
-        document.body.style.visibility = "visible";
-      });
+      document.body.style.visibility = "visible";
     })();
   </script>
-
 
   {% block extra_css %}{% endblock %}
 </head>
