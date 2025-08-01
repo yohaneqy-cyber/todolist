@@ -1,3 +1,9 @@
+input, textarea, select {
+  border: 1px solid #444; /* یک رنگ خاکستری تیره به جای سفید */
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+
 /* ==== حالت دارک مود کلی ==== */
 .dark-mode {
   background-color: #121212;
