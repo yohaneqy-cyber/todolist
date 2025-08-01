@@ -22,8 +22,20 @@
       try {
         if (localStorage.getItem("dark-mode") === "true") {
           document.body.classList.add("dark-mode");
+
+          // فوراً رنگ حاشیه فرم‌ها را برای حالت دارک مود اعمال کن
+          const inputs = document.querySelectorAll("input, textarea, select");
+          inputs.forEach(input => {
+            input.style.borderColor = "#444";  // رنگ حاشیه تیره
+          });
         } else {
           document.body.classList.remove("dark-mode");
+
+          // رنگ حاشیه‌ها را پاک کن (بازگشت به CSS اصلی)
+          const inputs = document.querySelectorAll("input, textarea, select");
+          inputs.forEach(input => {
+            input.style.borderColor = "";
+          });
         }
       } catch (e) {}
 

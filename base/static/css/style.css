@@ -562,14 +562,16 @@ html.dark-mode, body.dark-mode .profile-submit-btn:hover {
   margin-bottom: 0 !important;
 }
 
-html.dark-mode, body.dark-mode input,
-html.dark-mode, body.dark-mode textarea,
-html.dark-mode, body.dark-mode select {
-  background-color: #1f1f1f !important;
-  color: #f1f1f1 !important;
-  caret-color: white;
-  border: 1px solid #000000 !important;
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background-color: #1f1f1f;    /* بک‌گراند تیره */
+  color: #f1f1f1;               /* رنگ متن روشن */
+  caret-color: white;           /* رنگ کرسر متن */
+  border: 1px solid #333;       /* رنگ حاشیه تیره‌تر (مشکی نرم‌تر) */
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
 }
+
 
 /* وقتی کاربر فوکوس می‌کند (درحال تایپ) */
 html.dark-mode, body.dark-mode input:focus,
