@@ -1,3 +1,81 @@
+/* ==== حالت دارک مود کلی ==== */
+.dark-mode {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+
+/* متن‌های معمولی */
+.dark-mode p,
+.dark-mode span,
+.dark-mode li,
+.dark-mode a {
+  color: #f1f1f1;
+}
+
+/* هدرها */
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6 {
+  color: #ffffff;
+}
+
+/* بک‌گراند کارت‌ها، باکس‌ها و کانتینرها */
+.dark-mode .card,
+.dark-mode .box,
+.dark-mode .container {
+  background-color: #1e1e1e;
+  border-color: #333;
+}
+
+/* مودال‌ها */
+.dark-mode .modal-content,
+.dark-mode .modal-content1,
+.dark-mode .myapp-delete-modal-content {
+  background-color: #1e1e1e;
+  color: #f1f1f1;
+  border: 1px solid #333;
+}
+
+/* دکمه‌ها */
+.dark-mode button,
+.dark-mode .btn {
+  background-color: #333;
+  color: #f1f1f1;
+  border-color: #555;
+}
+
+.dark-mode button:hover,
+.dark-mode .btn:hover {
+  background-color: #444;
+}
+
+/* لینک‌ها */
+.dark-mode a {
+  color: #90caf9;
+}
+
+.dark-mode a:hover {
+  color: #bbdefb;
+}
+
+/* فرم‌ها */
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+  background-color: #222;
+  color: #f1f1f1;
+  border: 1px solid #555;
+}
+
+.dark-mode input:focus,
+.dark-mode textarea:focus,
+.dark-mode select:focus {
+  border-color: #90caf9;
+}
+
 .buttons-container {
   display: flex;
   gap: 16px;
@@ -5,8 +83,8 @@
   margin-top: 20px;
 }
 
-body.dark-mode .myapp-btn-secondary,
-body.dark-mode .myapp-btn-danger {
+html.dark-mode, body.dark-mode .myapp-btn-secondary,
+html.dark-mode, body.dark-mode .myapp-btn-danger {
   width: 140px !important;
   padding: 10px 0 !important;
   border-radius: 8px !important;
@@ -21,36 +99,35 @@ body.dark-mode .myapp-btn-danger {
   display: inline-block !important;
 }
 
-body.dark-mode .myapp-btn-secondary {
+html.dark-mode, body.dark-mode .myapp-btn-secondary {
   background-color: #333 !important;
   color: #ddd !important;
 }
 
-body.dark-mode .myapp-btn-secondary:hover {
+html.dark-mode, body.dark-mode .myapp-btn-secondary:hover {
   background-color: #555 !important;
 }
 
-body.dark-mode .myapp-btn-secondary:active {
+html.dark-mode, body.dark-mode .myapp-btn-secondary:active {
   background-color: #222 !important;
   transform: scale(0.90) !important;
   outline: none !important;
 }
 
-body.dark-mode .myapp-btn-danger {
+html.dark-mode, body.dark-mode .myapp-btn-danger {
   background-color: #e53935 !important;
   color: white !important;
 }
 
-body.dark-mode .myapp-btn-danger:hover {
+html.dark-mode, body.dark-mode .myapp-btn-danger:hover {
   background-color: #c62828 !important;
 }
 
-body.dark-mode .myapp-btn-danger:active {
+html.dark-mode, body.dark-mode .myapp-btn-danger:active {
   background-color: #b71c1c !important;
   transform: scale(0.90) !important;
   outline: none !important;
 }
-
 
 .dark-mode-toggle {
   position: fixed;
@@ -78,13 +155,12 @@ body.dark-mode .myapp-btn-danger:active {
 }
 
 html.dark-mode .dark-mode-toggle,
-body.dark-mode .dark-mode-toggle {
+html.dark-mode, body.dark-mode .dark-mode-toggle {
   background: #333;
   color: #ffeb3b;
 }
 
-
-body.dark-mode .logout-modal {
+html.dark-mode, body.dark-mode .logout-modal {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
@@ -96,7 +172,7 @@ body.dark-mode .logout-modal {
   z-index: 1500;
 }
 
-body.dark-mode .logout-modal-content {
+html.dark-mode, body.dark-mode .logout-modal-content {
   background-color: #121212;
   color: #eee;
   padding: 24px 30px;
@@ -109,7 +185,7 @@ body.dark-mode .logout-modal-content {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-body.dark-mode .logout-close {
+html.dark-mode, body.dark-mode .logout-close {
   position: absolute;
   top: 14px;
   right: 18px;
@@ -121,30 +197,30 @@ body.dark-mode .logout-close {
   transition: color 0.3s ease;
 }
 
-body.dark-mode .logout-close:hover {
+html.dark-mode, body.dark-mode .logout-close:hover {
   color: #fff;
 }
 
-body.dark-mode .logout-title {
+html.dark-mode, body.dark-mode .logout-title {
   margin-top: 0;
   font-size: 22px;
   font-weight: 700;
   color: #fff;
 }
 
-body.dark-mode .logout-text {
+html.dark-mode, body.dark-mode .logout-text {
   font-size: 16px;
   margin: 20px 0;
   color: #ccc;
 }
 
-body.dark-mode .logout-buttons {
+html.dark-mode, body.dark-mode .logout-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
 }
 
-body.dark-mode .logout-cancel-btn {
+html.dark-mode, body.dark-mode .logout-cancel-btn {
   padding: 10px 20px;
   background-color: #333;
   border: none;
@@ -156,16 +232,15 @@ body.dark-mode .logout-cancel-btn {
   transition: transform 0.1s ease, background-color 0.3s ease;
 }
 
-body.dark-mode .logout-cancel-btn:hover {
+html.dark-mode, body.dark-mode .logout-cancel-btn:hover {
   background-color: #555;
 }
 
-body.dark-mode .logout-cancel-btn:active {
+html.dark-mode, body.dark-mode .logout-cancel-btn:active {
   transform: scale(0.90) !important; /* کوچیک شدن هنگام کلیک */
 }
 
-
-body.dark-mode .logout-confirm-btn {
+html.dark-mode, body.dark-mode .logout-confirm-btn {
   padding: 10px 24px;
   background-color: #e53935;
   color: white;
@@ -179,19 +254,18 @@ body.dark-mode .logout-confirm-btn {
   user-select: none;
 }
 
-body.dark-mode .logout-confirm-btn:hover {
+html.dark-mode, body.dark-mode .logout-confirm-btn:hover {
   background-color: #c62828;
 }
 
-body.dark-mode .logout-confirm-btn:active {
+html.dark-mode, body.dark-mode .logout-confirm-btn:active {
   background-color: #b71c1c;
   transform: scale(0.90); /* shrink on click */
   outline: none;
 }
 
-
 /* Smaller dark mode checkbox items */
-body.dark-mode .share-with-checkboxes .custom-checkbox {
+html.dark-mode, body.dark-mode .share-with-checkboxes .custom-checkbox {
     background-color: #1a1a1a; /* dark gray */
     padding: 4px 8px;          /* smaller padding */
     border-radius: 4px;        /* smaller radius */
@@ -204,12 +278,10 @@ body.dark-mode .share-with-checkboxes .custom-checkbox {
     color: #eee;
 }
 
-
-
 /* DARK MODE FIX — force black background for all task lists */
-body.dark-mode .task-list-normal,
-body.dark-mode .task-list-recurring,
-body.dark-mode .task-list-subtasks {
+html.dark-mode, body.dark-mode .task-list-normal,
+html.dark-mode, body.dark-mode .task-list-recurring,
+html.dark-mode, body.dark-mode .task-list-subtasks {
   background-color: #000000 !important; /* pure black */
   color: #ffffff !important; /* pure white text */
   padding: 12px 18px;
@@ -218,75 +290,73 @@ body.dark-mode .task-list-subtasks {
   margin-bottom: 20px;
 }
 
-
 /* Dark mode - smaller background size */
-body.dark-mode .task-list-normal,
-body.dark-mode .task-list-recurring,
-body.dark-mode .task-list-subtasks {
+html.dark-mode, body.dark-mode .task-list-normal,
+html.dark-mode, body.dark-mode .task-list-recurring,
+html.dark-mode, body.dark-mode .task-list-subtasks {
   padding: 4px 8px !important; /* was bigger, now smaller */
 }
 
 /* List item styles in dark mode */
-body.dark-mode .task-list-normal li,
-body.dark-mode .task-list-recurring li,
-body.dark-mode .task-list-subtasks li {
+html.dark-mode, body.dark-mode .task-list-normal li,
+html.dark-mode, body.dark-mode .task-list-recurring li,
+html.dark-mode, body.dark-mode .task-list-subtasks li {
   background-color: transparent !important; /* no white inside */
   border-bottom: 1px solid #333 !important;
   padding: 6px 0;
 }
 
 /* Remove last border */
-body.dark-mode .task-list-normal li:last-child,
-body.dark-mode .task-list-recurring li:last-child,
-body.dark-mode .task-list-subtasks li:last-child {
+html.dark-mode, body.dark-mode .task-list-normal li:last-child,
+html.dark-mode, body.dark-mode .task-list-recurring li:last-child,
+html.dark-mode, body.dark-mode .task-list-subtasks li:last-child {
   border-bottom: none !important;
 }
 
 /* Headings in dark mode */
-body.dark-mode h2 {
+html.dark-mode, body.dark-mode h2 {
   color: #ffffff !important;
 }
 
-
 /* Dark mode overlay background */
-body.dark-mode .modal {
+html.dark-mode, body.dark-mode .modal {
   background-color: rgba(0, 0, 0, 0.9) !important; /* darker overlay */
 }
 
 /* Dark mode modal content background and text */
-body.dark-mode .modal .modal-content {
+html.dark-mode, body.dark-mode .modal .modal-content {
   background-color: #121212 !important; /* dark background */
   color: #eee !important; /* light text */
 }
 
 /* Specific for unfriend modal buttons in dark mode */
-body.dark-mode .unfriend-modal .modal-content .confirm-btn,
-body.dark-mode .unfriend-modal .modal-content .cancel-btn {
+html.dark-mode, body.dark-mode .unfriend-modal .modal-content .confirm-btn,
+html.dark-mode, body.dark-mode .unfriend-modal .modal-content .cancel-btn {
   background-color: #333;
   color: #eee;
   border: 1px solid #555;
   transition: background-color 0.3s ease;
 }
 
-body.dark-mode .unfriend-modal .modal-content .confirm-btn:hover,
-body.dark-mode .unfriend-modal .modal-content .cancel-btn:hover {
+html.dark-mode, body.dark-mode .unfriend-modal .modal-content .confirm-btn:hover,
+html.dark-mode, body.dark-mode .unfriend-modal .modal-content .cancel-btn:hover {
   background-color: #555;
 }
 
 /* Close button color in dark mode */
-body.dark-mode .modal .close {
+html.dark-mode, body.dark-mode .modal .close {
   color: #eee;
 }
 
 /* Error message text and button in dark mode */
-body.dark-mode #errorMessage {
+html.dark-mode, body.dark-mode #errorMessage {
   background-color: #222;
   color: #f88;
   border-radius: 6px;
   padding: 8px;
 }
 
-body.dark-mode #errorMessage button {
+html.dark-mode, body.dark-mode #errorMessage button {
   background: none;
   color: #f88;
   border: none;
@@ -296,16 +366,16 @@ body.dark-mode #errorMessage button {
 }
 
 /* Inputs in dark mode */
-body.dark-mode #userSearchInput {
+html.dark-mode, body.dark-mode #userSearchInput {
   background-color: #222;
   color: #eee;
   border: 1px solid #555;
 }
 
 /* Tab buttons in dark mode */
-body.dark-mode #searchTabBtn,
-body.dark-mode #requestsTabBtn,
-body.dark-mode #friendsTabBtn {
+html.dark-mode, body.dark-mode #searchTabBtn,
+html.dark-mode, body.dark-mode #requestsTabBtn,
+html.dark-mode, body.dark-mode #friendsTabBtn {
   background-color: #333;
   color: #eee;
   border: 1px solid #555;
@@ -315,19 +385,19 @@ body.dark-mode #friendsTabBtn {
   transition: background-color 0.3s ease;
 }
 
-body.dark-mode #searchTabBtn:hover,
-body.dark-mode #requestsTabBtn:hover,
-body.dark-mode #friendsTabBtn:hover {
+html.dark-mode, body.dark-mode #searchTabBtn:hover,
+html.dark-mode, body.dark-mode #requestsTabBtn:hover,
+html.dark-mode, body.dark-mode #friendsTabBtn:hover {
   background-color: #555;
   color: #fff;
 }
 
-body.dark-mode .auth-container {
+html.dark-mode, body.dark-mode .auth-container {
   background-color: #121212 !important;
 }
 
 /* پروفایل فرم در حالت دارک‌مود */
-body.dark-mode .profile-form {
+html.dark-mode, body.dark-mode .profile-form {
   background-color: #121212 !important; /* مشکی تیره */
   color: #f1f1f1 !important; /* متن سفید */
   padding: 20px !important;
@@ -336,9 +406,9 @@ body.dark-mode .profile-form {
 }
 
 /* فیلدهای داخل فرم پروفایل */
-body.dark-mode .profile-form input,
-body.dark-mode .profile-form textarea,
-body.dark-mode .profile-form select {
+html.dark-mode, body.dark-mode .profile-form input,
+html.dark-mode, body.dark-mode .profile-form textarea,
+html.dark-mode, body.dark-mode .profile-form select {
   background-color: #1f1f1f !important;
   color: #f1f1f1 !important;
   border: 1px solid #444 !important;
@@ -348,27 +418,27 @@ body.dark-mode .profile-form select {
 }
 
 /* placeholder فیلدها */
-body.dark-mode .profile-form input::placeholder,
-body.dark-mode .profile-form textarea::placeholder {
+html.dark-mode, body.dark-mode .profile-form input::placeholder,
+html.dark-mode, body.dark-mode .profile-form textarea::placeholder {
   color: #bbb !important;
 }
 
 /* فوکوس روی فیلدها */
-body.dark-mode .profile-form input:focus,
-body.dark-mode .profile-form select:focus,
-body.dark-mode .profile-form textarea:focus {
+html.dark-mode, body.dark-mode .profile-form input:focus,
+html.dark-mode, body.dark-mode .profile-form select:focus,
+html.dark-mode, body.dark-mode .profile-form textarea:focus {
   border-color: #64b5f6 !important;
   outline: none !important;
   box-shadow: 0 0 6px #64b5f6 !important;
 }
 
 /* لیبل‌های داخل فرم */
-body.dark-mode .profile-form label {
+html.dark-mode, body.dark-mode .profile-form label {
   color: #f1f1f1 !important;
 }
 
 /* دکمه ذخیره تغییرات */
-body.dark-mode .profile-form .profile-submit-btn {
+html.dark-mode, body.dark-mode .profile-form .profile-submit-btn {
   background-color: #1976d2 !important; /* آبی متناسب با دارک‌مود */
   color: white !important;
   border: none !important;
@@ -378,12 +448,12 @@ body.dark-mode .profile-form .profile-submit-btn {
   transition: background-color 0.3s ease !important;
 }
 
-body.dark-mode .profile-form .profile-submit-btn:hover {
+html.dark-mode, body.dark-mode .profile-form .profile-submit-btn:hover {
   background-color: #1565c0 !important; /* آبی تیره‌تر هنگام هاور */
 }
 
 /* فرم سفارشی (Custom Form) در حالت دارک‌مود */
-body.dark-mode .custom-form {
+html.dark-mode, body.dark-mode .custom-form {
   background-color: #121212 !important; /* مشکی تیره */
   color: #f1f1f1 !important; /* متن سفید */
   padding: 20px !important;
@@ -392,9 +462,9 @@ body.dark-mode .custom-form {
 }
 
 /* فیلدهای داخل فرم سفارشی */
-body.dark-mode .custom-form input,
-body.dark-mode .custom-form textarea,
-body.dark-mode .custom-form select {
+html.dark-mode, body.dark-mode .custom-form input,
+html.dark-mode, body.dark-mode .custom-form textarea,
+html.dark-mode, body.dark-mode .custom-form select {
   background-color: #1f1f1f !important;
   color: #f1f1f1 !important;
   border: 1px solid #444 !important;
@@ -404,28 +474,28 @@ body.dark-mode .custom-form select {
 }
 
 /* placeholder فیلدهای فرم سفارشی */
-body.dark-mode .custom-form input::placeholder,
-body.dark-mode .custom-form textarea::placeholder {
+html.dark-mode, body.dark-mode .custom-form input::placeholder,
+html.dark-mode, body.dark-mode .custom-form textarea::placeholder {
   color: #bbb !important;
 }
 
 /* فوکوس روی فیلدهای فرم سفارشی */
-body.dark-mode .custom-form input:focus,
-body.dark-mode .custom-form select:focus,
-body.dark-mode .custom-form textarea:focus {
+html.dark-mode, body.dark-mode .custom-form input:focus,
+html.dark-mode, body.dark-mode .custom-form select:focus,
+html.dark-mode, body.dark-mode .custom-form textarea:focus {
   border-color: #64b5f6 !important;
   outline: none !important;
   box-shadow: 0 0 6px #64b5f6 !important;
 }
 
 /* لیبل‌های داخل فرم سفارشی */
-body.dark-mode .custom-form label {
+html.dark-mode, body.dark-mode .custom-form label {
   color: #f1f1f1 !important;
 }
 
 /* دکمه‌های فرم سفارشی */
-body.dark-mode .custom-form button,
-body.dark-mode .custom-form .submit-btn {
+html.dark-mode, body.dark-mode .custom-form button,
+html.dark-mode, body.dark-mode .custom-form .submit-btn {
   background-color: #1976d2 !important; /* آبی متناسب با دارک‌مود */
   color: white !important;
   border: none !important;
@@ -435,14 +505,13 @@ body.dark-mode .custom-form .submit-btn {
   transition: background-color 0.3s ease !important;
 }
 
-body.dark-mode .custom-form button:hover,
-body.dark-mode .custom-form .submit-btn:hover {
+html.dark-mode, body.dark-mode .custom-form button:hover,
+html.dark-mode, body.dark-mode .custom-form .submit-btn:hover {
   background-color: #1565c0 !important; /* آبی تیره‌تر هنگام هاور */
 }
 
-
 /* دکمه ذخیره تغییرات پروفایل */
-body.dark-mode .profile-submit-btn {
+html.dark-mode, body.dark-mode .profile-submit-btn {
   background-color: #1976d2 !important; /* آبی زیبا */
   color: white !important;
   border: none !important;
@@ -452,7 +521,7 @@ body.dark-mode .profile-submit-btn {
   transition: background-color 0.3s ease !important;
 }
 
-body.dark-mode .profile-submit-btn:hover {
+html.dark-mode, body.dark-mode .profile-submit-btn:hover {
   background-color: #1565c0 !important; /* آبی تیره‌تر */
 }
 
@@ -487,20 +556,18 @@ body.dark-mode .profile-submit-btn:hover {
   margin-bottom: 0 !important;
 }
 
-
-
-body.dark-mode input,
-body.dark-mode textarea,
-body.dark-mode select {
+html.dark-mode, body.dark-mode input,
+html.dark-mode, body.dark-mode textarea,
+html.dark-mode, body.dark-mode select {
   background-color: #1f1f1f !important;
   color: #f1f1f1 !important;
   border: 1px solid #444 !important;
 }
 
 /* وقتی کاربر فوکوس می‌کند (درحال تایپ) */
-body.dark-mode input:focus,
-body.dark-mode textarea:focus,
-body.dark-mode select:focus {
+html.dark-mode, body.dark-mode input:focus,
+html.dark-mode, body.dark-mode textarea:focus,
+html.dark-mode, body.dark-mode select:focus {
   background-color: #1f1f1f !important;
   color: #ffffff !important;
   border-color: #90caf9 !important;
@@ -508,19 +575,18 @@ body.dark-mode select:focus {
 }
 
 /* رنگ placeholder در حالت تاریک */
-body.dark-mode input::placeholder,
-body.dark-mode textarea::placeholder {
+html.dark-mode, body.dark-mode input::placeholder,
+html.dark-mode, body.dark-mode textarea::placeholder {
   color: #999 !important;
 }
 
-
-body.dark-mode .login-container {
+html.dark-mode, body.dark-mode .login-container {
   background-color: #121212 !important;
   color: #ffffff !important;
 }
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea {
+html.dark-mode, body.dark-mode input,
+html.dark-mode, body.dark-mode select,
+html.dark-mode, body.dark-mode textarea {
   background-color: #1f1f1f !important;
   color: #f1f1f1 !important;
   border: 1px solid #444 !important;
@@ -529,22 +595,21 @@ body.dark-mode textarea {
   transition: border-color 0.3s ease !important;
 }
 
-body.dark-mode input::placeholder,
-body.dark-mode textarea::placeholder {
+html.dark-mode, body.dark-mode input::placeholder,
+html.dark-mode, body.dark-mode textarea::placeholder {
   color: #bbb !important;
 }
 
-body.dark-mode input:focus,
-body.dark-mode select:focus,
-body.dark-mode textarea:focus {
+html.dark-mode, body.dark-mode input:focus,
+html.dark-mode, body.dark-mode select:focus,
+html.dark-mode, body.dark-mode textarea:focus {
   border-color: #64b5f6 !important;  /* آبی روشن */
   outline: none !important;
   box-shadow: 0 0 6px #64b5f6 !important;
 }
 
-
 /* حالت تاریک برای فرم لاگین/ثبت‌نام */
-body.dark-mode .login-container {
+html.dark-mode, body.dark-mode .login-container {
   background-color: #121212;
   color: #f1f1f1;
   border-radius: 12px;
@@ -553,107 +618,105 @@ body.dark-mode .login-container {
 }
 
 /* عنوان‌ها */
-body.dark-mode .login-title,
-body.dark-mode .auth-title {
+html.dark-mode, body.dark-mode .login-title,
+html.dark-mode, body.dark-mode .auth-title {
   color: #ffffff;
 }
 
 /* فیلدهای ورودی */
-body.dark-mode .login-input {
+html.dark-mode, body.dark-mode .login-input {
   background-color: #1f1f1f;
   color: #ffffff;
   border: 1px solid #444;
 }
 
-body.dark-mode .login-input::placeholder {
+html.dark-mode, body.dark-mode .login-input::placeholder {
   color: #bbb;
 }
 
 /* لیبل‌ها */
-body.dark-mode .login-label {
+html.dark-mode, body.dark-mode .login-label {
   color: #f1f1f1;
 }
 
 /* پیام خطا */
-body.dark-mode .error-message {
+html.dark-mode, body.dark-mode .error-message {
   background: #2c2c2c;
   color: #ff6b6b;
   border-left: 4px solid #e53935;
 }
 
-
-body.dark-mode .login-button:hover {
+html.dark-mode, body.dark-mode .login-button:hover {
   background-color: #444;
 }
 
 /* لینک‌های پایین فرم */
-body.dark-mode .auth-link {
+html.dark-mode, body.dark-mode .auth-link {
   color: #90caf9;
   text-decoration: none;
 }
 
-body.dark-mode .auth-link:hover {
+html.dark-mode, body.dark-mode .auth-link:hover {
   color: #ffffff;
   text-decoration: underline;
 }
 
-
 /* === DARK MODE BASE === */
 html.dark_mode,
-body.dark-mode {
+html.dark-mode, body.dark-mode {
   background-color: #121212;
   color: #f1f1f1;
 }
 
 /* تیترها */
-body.dark-mode h1, body.dark-mode h2, body.dark-mode h3,
-body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
+html.dark-mode, body.dark-mode h1, html.dark-mode, body.dark-mode h2, html.dark-mode, body.dark-mode h3,
+html.dark-mode, body.dark-mode h4, html.dark-mode, body.dark-mode h5, html.dark-mode, body.dark-mode h6 {
   color: #ffffff;
 }
 
 /* متن‌های عمومی */
-body.dark-mode p,
-body.dark-mode span,
-body.dark-mode div,
-body.dark-mode li {
+html.dark-mode, body.dark-mode p,
+html.dark-mode, body.dark-mode span,
+html.dark-mode, body.dark-mode div,
+html.dark-mode, body.dark-mode li {
   color: #f1f1f1;
 }
 
 /* لینک‌ها */
-body.dark-mode a {
+html.dark-mode, body.dark-mode a {
   color: #90caf9;
   text-decoration: none;
 }
 
 /* فیلدهای فرم */
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea {
+html.dark-mode, body.dark-mode input,
+html.dark-mode, body.dark-mode select,
+html.dark-mode, body.dark-mode textarea {
   background-color: #1f1f1f;
   color: #f1f1f1;
   border-color: #444;
 }
-body.dark-mode input::placeholder,
-body.dark-mode textarea::placeholder {
+html.dark-mode, body.dark-mode input::placeholder,
+html.dark-mode, body.dark-mode textarea::placeholder {
   color: #bbb;
 }
 
 /* دکمه‌ها */
-body.dark-mode .btn,
-body.dark-mode button {
+html.dark-mode, body.dark-mode .btn,
+html.dark-mode, body.dark-mode button {
   background-color: #333;
   color: white;
   border-color: #888;
 }
-body.dark-mode .btn:hover,
-body.dark-mode button:hover {
+html.dark-mode, body.dark-mode .btn:hover,
+html.dark-mode, body.dark-mode button:hover {
   background-color: #444;
 }
 
 /* آیتم‌های لیست (لیست دوستان، درخواست‌ها و ...) */
-body.dark-mode #friendRequestsList li,
-body.dark-mode #userList li,
-body.dark-mode #friendsList li {
+html.dark-mode, body.dark-mode #friendRequestsList li,
+html.dark-mode, body.dark-mode #userList li,
+html.dark-mode, body.dark-mode #friendsList li {
   background-color: #1e1e1e;
   color: #f1f1f1;
   border-bottom: 1px solid #333;
@@ -661,20 +724,20 @@ body.dark-mode #friendsList li {
 }
 
 /* کارت‌های تسک */
-body.dark-mode .task-card {
+html.dark-mode, body.dark-mode .task-card {
   background-color: #1e1e1e;
   border: 1px solid #444;
   color: #f1f1f1;
 }
 
 /* باکس‌ها و کانتینرها */
-body.dark-mode .box,
-body.dark-mode .container,
-body.dark-mode .card,
-body.dark-mode .content,
-body.dark-mode .profile-container,
-body.dark-mode .filters-container,
-body.dark-mode .wrapper {
+html.dark-mode, body.dark-mode .box,
+html.dark-mode, body.dark-mode .container,
+html.dark-mode, body.dark-mode .card,
+html.dark-mode, body.dark-mode .content,
+html.dark-mode, body.dark-mode .profile-container,
+html.dark-mode, body.dark-mode .filters-container,
+html.dark-mode, body.dark-mode .wrapper {
   background-color: #121212;
   color: #f1f1f1;
   border-color: #333;
@@ -688,8 +751,7 @@ input.login-input:-moz-autofill {
   caret-color: #fff !important;
 }
 
-
-body.dark-mode input.login-input:-moz-autofill {
+html.dark-mode, body.dark-mode input.login-input:-moz-autofill {
   box-shadow: 0 0 0 1000px #1f1f1f inset !important;
   -moz-text-fill-color: #ffffff !important;
   caret-color: #ffffff !important;
@@ -697,88 +759,53 @@ body.dark-mode input.login-input:-moz-autofill {
 }
 
 /* مودال‌ها */
-body.dark-mode .myapp-delete-modal-content,
-body.dark-mode .modal-content,
-body.dark-mode .modal-content1 {
+html.dark-mode, body.dark-mode .myapp-delete-modal-content,
+html.dark-mode, body.dark-mode .modal-content,
+html.dark-mode, body.dark-mode .modal-content1 {
   background-color: #1c1c1c;
   color: #f1f1f1;
 }
 
 /* پس‌زمینه مودال‌ها */
-body.dark-mode .myapp-delete-modal,
-body.dark-mode .modal,
-body.dark-mode .modal1 {
+html.dark-mode, body.dark-mode .myapp-delete-modal,
+html.dark-mode, body.dark-mode .modal,
+html.dark-mode, body.dark-mode .modal1 {
   background-color: rgba(0, 0, 0, 0.75);
 }
 
 /* آیکن بستن مودال */
-body.dark-mode .modal-close,
-body.dark-mode .close1 {
+html.dark-mode, body.dark-mode .modal-close,
+html.dark-mode, body.dark-mode .close1 {
   color: #ccc;
 }
-body.dark-mode .modal-close:hover,
-body.dark-mode .close1:hover {
+html.dark-mode, body.dark-mode .modal-close:hover,
+html.dark-mode, body.dark-mode .close1:hover {
   color: #fff;
 }
 
 /* پیام‌ها */
-body.dark-mode .messages li {
+html.dark-mode, body.dark-mode .messages li {
   background-color: #2c2c2c;
   color: #fff;
   border-left-color: #90caf9;
 }
 
 /* Dark Mode Autofill Fix */
-body.dark-mode input:-webkit-autofill,
-body.dark-mode input:-webkit-autofill:focus,
-body.dark-mode input:-webkit-autofill:hover {
+html.dark-mode, body.dark-mode input:-webkit-autofill,
+html.dark-mode, body.dark-mode input:-webkit-autofill:focus,
+html.dark-mode, body.dark-mode input:-webkit-autofill:hover {
   -webkit-box-shadow: 0 0 0px 1000px #1f1f1f inset !important;
   -webkit-text-fill-color: #ffffff !important; /* متن سفید */
   caret-color: #ffffff !important; /* مکان‌نما سفید */
   border: 1px solid #444 !important;
 }
 
-body.dark-mode textarea:-webkit-autofill,
-body.dark-mode select:-webkit-autofill {
+html.dark-mode, body.dark-mode textarea:-webkit-autofill,
+html.dark-mode, body.dark-mode select:-webkit-autofill {
   -webkit-box-shadow: 0 0 0px 1000px #1f1f1f inset !important;
   -webkit-text-fill-color: #ffffff !important;
   caret-color: #ffffff !important;
   border: 1px solid #444 !important;
-}
- 
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #121212;
-    color: #eee;
-  }
-
-  .login-container,
-  .auth-container {
-    background-color: #1e1e1e;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
-  }
-
-  .login-input,
-  .auth-input {
-    background-color: #2b2b2b;
-    color: #eee;
-    border: 1px solid #444;
-  }
-
-  .login-button,
-  .auth-button {
-    background-color: #2196f3;
-    color: white;
-  }
-
-  .login-button:hover,
-  .auth-button:hover {
-    background-color: #1e88e5;
-  }
-
-  .error-message {
-    color: #ff6b6b;
-  }
 }
 
 /* =========================
@@ -863,7 +890,6 @@ body.dark-mode select:-webkit-autofill {
   background-color: #1c5ea8;
 }
 
-
   .auth-button {
     width: 100%;
     padding: 12px;
@@ -897,8 +923,6 @@ body.dark-mode select:-webkit-autofill {
   .auth-button:hover {
     background-color: #1c5ea8;
   }
-
-
 
 /* Base style */
 .error-message {
@@ -936,7 +960,6 @@ body.dark-mode select:-webkit-autofill {
   opacity: 0;
   pointer-events: none;
 }
-
 
 .login-links a {
   text-decoration: none !important;
@@ -1027,7 +1050,6 @@ body.dark-mode select:-webkit-autofill {
   transform: translateY(0);
 }
 
-
 /* Responsive */
 @media (max-width: 480px) {
   .auth-container {
@@ -1076,10 +1098,6 @@ body.dark-mode select:-webkit-autofill {
   }
 }
 
-
-
-
-
 /* کانتینر کلی لاگین */
 .login-container {
   max-width: 500px !important;
@@ -1105,7 +1123,6 @@ body.dark-mode select:-webkit-autofill {
   width: 100% !important;
   text-align: center !important; /* وسط‌چین کردن محتوای فرم */
 }
-
 
 /* دکمه ارسال فرم */
 .login-button {
@@ -1158,13 +1175,11 @@ body.dark-mode select:-webkit-autofill {
   box-shadow: 0 2px 6px rgba(42, 128, 185, 0.4);
 }
 
-
 @media (max-width: 480px) {
   .calendar-link {
     display: none !important;
   }
 }
-
 
 .task-card {
   background: #e1e8ff;
@@ -1303,9 +1318,6 @@ body.dark-mode select:-webkit-autofill {
   overflow: visible; /* مهم برای جلوگیری از برش سایه‌ها */
 }
 
-
-
-
 @media (max-width: 600px) {
   .task-title {
     max-width: 100%;
@@ -1416,8 +1428,6 @@ body.dark-mode select:-webkit-autofill {
   }
 }
 
-
-
 .all-task-card {
   background: #e1e8ff;
   color: #1a237e;
@@ -1435,8 +1445,6 @@ body.dark-mode select:-webkit-autofill {
   box-shadow: 0 12px 24px rgba(0, 0, 100, 0.12);
   transform: translateY(-3px);
 }
-
-
 
 .task-title {
   font-size: 1.1rem;
@@ -1501,7 +1509,6 @@ body.dark-mode select:-webkit-autofill {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 
 .btn:hover {
   background: linear-gradient(135deg, #303f9f, #3949ab);
@@ -1782,7 +1789,6 @@ body.dark-mode select:-webkit-autofill {
   transform: scale(0.95);
 }
 
-
 .user-greeting-center {
   text-align: center;
   margin: 15px 0;
@@ -1855,7 +1861,6 @@ body.dark-mode select:-webkit-autofill {
   border-radius: 2px;
 }
 
-
 .filters-container select {
   padding: 6px 12px;
   border-radius: 6px;
@@ -1922,7 +1927,6 @@ body {
   transition: background-color 0.3s ease;
 }
 
-
 .bio:hover {
   background-color: #dbe4f7;
 }
@@ -1944,7 +1948,6 @@ body {
     padding: 12px 15px;
   }
 }
-
 
 /* استایل هدر و نوار ناوبری */
 header {
@@ -2057,7 +2060,6 @@ ul li a:hover {
   color: #1e4cb8;
 }
 
-
 .auth-form label {
   display: block;
   margin-bottom: 6px;
@@ -2081,18 +2083,12 @@ ul li a:hover {
   outline: none;
 }
 
-
-
-
-
 .resend-note {
   margin-top: 12px;
   text-align: center;
   color: #c0392b;
   font-size: 14px;
 }
-
-
 
 .auth-email {
   font-weight: bold;
@@ -2104,9 +2100,6 @@ ul li a:hover {
   color: #555;
   margin-top: 10px;
 }
-
-
-
 
 .form-input,
 .form-select,
@@ -2146,7 +2139,6 @@ ul li a:hover {
 .form-button:hover {
   background-color: #3b5b9e;
 }
-
 
 /* container فرم */
 .container {
@@ -2279,8 +2271,6 @@ button.btn-primary:hover {
   opacity: 0.85;
 }
 
-
-
 .modal-content {
   background: white;
   border-radius: 10px;
@@ -2347,8 +2337,6 @@ a.back-to-home:focus-visible {
   }
 }
 
-
-
 .avatar-placeholder {
   display: flex;
   width: 170px;
@@ -2405,8 +2393,6 @@ form p input[type="password"]:focus {
   box-shadow: 0 0 4px #4a90e2;
 }
 
-
-
 /* Make form field blocks tighter */
 .auth-form p {
   margin-bottom: 6px !important; /* reduce vertical space between fields */
@@ -2457,12 +2443,9 @@ textarea[name="bio"] {
   max-width: 280px !important;
 }
 
-
 .auth-container:hover {
   box-shadow: 0 20px 60px rgba(25, 42, 86, 0.25);
 }
-
-
 
 .auth-label {
   align-self: flex-start;
@@ -2497,10 +2480,6 @@ textarea[name="bio"] {
   border-color: #2980b9;
   box-shadow: 0 0 10px rgba(41, 128, 185, 0.4);
 }
-
-
-
-
 
 .auth-link {
   position: relative !important;
@@ -2569,8 +2548,6 @@ textarea[name="bio"] {
   }
 }
 
-
-
 .auth-form label {
   display: block;
   margin-bottom: 0.5rem;
@@ -2591,14 +2568,12 @@ textarea[name="bio"] {
   box-sizing: border-box;
 }
 
-
 .resend-note {
   color: red;
   margin-top: 1rem;
   font-size: 0.9rem;
   text-align: center;
 }
-
 
 .buttons-container {
   display: flex;
@@ -2651,7 +2626,6 @@ textarea[name="bio"] {
   background-color: #0011ff;
   box-shadow: 0 0 8px rgba(18, 122, 190, 0.6);
 }
-
 
 .messages {
   position: fixed;
@@ -2777,7 +2751,6 @@ textarea[name="bio"] {
     padding: 6px 0;
   }
 }
-
 
 .auth-form-fields label {
   font-weight: 600;

@@ -6,19 +6,18 @@
   <title>{% block title %}MySite{% endblock %}</title>
 
   {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
-  <!-- اجرای دارک مود قبل از لود CSS برای جلوگیری از چشمک -->
-  <script>
+  <!-- اجرای حالت تاریک قبل از لود صفحه برای جلوگیری از چشمک -->
+<script>
   (function () {
     try {
       if (localStorage.getItem("dark-mode") === "true") {
-        document.documentElement.classList.add("dark-mode");
+        document.body.classList.add("dark-mode");
       }
     } catch (e) {}
   })();
-  </script>
-
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
+</script>
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -46,7 +45,7 @@
   <script>
   document.addEventListener("DOMContentLoaded", function () {
     const toggleBtn = document.getElementById("darkModeToggle");
-    const root = document.documentElement; // استفاده از <html>
+    const root = document.body; // کار روی body
 
     // حالت اولیه
     if (localStorage.getItem("dark-mode") === "true") {
@@ -65,7 +64,7 @@
       toggleBtn.textContent = isDark ? "☀️" : "🌙";
     });
 
-    // محو کردن پیام‌ها
+    // پیام‌ها محو شوند
     const messages = document.querySelectorAll(".messages li");
     if (messages.length) {
       messages.forEach((msg) => {
