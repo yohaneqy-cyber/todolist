@@ -1,36 +1,36 @@
 <!DOCTYPE html>
-<html lang="fa" dir="ltr">
+<html lang="fa" dir="ltr" style="visibility: hidden;">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}MySite{% endblock %}</title>
 
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
-
-  <!-- Dark mode setup before page load (no flash) -->
+  <!-- اجرای سریع اسکریپت قبل از لود CSS برای جلوگیری از فلش -->
   <script>
-  (function () {
-    try {
-      if (localStorage.getItem("dark-mode") === "true") {
-        document.documentElement.classList.add("dark-mode"); // add to <html>
-      }
-    } catch (e) {}
-  })();
+    (function () {
+      try {
+        if (localStorage.getItem("dark-mode") === "true") {
+          // اضافه کردن کلاس موقت به html برای جلوگیری از فلش
+          document.documentElement.classList.add("dark-mode-temp");
+        }
+      } catch (e) {}
+      document.documentElement.style.visibility = "visible";
+    })();
   </script>
 
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2" />
   {% block extra_css %}{% endblock %}
 </head>
 
 <body>
   {% include 'base/navbar.html' %}
 
-  <!-- Dark mode toggle button -->
+  <!-- دکمه تغییر حالت تاریک -->
   <div class="dark-mode-toggle-container">
     <button id="darkModeToggle" class="dark-mode-toggle" title="تغییر حالت تیره">🌙</button>
   </div>
 
-  <!-- Messages -->
   {% if messages %}
     <ul class="messages">
       {% for message in messages %}
@@ -43,41 +43,42 @@
 
   {% block scripts %}
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const toggleBtn = document.getElementById("darkModeToggle");
-    const root = document.documentElement; // use <html>
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggleBtn = document.getElementById("darkModeToggle");
+      const body = document.body;
 
-    // Initial state
-    if (localStorage.getItem("dark-mode") === "true") {
-      root.classList.add("dark-mode");
-      toggleBtn.textContent = "☀️";
-    } else {
-      root.classList.remove("dark-mode");
-      toggleBtn.textContent = "🌙";
-    }
+      // حذف کلاس موقت از html
+      document.documentElement.classList.remove("dark-mode-temp");
 
-    // Toggle click
-    toggleBtn.addEventListener("click", () => {
-      root.classList.toggle("dark-mode");
-      const isDark = root.classList.contains("dark-mode");
-      localStorage.setItem("dark-mode", isDark);
-      toggleBtn.textContent = isDark ? "☀️" : "🌙";
-    });
+      // مقدار اولیه دکمه بر اساس localStorage
+      if (localStorage.getItem("dark-mode") === "true") {
+        body.classList.add("dark-mode");
+        toggleBtn.textContent = "☀️";
+      } else {
+        body.classList.remove("dark-mode");
+        toggleBtn.textContent = "🌙";
+      }
 
-    // Fade out messages
-    const messages = document.querySelectorAll(".messages li");
-    if (messages.length) {
-      messages.forEach((msg) => {
-        setTimeout(() => {
-          msg.style.opacity = "0";
-          msg.style.transform = "translateY(-10px)";
-        }, 2600);
-        setTimeout(() => {
-          msg.remove();
-        }, 3000);
+      toggleBtn.addEventListener("click", () => {
+        const isDark = body.classList.toggle("dark-mode");
+        localStorage.setItem("dark-mode", isDark);
+        toggleBtn.textContent = isDark ? "☀️" : "🌙";
       });
-    }
-  });
+
+      // افکت محو شدن پیام‌ها (در صورت وجود)
+      const messages = document.querySelectorAll(".messages li");
+      if (messages.length) {
+        messages.forEach((msg) => {
+          setTimeout(() => {
+            msg.style.opacity = "0";
+            msg.style.transform = "translateY(-10px)";
+          }, 2600);
+          setTimeout(() => {
+            msg.remove();
+          }, 3000);
+        });
+      }
+    });
   </script>
   {% endblock %}
 </body>
