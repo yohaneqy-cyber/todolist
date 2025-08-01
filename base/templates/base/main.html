@@ -21,16 +21,25 @@
     (function () {
       try {
         if (localStorage.getItem("dark-mode") === "true") {
-          document.body.classList.add("dark-mode");
+          document.documentElement.classList.add("dark-mode");
         } else {
-          document.body.classList.remove("dark-mode");
+          document.documentElement.classList.remove("dark-mode");
         }
       } catch (e) {}
 
-      // بلافاصله بدن صفحه رو نمایش بده
-      document.body.style.visibility = "visible";
+      function showBody() {
+        if (document.body) {
+          document.body.style.visibility = "visible";
+        } else {
+          // اگر body هنوز آماده نیست، دوباره تلاش کن
+          setTimeout(showBody, 20);
+        }
+      }
+
+      showBody();
     })();
   </script>
+
 
   {% block extra_css %}{% endblock %}
 </head>
