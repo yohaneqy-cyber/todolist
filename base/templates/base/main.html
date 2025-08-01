@@ -5,21 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}MySite{% endblock %}</title>
 
-  <!-- اجرای سریع اسکریپت قبل از لود CSS برای جلوگیری از فلش -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2" />
+
+  <!-- اجرای سریع اسکریپت قبل از لود CSS برای تنظیم حالت تاریک و نمایش صفحه -->
   <script>
     (function () {
       try {
         if (localStorage.getItem("dark-mode") === "true") {
-          // اضافه کردن کلاس موقت به html برای جلوگیری از فلش
-          document.documentElement.classList.add("dark-mode-temp");
+          document.documentElement.classList.add("dark-mode");
         }
       } catch (e) {}
+      // حالا صفحه را نمایان کن وقتی کلاس تاریک اضافه یا حذف شد
       document.documentElement.style.visibility = "visible";
     })();
   </script>
 
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2" />
   {% block extra_css %}{% endblock %}
 </head>
 
@@ -47,15 +48,10 @@
       const toggleBtn = document.getElementById("darkModeToggle");
       const body = document.body;
 
-      // حذف کلاس موقت از html
-      document.documentElement.classList.remove("dark-mode-temp");
-
       // مقدار اولیه دکمه بر اساس localStorage
-      if (localStorage.getItem("dark-mode") === "true") {
-        body.classList.add("dark-mode");
+      if (body.classList.contains("dark-mode")) {
         toggleBtn.textContent = "☀️";
       } else {
-        body.classList.remove("dark-mode");
         toggleBtn.textContent = "🌙";
       }
 
@@ -65,7 +61,7 @@
         toggleBtn.textContent = isDark ? "☀️" : "🌙";
       });
 
-      // افکت محو شدن پیام‌ها (در صورت وجود)
+      // افکت محو شدن پیام‌ها
       const messages = document.querySelectorAll(".messages li");
       if (messages.length) {
         messages.forEach((msg) => {
