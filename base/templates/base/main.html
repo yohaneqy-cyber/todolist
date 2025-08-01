@@ -21,29 +21,20 @@
     (function () {
       try {
         if (localStorage.getItem("dark-mode") === "true") {
-          document.body.classList.add("dark-mode");
-
-          // اعمال فوری رنگ باکس‌ها و کرسر برای دارک مود
-          document.querySelectorAll("input, textarea, select").forEach(el => {
-            el.style.borderColor = "#444";  // رنگ حاشیه
-            el.style.caretColor = "white";  // رنگ کرسر
-            el.style.backgroundColor = "#1f1f1f"; // پس‌زمینه تیره
-            el.style.color = "#f1f1f1"; // متن سفید
-          });
-        } else {
-          document.body.classList.remove("dark-mode");
+          const style = document.createElement("style");
+          style.id = "dark-mode-input-fix";
+          style.textContent = `
+            input, textarea, select {
+              background-color: #1f1f1f !important;
+              color: #f1f1f1 !important;
+              caret-color: white !important;
+              border: 1px solid #444 !important;
+              transition: none !important;
+            }
+          `;
+          document.head.appendChild(style);
         }
-      } catch (e) {}
-
-      function showBody() {
-        if (document.body) {
-          document.body.style.visibility = "visible";
-        } else {
-          setTimeout(showBody, 20);
-        }
-      }
-
-      showBody();
+      } catch(e) {}
     })();
   </script>
 
