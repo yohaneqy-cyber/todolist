@@ -12,25 +12,24 @@
   <style>
     body {
       visibility: hidden;
+      transition: visibility 0.3s ease;
     }
   </style>
 
   <!-- اجرای حالت تاریک قبل از لود صفحه برای جلوگیری از چشمک -->
   <script>
-  (function () {
-    try {
-      if (localStorage.getItem("dark-mode") === "true") {
-        document.body.classList.add("dark-mode");
-      } else {
-        document.body.classList.remove("dark-mode");
-      }
-    } catch (e) {}
+    (function () {
+      try {
+        if (localStorage.getItem("dark-mode") === "true") {
+          document.body.classList.add("dark-mode");
+        } else {
+          document.body.classList.remove("dark-mode");
+        }
+      } catch (e) {}
 
-    // وقتی DOM آماده شد، بدن رو نمایش بده
-    document.addEventListener("DOMContentLoaded", function () {
+      // بلافاصله بدن صفحه رو نمایش بده
       document.body.style.visibility = "visible";
-    });
-  })();
+    })();
   </script>
 
   {% block extra_css %}{% endblock %}
@@ -57,41 +56,41 @@
 
   {% block scripts %}
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const toggleBtn = document.getElementById("darkModeToggle");
-    const root = document.body;
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggleBtn = document.getElementById("darkModeToggle");
+      const root = document.body;
 
-    // حالت اولیه
-    if (localStorage.getItem("dark-mode") === "true") {
-      root.classList.add("dark-mode");
-      toggleBtn.textContent = "☀️";
-    } else {
-      root.classList.remove("dark-mode");
-      toggleBtn.textContent = "🌙";
-    }
+      // حالت اولیه
+      if (localStorage.getItem("dark-mode") === "true") {
+        root.classList.add("dark-mode");
+        toggleBtn.textContent = "☀️";
+      } else {
+        root.classList.remove("dark-mode");
+        toggleBtn.textContent = "🌙";
+      }
 
-    // کلیک روی دکمه
-    toggleBtn.addEventListener("click", () => {
-      root.classList.toggle("dark-mode");
-      const isDark = root.classList.contains("dark-mode");
-      localStorage.setItem("dark-mode", isDark);
-      toggleBtn.textContent = isDark ? "☀️" : "🌙";
-    });
-
-    // پیام‌ها محو شوند
-    const messages = document.querySelectorAll(".messages li");
-    if (messages.length) {
-      messages.forEach((msg) => {
-        setTimeout(() => {
-          msg.style.opacity = "0";
-          msg.style.transform = "translateY(-10px)";
-        }, 2600);
-        setTimeout(() => {
-          msg.remove();
-        }, 3000);
+      // کلیک روی دکمه
+      toggleBtn.addEventListener("click", () => {
+        root.classList.toggle("dark-mode");
+        const isDark = root.classList.contains("dark-mode");
+        localStorage.setItem("dark-mode", isDark);
+        toggleBtn.textContent = isDark ? "☀️" : "🌙";
       });
-    }
-  });
+
+      // پیام‌ها محو شوند
+      const messages = document.querySelectorAll(".messages li");
+      if (messages.length) {
+        messages.forEach((msg) => {
+          setTimeout(() => {
+            msg.style.opacity = "0";
+            msg.style.transform = "translateY(-10px)";
+          }, 2600);
+          setTimeout(() => {
+            msg.remove();
+          }, 3000);
+        });
+      }
+    });
   </script>
   {% endblock %}
 </body>
