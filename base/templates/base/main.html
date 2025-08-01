@@ -8,13 +8,10 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 
-  <!-- Add this style to hide body initially -->
+  <!-- Hide body until mode is set -->
   <style>
     body {
       visibility: hidden;
-    }
-    body.dark-mode {
-      visibility: visible;
     }
   </style>
 
@@ -23,14 +20,19 @@
     (function () {
       try {
         if (localStorage.getItem("dark-mode") === "true") {
-          document.body.classList.add("dark-mode");
+          document.documentElement.classList.add("dark-mode");
+        } else {
+          document.documentElement.classList.remove("dark-mode"); // force light mode
         }
+      } catch (e) {}
+
+      // Show body when DOM ready
+      document.addEventListener("DOMContentLoaded", function () {
         document.body.style.visibility = "visible";
-      } catch (e) {
-        document.body.style.visibility = "visible";
-      }
+      });
     })();
   </script>
+
 
   {% block extra_css %}{% endblock %}
 </head>
@@ -58,7 +60,7 @@
   <script>
   document.addEventListener("DOMContentLoaded", function () {
     const toggleBtn = document.getElementById("darkModeToggle");
-    const root = document.body; // کار روی body
+    const root = document.body;
 
     // حالت اولیه
     if (localStorage.getItem("dark-mode") === "true") {
