@@ -363,12 +363,13 @@
   .unfriend-modal .modal-content {
     max-width: 90vw;
     width: 90vw;
-    max-height: 180px;
+    /* max-height: 180px; */ /* حذف شود */
+    max-height: 90vh; /* اجازه می‌ده تا کل صفحه رو بگیره */
     padding: 10px 16px;
     border-radius: 14px;
     font-size: 13px;
     line-height: 1.2;
-    overflow-y: hidden;
+    overflow-y: auto; /* اجازه اسکرول */
   }
 
   .unfriend-modal .modal-content h2 {
@@ -1254,7 +1255,7 @@ body.logout-modal-open {
       <div class="logout-modal-content">
         <button id="closeLogoutModal" class="logout-close" aria-label="Close">&times;</button>
         <h2 id="logoutTitle" class="logout-title">Confirm Logout</h2>
-        <p class="logout-text">Are you sure you want to log out?</p>
+        <p class="logout-text">Are you sure you want to logout?</p>
         <div class="logout-buttons" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
           <button class="logout-cancel-btn" id="cancelLogoutBtn">Cancel</button>
           <a href="{% url 'logout' %}" class="logout-confirm-btn">Yes, Logout</a>
@@ -1326,7 +1327,7 @@ body.logout-modal-open {
   <div class="modal-content">
     <span id="closeConfirmUnfriendModal" class="close" role="button" aria-label="Close">&times;</span>
     <h2 id="confirmUnfriendTitle">Confirm Unfriend</h2>
-    <p>Are you sure you want to remove {{ user.name }} from friend list?</p>
+    <p>Are you sure you want to remove {{ friend.name }} from friend list?</p>
     <div class="buttons-container">
       <button class="confirm-btn" id="confirmUnfriendBtn">Yes, Remove</button>
       <button class="cancel-btn" id="cancelUnfriendBtn">Cancel</button>
