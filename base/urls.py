@@ -41,5 +41,6 @@ urlpatterns = [
     path('friends/decline/<int:request_id>/', views.decline_friend_request, name='decline_friend_request'),
     path('friends/list/', views.friends_list_api, name='friends_list_api'),
     path('unfriend/<int:user_id>/', views.unfriend, name='unfriend'),
-    path('user_profile_ajax/<int:user_id>/', views.user_profile_ajax, name='user_profile_ajax'),    
+    path('user_profile_ajax/<int:user_id>/', views.user_profile_ajax, name='user_profile_ajax'),
+    path('api/chat/messages', views.ChatMessageApi.as_view(), name='chat-messages-api')
 ]

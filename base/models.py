@@ -160,3 +160,12 @@ class Friendship(models.Model):
 
     def __str__(self):
         return f"{self.user1} <-> {self.user2}"
+
+
+class ChatMessage(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    massege = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email}: {self.massege[:20]}"

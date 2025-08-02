@@ -1,11 +1,12 @@
 import json
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.db.models import Q
-from datetime import timedelta
-from datetime import timezone
+from datetime import timedelta, timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_GET, require_POST
 from django.contrib.sites.shortcuts import get_current_site
@@ -16,6 +17,7 @@ from django.contrib import messages
 from django.core.mail import EmailMessage
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import SetPasswordForm
+from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -27,13 +29,12 @@ from django.db.models.functions import Cast
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.urls import reverse
 from django.conf import settings
-from datetime import timedelta
 from rest_framework import status 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship
+from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship, ChatMessage
 from .serializers import TaskSerializer
 from .forms import CustomUserCreationForm, ReminderForm, ChengeForm, RecurringTaskForm, TaskForm, LoginForm, MySetPasswordForm
 
@@ -836,3 +837,47 @@ def user_profile_ajax(request, user_id):
     user = get_object_or_404(User, id=user_id)
     return render(request, 'base/user_profile.html', {'user': user})    
 
+
+from django.utils import timezone
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ChatMessageApi(View):
+
+    def get(self, request):
+        messages = ChatMessage.objects.order_by('-timestamp')[:20]
+        data = []
+        for msg in reversed(messages):
+            local_time = timezone.localtime(msg.timestamp) if msg.timestamp else None
+            data.append({
+                'id': msg.id,
+                'user': msg.user.email,
+                'content': msg.massege,
+                'timestamp': local_time.strftime("%H:%M:%S") if local_time else '',
+            })
+        return JsonResponse({"messages": data}, safe=False)
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            content = data.get('content', '').strip()
+
+            if not content:
+                return JsonResponse({"error": "Empty message"}, status=400)
+
+            user = request.user
+            if not user.is_authenticated:
+                return JsonResponse({"error": "Authentication required"}, status=401)
+
+            msg = ChatMessage.objects.create(user=user, massege=content)
+
+            local_time = timezone.localtime(msg.timestamp) if msg.timestamp else None
+
+            return JsonResponse({
+                'id': msg.id,
+                'user': msg.user.email,
+                'content': msg.massege,
+                'timestamp': local_time.strftime("%H:%M:%S") if local_time else '',
+            }, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)

@@ -31,17 +31,6 @@
   </div>
 
   <div class="form-group">
-    <label class="form-label"><strong>Attachment:</strong></label>
-    {% if task.attachment %}
-      <a class="form-input" href="{{ task.attachment.url }}" target="_blank">Download</a>
-    {% else %}
-      <p class="form-input">nothing</p>
-    {% endif %}
-  </div>
-
-  <hr style="margin: 20px 0;">
-
-  <div class="form-group">
     {% if request.user == task.user %}
       <a href="{% url 'update_task' task.pk %}" class="form-button">Edit</a>
       <a href="{% url 'delete_task' task.pk %}" class="form-button" style="background-color: #f44336;">Delete</a>
