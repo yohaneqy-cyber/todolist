@@ -8,6 +8,7 @@ from .models import User, RecurringTask, Task, Friendship
 
 User = get_user_model()
 
+# گرفتن لیست دوستان کاربر
 def get_user_friends(user):
     friendships = Friendship.objects.filter(user1=user) | Friendship.objects.filter(user2=user)
     friends = []
@@ -18,31 +19,27 @@ def get_user_friends(user):
             friends.append(friendship.user1)
     return User.objects.filter(id__in=[friend.id for friend in friends])
 
+# ثبت نام کاربر جدید
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('name', 'email', 'avatar', 'bio', 'password1', 'password2')
         widgets = {
             'bio': forms.Textarea(attrs={
-                'class': 'auth-input',
+                'class': 'auth-input bio-field',
                 'rows': 2,
-                'style': 'min-height:50px; max-height:80px; resize: vertical;',
+                'style': 'resize:none;',
             }),
         }
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-
-        # چک کردن اینکه آیا کاربر فعال با این ایمیل وجود دارد یا خیر
         if User.objects.filter(email=email, is_active=True).exists():
             raise forms.ValidationError('This Email is Already Taken')
-        
-        # اگر کاربر غیر فعالی با این ایمیل هست، حذفش کن (برای پاکسازی)
         User.objects.filter(email=email, is_active=False).delete()
-
         return email
 
-
+# فرم تسک‌های تکرارشونده
 class RecurringTaskForm(forms.ModelForm):
     class Meta:
         model = RecurringTask
@@ -57,13 +54,20 @@ class RecurringTaskForm(forms.ModelForm):
         self.fields['interval_type'].required = True
         self.fields['interval'].required = True
         self.fields['start_date'].required = True
-        
 
+# فرم تغییر پروفایل
 class ChengeForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('avatar', 'name', 'email', 'bio')
-    
+        widgets = {
+            'bio': forms.Textarea(attrs={
+                'class': 'auth-input bio-field',
+                'rows': 2,
+                'style': 'resize:none;',
+            }),
+        }
+
     def __init__(self, *args, **kwargs):
         self.user = kwargs.get('instance')
         super().__init__(*args, **kwargs)
@@ -81,12 +85,12 @@ class ChengeForm(forms.ModelForm):
 
         return email
 
-
-
+# فرم یادآور
 class ReminderForm(forms.Form):
     title = forms.CharField(max_length=200)
     reminder_at = forms.DateTimeField(required=False, widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}))
 
+# فرم ساخت/ویرایش تسک
 class TaskForm(forms.ModelForm):
     share_with = forms.ModelMultipleChoiceField(
         queryset=None,
@@ -100,7 +104,11 @@ class TaskForm(forms.ModelForm):
         fields = ['title', 'priority', 'completed', 'parent', 'due_date', 'bio', 'attachment', 'share_with']
         widgets = {
             'due_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'bio': forms.Textarea(attrs={'rows': 3}),
+            'bio': forms.Textarea(attrs={
+                'class': 'auth-input bio-field',
+                'rows': 1,
+                'style': 'resize:none;',
+            }),
         }
 
     def __init__(self, *args, **kwargs):
@@ -123,11 +131,10 @@ class TaskForm(forms.ModelForm):
 
         if parent and self.instance.pk and parent.pk == self.instance.pk:
             raise ValidationError('A task cannot be its own parent')
-        
+
         return parent
-    
 
-
+# فرم لاگین
 class LoginForm(forms.Form):
     email = forms.EmailField(widget=forms.EmailInput(attrs={
         'class': 'auth-input',
@@ -154,9 +161,9 @@ class LoginForm(forms.Form):
             cleaned_data['user'] = user
         return cleaned_data
 
+# فرم تغییر پسورد
 class MySetPasswordForm(SetPasswordForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(user, *args, **kwargs)
         for field in self.fields.values():
-            field.widget.attrs.update({'class':'auth-input'})
-
+            field.widget.attrs.update({'class': 'auth-input'})

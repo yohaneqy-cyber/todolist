@@ -838,7 +838,6 @@ def user_profile_ajax(request, user_id):
     return render(request, 'base/user_profile.html', {'user': user})    
 
 
-from django.utils import timezone
 
 @method_decorator(csrf_exempt, name='dispatch')
 class ChatMessageApi(View):

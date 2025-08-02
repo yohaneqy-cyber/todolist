@@ -1,3 +1,4 @@
+
 body.dark-mode {
   background-color: #121212 !important;
   color: #ffffff !important;
@@ -56,6 +57,37 @@ body.dark-mode .form-button:hover {
 body.dark-mode .form-button[style*="background-color: #f44336;"] {
   background-color: #b71c1c !important;
   color: #fff !important;
+}
+
+
+body.dark-mode .link-cancel, 
+body.dark-mode .btn-save {
+  color: #fff !important; /* متن سفید */
+  box-sizing: border-box;
+  border: none !important;
+  user-select: none !important;
+  text-align: center !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+body.dark-mode .link-cancel {
+  background-color: #b71c1c !important; /* رنگ قرمز تیره‌تر */
+}
+
+body.dark-mode .link-cancel:hover {
+  background-color: #7f1212 !important;
+  box-shadow: 0 0 8px rgba(183, 28, 28, 0.9) !important;
+}
+
+body.dark-mode .btn-save {
+  background-color: #283593 !important; /* آبی تیره */
+}
+
+body.dark-mode .btn-save:hover {
+  background-color: #1a237e !important;
+  box-shadow: 0 0 8px rgba(40, 53, 147, 0.9) !important;
 }
 
 body.dark-mode .form-button[style*="background-color: #f44336;"]:hover {
@@ -158,13 +190,6 @@ input, textarea, select {
 .dark-mode textarea:focus,
 .dark-mode select:focus {
   border-color: #90caf9;
-}
-
-.buttons-container {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  margin-top: 20px;
 }
 
 html.dark-mode, body.dark-mode .myapp-btn-secondary,
@@ -610,7 +635,8 @@ html.dark-mode, body.dark-mode .profile-submit-btn:hover {
 }
 
 /* فاصله بین هر گروه label + input */
-.login-field {  margin-bottom: 1.4rem !important; /* فاصله مناسب بین هر فیلد (label + input) */
+.login-field {  
+  margin-bottom: 1.4rem !important; 
 }
 
 /* فاصله کمتر بین label و input خودش */
@@ -2063,6 +2089,22 @@ body {
   padding: 0 15px;
 }
 
+.bio-field {
+  padding: 2px 4px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  min-height: 20px !important;
+  max-height: 30px !important;
+  resize: none !important;
+  font-family: inherit !important;
+  margin: 0 !important;
+}
+
+
+
+
 /* استایل بخش bio */
 .bio {
   background-color: #eef2f7;
@@ -2730,14 +2772,18 @@ textarea[name="bio"] {
 .buttons-container {
   display: flex;
   justify-content: center; /* وسط‌چین افقی */
-  gap: 12px;               /* فاصله بین دکمه‌ها */
-  margin-top: 20px;        /* فاصله از بالا (اختیاری) */
+  gap: 12px;               
+  margin-top: 20px;        
+  width: 100%;             /* حتما عرض کامل بگیره */
+  box-sizing: border-box;  /* برای اطمینان */
 }
 
-.link-cancel {
-  display: inline-block;
-  padding: 8px 16px;
+.link-cancel, .btn-save {
+  display: inline-flex;      /* تغییر به inline-flex برای بهتر بودن */
+  justify-content: center;   /* متن داخل دکمه هم وسط */
+  align-items: center;       /* متن وسط عمودی */
   min-width: 100px;
+  padding: 8px 16px;
   font-size: 14px;
   line-height: 1.5;
   border-radius: 6px;
@@ -2745,39 +2791,26 @@ textarea[name="bio"] {
   cursor: pointer;
   text-decoration: none;
   color: white;
-  background-color: #e53935;
-  text-align: center;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   box-sizing: border-box;
+  text-align: center;
+  border: none;
+  user-select: none;
 }
-
+.link-cancel {
+  background-color: #e53935;
+}
 .link-cancel:hover {
   background-color: #b71c1c;
   box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
 }
-
 .btn-save {
-  display: inline-block;
-  padding: 8px 16px;
-  min-width: 100px;
-  font-size: 14px;
-  line-height: 1.5;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  color: white;
   background-color: #3f51b5;
-  text-align: center;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  border: none;
-  box-sizing: border-box;
 }
-
 .btn-save:hover {
   background-color: #0011ff;
   box-shadow: 0 0 8px rgba(18, 122, 190, 0.6);
 }
+
 
 .messages {
   position: fixed;
