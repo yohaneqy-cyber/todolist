@@ -1389,6 +1389,8 @@ html.dark-mode, body.dark-mode select:-webkit-autofill {
   filter: brightness(0.9);
 }
 
+
+
 .subtasks {
   padding-top: 8px;
   margin-top: 6px;
@@ -1434,19 +1436,27 @@ html.dark-mode, body.dark-mode select:-webkit-autofill {
 }
 
 @media (max-width: 600px) {
-  .task-title {
-    max-width: 100%;
-  }
-
   .task-actions {
-    flex-direction: column;
-    gap: 6px;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(100px, 1fr));
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
   }
 
-  .task-card {
-    padding: 12px 14px;
+  .task-actions .btn {
+    width: 100% !important;
+  }
+
+  /* اگر تعداد دکمه‌ها فرد باشه و دکمه آخر تنها باشه، اون دکمه وسط قرار بگیره */
+  .task-actions .btn:last-child:nth-child(odd) {
+    grid-column: 1 / -1; /* spanning full width */
+    justify-self: center;
+    max-width: 160px; /* عرض کمتر برای ظاهر بهتر */
+    margin: 0 auto;
   }
 }
+
 .filters-container {
   display: flex !important;
   justify-content: center !important;   /* وسط‌چین در دسکتاپ */

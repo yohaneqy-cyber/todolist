@@ -74,12 +74,6 @@ def task_create(request):
     return Response(serializer.data)
 
 
-from django.db.models import Q, IntegerField
-from django.db.models.functions import Cast
-from django.utils.timezone import now
-from datetime import timedelta
-from django.shortcuts import render
-
 def home(request):
     filter_type = request.GET.get('filter', 'all')
     category_id = request.GET.get('category')
@@ -843,38 +837,62 @@ def user_profile_ajax(request, user_id):
 class ChatMessageApi(View):
 
     def get(self, request):
-        messages = ChatMessage.objects.order_by('-timestamp')[:20]
+        sender_id = request.GET.get('sender_id')
+        receiver_id = request.GET.get('receiver_id')
+
+        if not sender_id or not receiver_id:
+            return JsonResponse({"error": "sender_id and receiver_id required"}, status=400)
+        
+        try:
+            sender = User.objects.get(id=sender_id)
+            receiver = User.objects.get(id=receiver_id)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+           
+        messages = ChatMessage.objects.filter(
+            Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)
+        ).order_by('-timestamp')[:50]
+
         data = []
         for msg in reversed(messages):
             local_time = timezone.localtime(msg.timestamp) if msg.timestamp else None
             data.append({
                 'id': msg.id,
-                'user': msg.user.email,
-                'content': msg.massege,
+                'sender': msg.sender.email,
+                'receiver': msg.receiver.email,
+                'message': msg.message,
                 'timestamp': local_time.strftime("%H:%M:%S") if local_time else '',
             })
-        return JsonResponse({"messages": data}, safe=False)
-
+        return JsonResponse({'messages': data}, safe=False)
+    
     def post(self, request):
         try:
             data = json.loads(request.body)
-            content = data.get('content', '').strip()
+            sender_id = data.get('sender_id')
+            receiver_id = data.get('receiver_id')
+            content = data.get('message', '').strip()
 
+            if not sender_id or not receiver_id:
+                return JsonResponse({"error": "sender_id and receiver_id required"}, status=400)
+            
             if not content:
                 return JsonResponse({"error": "Empty message"}, status=400)
 
-            user = request.user
-            if not user.is_authenticated:
-                return JsonResponse({"error": "Authentication required"}, status=401)
+            try:
+                sender = User.objects.get(id=sender_id)
+                receiver = User.objects.get(id=receiver_id)
+            except User.DoesNotExist:
+                return JsonResponse({"error": "User not found"}, status=404)
 
-            msg = ChatMessage.objects.create(user=user, massege=content)
+            msg = ChatMessage.objects.create(sender=sender, receiver=receiver, message=content)
 
             local_time = timezone.localtime(msg.timestamp) if msg.timestamp else None
 
             return JsonResponse({
                 'id': msg.id,
-                'user': msg.user.email,
-                'content': msg.massege,
+                'sender': msg.sender.email,
+                'receiver': msg.receiver.email,
+                'message': msg.message,
                 'timestamp': local_time.strftime("%H:%M:%S") if local_time else '',
             }, status=201)
 
