@@ -1,14 +1,50 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MySite</title>
-  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
   <style>
+.message.selected {
+  background-color: #e0f7fa !important; /* light blue, change as needed */
+}
+
+body.dark-mode {
+  background-color: #121212 !important;
+  color: #ffffff !important;
+}
+
+/* محتوای مودال چت */
+body.dark-mode #chatModal .modal-content {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* ناحیه پیام‌ها */
+body.dark-mode #chatMessages {
+  background-color: #000000 !important;
+  border-color: #333 !important;
+  color: #ffffff !important;
+}
+
+/* ورودی پیام */
+body.dark-mode #chatInput {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+  border: 1px solid #555 !important;
+}
+
+/* دکمه ارسال */
+body.dark-mode #chatForm button {
+  background-color: #673ab7 !important;  /* بنفش تیره */
+  color: #ffffff !important;
+}
+
+/* عنوان مودال */
+body.dark-mode #chatModalTitle {
+  color: #ffffff !important;
+}
 
 #chatMessages {
   display: flex;
@@ -139,7 +175,6 @@
   }
 }
 
-
 /* حالت تاریک */
 body.dark-mode .chat-message.them {
   background: #2c2c2c;
@@ -220,6 +255,82 @@ body.dark-mode .confirm-btn:active {
 }
 
 
+/* کادر منو */
+.context-menu {
+  position: absolute;
+  z-index: 20000;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px 0;
+  min-width: 140px;
+  display: none;
+  overflow: hidden; /* ✅ جلوگیری از بیرون زدن هاور */
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+/* وقتی hidden نیست نمایش بده */
+.context-menu:not(.hidden) {
+  display: block;
+}
+
+/* مخفی کردن */
+.hidden {
+  display: none !important;
+}
+
+/* دکمه‌های داخل منو */
+.context-btn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  width: 100%;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  user-select: none;
+}
+
+/* هاور دکمه */
+.context-btn:hover {
+  background-color: #f0f0f5;
+  color: #111;
+}
+
+/* آیکون‌ها */
+.context-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+
+.message-wrapper {
+  border-radius: 12px;
+  padding: 2px;
+  transition: background-color 0.2s ease;
+}
+
+.message-wrapper.selected {
+  background-color: #b2ffb2; /* سبز کم‌رنگ‌تر به عنوان پس‌زمینه انتخاب */
+}
+
+
+
+/* افکت باز شدن */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
 
 body.dark-mode .cancel-btn {
@@ -1589,10 +1700,50 @@ body.logout-modal-open {
     </form>
   </div>
 </div>
+
+
+
+  <div class="message my-message" data-id="{{ message.id }}">
+    <p class="message-text">{{ message.message }}</p>
+  </div>
+
+
+
+<!-- منوی کلیک راست -->
+<div id="messageMenu" class="context-menu hidden">
+  <button id="editMessage" class="context-btn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2 2 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+    <span>Edit</span>
+  </button>
+
+  <button id="deleteMessage" class="context-btn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 6h18" />
+      <path d="M8 6v-2h8v2" />
+      <path d="M19 6l-1 14H6L5 6" />
+      <line x1="10" y1="11" x2="10" y2="17" />
+      <line x1="14" y1="11" x2="14" y2="17" />
+    </svg>
+    <span>Delete</span>
+  </button>
+
+
+  <button id="replyMessage" class="context-btn">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 9V5l-7 7 7 7v-4.1c4.8 0 7.5 1.7 9 5.1-1-5.4-3.8-10-9-10z"/>
+  </svg>
+  <span>Reply</span>
+</button>
+</div>
+
+
+
   {% block content %}{% endblock %}
 
 <script>
-
   window.currentUserId = {% if request.user.is_authenticated %}{{ request.user.id }}{% else %}null{% endif %};
   window.currentUserEmail = {% if request.user.is_authenticated %}"{{ request.user.email|escapejs }}"{% else %}null{% endif %};
 </script>
@@ -1604,39 +1755,151 @@ body.logout-modal-open {
 
   let currentChatUserId = null; // شناسه کاربری که الان چت می‌کنیم باهاش
 
-  // تابع دریافت توکن CSRF از کوکی
-  function getCSRFToken() {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let cookie of cookies) {
-        cookie = cookie.trim();
-        if (cookie.startsWith('csrftoken=')) {
-          cookieValue = decodeURIComponent(cookie.substring('csrftoken='.length));
-          break;
-        }
+function getCSRFToken() {
+  let cookieValue = null;
+  const name = 'csrftoken';
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.startsWith(name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
       }
     }
-    return cookieValue;
   }
+  return cookieValue;
+}
 
   // ذخیره پیام‌ها در localStorage
-  function saveMessagesToLocalStorage(userId) {
-    if (!userId) return;
-    const messages = [];
-    const chatMessages = document.getElementById("chatMessages");
-    if (!chatMessages) return;
+// ذخیره پیام‌ها در localStorage
+function saveMessagesToLocalStorage(userId) {
+  if (!userId) return;
 
-    chatMessages.querySelectorAll(".chat-message").forEach(msgElem => {
-      messages.push({
-        content: msgElem.querySelector(".message-text").textContent,
-        timestamp: msgElem.querySelector(".message-time").textContent,
-        isMe: msgElem.classList.contains("me")
-      });
+  const chatMessages = document.getElementById("chatMessages");
+  if (!chatMessages) return;
+
+  const messages = [];
+  chatMessages.querySelectorAll(".chat-message").forEach(msgElem => {
+    const content = msgElem.querySelector(".message-text")?.textContent || "";
+    const timestamp = msgElem.querySelector(".message-time")?.textContent || "";
+    const isMe = msgElem.classList.contains("me");
+
+    messages.push({ content, timestamp, isMe });
+  });
+
+  localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
+}
+
+// بارگذاری پیام‌ها از localStorage
+function loadMessagesFromLocalStorage(userId) {
+  if (!userId) return;
+  const chatMessages = document.getElementById("chatMessages");
+  if (!chatMessages) return;
+
+  const stored = localStorage.getItem(`chatMessages_${userId}`);
+  if (!stored) return;
+
+  const messages = JSON.parse(stored);
+  chatMessages.innerHTML = "";
+
+  messages.forEach(msg => {
+    const msgElem = document.createElement("div");
+    msgElem.classList.add("chat-message");
+    if (msg.isMe) msgElem.classList.add("me");
+    else msgElem.classList.add("them");
+
+    const textSpan = document.createElement("span");
+    textSpan.classList.add("message-text");
+    textSpan.textContent = msg.content;
+
+    const timeSpan = document.createElement("span");
+    timeSpan.classList.add("message-time");
+    timeSpan.textContent = msg.timestamp;
+
+    msgElem.appendChild(textSpan);
+    msgElem.appendChild(timeSpan);
+    chatMessages.appendChild(msgElem);
+  });
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// بارگذاری پیام‌ها از سرور
+async function loadMessagesFromServer(senderId, receiverId) {
+  try {
+    console.log(`📡 Fetching: /api/chat/messages/?sender_id=${senderId}&receiver_id=${receiverId}`);
+
+    const response = await fetch(`/api/chat/messages/?sender_id=${senderId}&receiver_id=${receiverId}`, {
+      credentials: 'include'
     });
 
-    localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
+    if (!response.ok) {
+      console.error(`❌ وضعیت درخواست: ${response.status}`);
+      throw new Error('خطا در دریافت پیام‌ها');
+    }
+
+    const data = await response.json();
+    const messages = data.messages || [];
+
+    const chatMessages = document.getElementById("chatMessages");
+    chatMessages.innerHTML = "";
+
+    messages.forEach(msg => {
+      const msgElem = document.createElement("div");
+      msgElem.classList.add("chat-message");
+
+      if (msg.sender === window.currentUserEmail) {
+        msgElem.classList.add("me");
+      } else {
+        msgElem.classList.add("them");
+      }
+
+      const textSpan = document.createElement("span");
+      textSpan.classList.add("message-text");
+      textSpan.textContent = msg.message;
+
+      const timeSpan = document.createElement("span");
+      timeSpan.classList.add("message-time");
+      timeSpan.textContent = msg.timestamp;
+
+      msgElem.appendChild(textSpan);
+      msgElem.appendChild(timeSpan);
+      chatMessages.appendChild(msgElem);
+    });
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    saveMessagesToLocalStorage(receiverId);
+
+  } catch (error) {
+    console.error("❌ خطا در loadMessagesFromServer:", error);
   }
+}
+
+// باز کردن مودال چت
+function openChatModal(userId, userName) {
+  window.currentChatUserId = userId;  // مقدار شناسه کاربری که میخوای باهاش چت کنی
+
+  const chatModal = document.getElementById("chatModal");
+  if (!chatModal) return;  // اگر مودال پیدا نشد کاری نکن
+  
+  const chatModalTitle = document.getElementById("chatModalTitle");
+  if (chatModalTitle) chatModalTitle.textContent = `Chat with ${userName}`;  // عنوان مودال
+
+  chatModal.style.display = "flex";  // نمایش مودال
+  chatModal.setAttribute("aria-hidden", "false");  // برای دسترس‌پذیری
+
+  document.body.classList.add("modal-open");  // غیرفعال کردن اسکرول پس‌زمینه
+
+  const chatInput = document.getElementById("chatInput");
+  if (chatInput) chatInput.value = "";  // پاک کردن ورودی پیام
+
+  // بارگذاری پیام‌ها
+  loadMessagesFromLocalStorage(userId);
+  loadMessagesFromServer(window.currentUserId, userId);
+}
+
 
   // بارگذاری پیام‌ها از localStorage
   function loadMessagesFromLocalStorage(userId) {
@@ -1672,63 +1935,91 @@ body.logout-modal-open {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  // بارگذاری پیام‌ها از سرور
-  async function loadMessagesFromServer(senderId, receiverId) {
-    try {
-      const response = await fetch(`/api/chat/messages/?sender_id=${senderId}&receiver_id=${receiverId}`, {
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('خطا در دریافت پیام‌ها');
+// بارگذاری پیام‌ها از سرور
+async function loadMessagesFromServer(senderId, receiverId) {
+  try {
+    console.log(`📡 Fetching: /api/chat/messages/?sender_id=${senderId}&receiver_id=${receiverId}`);
 
-      const data = await response.json();
-      const messages = data.messages || [];
+    const response = await fetch(`/api/chat/messages/?sender_id=${senderId}&receiver_id=${receiverId}`, {
+      credentials: 'include'
+    });
 
-      const chatMessages = document.getElementById("chatMessages");
-      chatMessages.innerHTML = "";
-
-      messages.forEach(msg => {
-        const msgElem = document.createElement("div");
-        msgElem.classList.add("chat-message");
-
-        if (msg.sender === window.currentUserEmail) msgElem.classList.add("me");
-        else msgElem.classList.add("them");
-
-        const textSpan = document.createElement("span");
-        textSpan.classList.add("message-text");
-        textSpan.textContent = msg.message;
-
-        const timeSpan = document.createElement("span");
-        timeSpan.classList.add("message-time");
-        timeSpan.textContent = msg.timestamp;
-
-        msgElem.appendChild(textSpan);
-        msgElem.appendChild(timeSpan);
-        chatMessages.appendChild(msgElem);
-      });
-
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-
-      saveMessagesToLocalStorage(receiverId);
-
-    } catch (error) {
-      console.error(error);
+    if (!response.ok) {
+      console.error(`❌ وضعیت درخواست: ${response.status}`);
+      throw new Error('خطا در دریافت پیام‌ها');
     }
+
+    const data = await response.json();
+    const messages = data.messages || [];
+
+    const chatMessages = document.getElementById("chatMessages");
+    chatMessages.innerHTML = "";
+
+    messages.forEach(msg => {
+      const msgElem = document.createElement("div");
+      msgElem.classList.add("chat-message");
+
+      // اگر ایمیل فرستنده برابر ایمیل کاربر فعلی باشد
+      if (msg.sender === window.currentUserEmail) {
+        msgElem.classList.add("me");
+      } else {
+        msgElem.classList.add("them");
+      }
+
+      const textSpan = document.createElement("span");
+      textSpan.classList.add("message-text");
+      textSpan.textContent = msg.message;
+
+      const timeSpan = document.createElement("span");
+      timeSpan.classList.add("message-time");
+      timeSpan.textContent = msg.timestamp;
+
+      msgElem.appendChild(textSpan);
+      msgElem.appendChild(timeSpan);
+      chatMessages.appendChild(msgElem);
+    });
+
+    // اسکرول به آخر لیست پیام‌ها
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // ذخیره پیام‌ها در localStorage
+    saveMessagesToLocalStorage(receiverId);
+
+  } catch (error) {
+    console.error("❌ خطا در loadMessagesFromServer:", error);
   }
+}
+
 
   // باز کردن مودال چت
-  function openChatModal(userId, userEmail) {
-    currentChatUserId = userId;
-    const chatModal = document.getElementById("chatModal");
-    if (!chatModal) return;
-    chatModal.style.display = "flex";
-    chatModal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-open");
+function openChatModal(userId, userName) {
+  window.currentChatUserId = userId;
 
-    const chatTitle = document.getElementById("chatModalTitle");
-    if (chatTitle) chatTitle.textContent = `Chat with ${userEmail}`;
+  const chatModal = document.getElementById("chatModal");
+  if (!chatModal) return;
 
-    loadMessagesFromServer(window.currentUserId, currentChatUserId);
-  }
+  // تغییر عنوان مودال به نام کاربر
+  const chatModalTitle = document.getElementById("chatModalTitle");
+  if (chatModalTitle) chatModalTitle.textContent = `Chat with ${userName}`;
+
+  // نمایش مودال
+  chatModal.style.display = "flex";
+  chatModal.setAttribute("aria-hidden", "false");
+
+  // جلوگیری از اسکرول پس‌زمینه
+  document.body.classList.add("modal-open");
+
+  // پاک کردن ورودی و پیام‌های قبلی
+  const chatInput = document.getElementById("chatInput");
+  if (chatInput) chatInput.value = "";
+
+  const chatMessages = document.getElementById("chatMessages");
+  if (chatMessages) chatMessages.innerHTML = "";
+
+  // اینجا می‌تونی پیام‌ها رو از سرور بارگذاری کنی (اگر می‌خوای)
+  // loadMessagesFromServer(window.currentUserId, userId);
+}
+
 
   // بستن مودال چت
 function closeChatModal() {
@@ -1743,56 +2034,123 @@ function closeChatModal() {
 
 
   // ارسال پیام
-async function sendMessage(event) {
-  event.preventDefault();
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const chatModal = document.getElementById("chatModal");
+  const closeBtn = document.getElementById("closeChatModal");
+  const chatForm = document.getElementById("chatForm");
   const chatInput = document.getElementById("chatInput");
-  const message = chatInput.value.trim();
-  if (!message) return;
-  if (!window.currentUserId || !currentChatUserId) {
-    alert("یک کاربر برای چت انتخاب کنید.");
-    return;
+  const chatMessages = document.getElementById("chatMessages");
+  const chatModalTitle = document.getElementById("chatModalTitle");
+
+  // شناسه کاربر فعلی که باهاش چت می‌کنیم
+  window.currentChatUserId = null;
+
+  // بستن مودال چت
+  function closeChatModal() {
+    chatModal.style.display = "none";
+    chatModal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
   }
 
-  const data = {
-    sender_id: window.currentUserId,
-    receiver_id: currentChatUserId,
-    message: message
-  };
+  if (closeBtn) closeBtn.addEventListener("click", closeChatModal);
 
-  try {
-    const response = await fetch("/api/chat/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken()
-      },
-      credentials: "include",
-      body: JSON.stringify(data)
-    });
+  // ارسال پیام
+  async function sendMessage(event) {
+    event.preventDefault();
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      alert("خطا در ارسال پیام: " + (errorData.error || "خطای نامشخص"));
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    if (!window.currentUserId || !window.currentChatUserId) {
+      alert("یک کاربر برای چت انتخاب کنید.");
       return;
     }
 
-    chatInput.value = "";
-    await loadMessagesFromServer(window.currentUserId, currentChatUserId);
+    try {
+      const response = await fetch("/api/chat/messages/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken()
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          sender_id: window.currentUserId,
+          receiver_id: window.currentChatUserId,
+          message: message
+        })
+      });
 
-    // اطمینان از باز بودن مودال:
-    const chatModal = document.getElementById("chatModal");
-    if (chatModal && chatModal.style.display !== "flex") {
-      chatModal.style.display = "flex";
-      chatModal.setAttribute("aria-hidden", "false");
-      document.body.classList.add("modal-open");
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert("خطا در ارسال پیام: " + (data.error || "خطای نامشخص"));
+        console.error("Server error:", data);
+        return;
+      }
+
+      chatInput.value = "";
+
+      // بارگذاری پیام‌ها فقط بعد از ارسال موفق
+      if (typeof loadMessagesFromServer === "function") {
+        loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
+      }
+
+    } catch (error) {
+      alert("خطا در ارسال پیام. لطفا دوباره تلاش کنید.");
+      console.error("Fetch error:", error);
     }
-  } catch (err) {
-    alert("خطا در ارسال پیام.");
-    console.error(err);
   }
+
+  // فقط یک بار اضافه کن
+  if (chatForm && !chatForm.dataset.listenerAdded) {
+    chatForm.addEventListener("submit", sendMessage);
+    chatForm.dataset.listenerAdded = "true";
+  }
+
+  // کلیک روی دکمه چت برای باز کردن مودال
+  document.body.addEventListener("click", (e) => {
+    const btn = e.target.closest(".chat-btn");
+    if (!btn) return;
+
+    const userId = btn.getAttribute("data-user-id");
+    const userName = btn.getAttribute("data-user-name");
+    if (!userId) return alert("کاربر انتخاب نشده!");
+
+    window.currentChatUserId = userId;
+
+    // تنظیم عنوان مودال و باز کردن آن
+    chatModalTitle.textContent = `Chat with ${userName}`;
+    chatModal.style.display = "flex";
+    chatModal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-open");
+
+    // پاک کردن محتوای قبلی
+    chatInput.value = "";
+    chatMessages.innerHTML = "";
+
+    // فقط یک بار اینجا
+    if (typeof loadMessagesFromServer === "function") {
+      loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
+    }
+  });
+});
+
+
+async function sendMessage(event) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  console.log("✅ sendMessage triggered");
+
+  const message = chatInput.value.trim();
+  if (!message) return;
+
+  // ادامه‌ی ارسال fetch...
 }
-
-
 
 
   // تابع عمومی برای باز کردن چت از هرجایی
@@ -2062,10 +2420,12 @@ searchInput.addEventListener("input", function() {
           })
           .catch(() => showErrorMessage("Network error, please try again."));
         };
-
 const chatBtn = document.createElement("button");
 chatBtn.classList.add("chat-btn");
 chatBtn.title = `Chat with ${user.name}`;
+chatBtn.setAttribute("data-user-id", user.id);
+chatBtn.setAttribute("data-user-name", user.name);
+
 chatBtn.style.position = "relative";
 chatBtn.style.padding = "4px";
 chatBtn.style.width = "28px";
@@ -2090,9 +2450,15 @@ chatBtn.innerHTML = `
   </svg>
 `;
 
+chatBtn.addEventListener("click", () => {
+  currentChatUserId = user.id;
+  fetchMessages(window.currentUserId, currentChatUserId);
+  openModal(document.getElementById('chatModal'));
+});
+
 chatBtn.addEventListener("mouseenter", () => {
   chatBtn.style.color = "#1976d2";
-  chatBtn.style.transform = "scale(1.1)"; // کمتر بزرگ شدن
+  chatBtn.style.transform = "scale(1.1)";
   chatBtn.style.boxShadow = "0 4px 12px rgba(25, 118, 210, 0.6)";
 });
 
@@ -2102,7 +2468,6 @@ chatBtn.addEventListener("mouseleave", () => {
   chatBtn.style.boxShadow = "none";
 });
 
-// جلوگیری از تغییرات هنگام کلیک
 chatBtn.addEventListener("mousedown", (e) => {
   e.preventDefault();
 });
@@ -2361,6 +2726,30 @@ cancelBtn.addEventListener('click', closeLogoutModal);
 
 // ادامه کد جاوااسکریپت قبلی
 
+// تابع نمایش پیام‌ها
+function renderMessages(messages) {
+  const chatMessages = document.getElementById("chatMessages");
+  chatMessages.innerHTML = '';
+  messages.forEach(msg => {
+    const msgElem = document.createElement("div");
+    msgElem.classList.add("chat-message", msg.user === window.currentUserEmail ? "me" : "other");
+
+    const textSpan = document.createElement("span");
+    textSpan.classList.add("message-text");
+    textSpan.textContent = msg.content;
+
+    const timeSpan = document.createElement("span");
+    timeSpan.classList.add("message-time");
+    timeSpan.textContent = msg.timestamp;
+
+    msgElem.appendChild(textSpan);
+    msgElem.appendChild(timeSpan);
+    chatMessages.appendChild(msgElem);
+  });
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// تابع باز کردن مودال چت با یک کاربر
 function openChatModal(userId, userName) {
   const chatModal = document.getElementById("chatModal");
   const chatModalTitle = document.getElementById("chatModalTitle");
@@ -2371,52 +2760,44 @@ function openChatModal(userId, userName) {
   chatModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
 
-  chatModalTitle.textContent = `Chat with ${userName}`;
-  chatMessages.innerHTML = ""; // ریست پیام‌ها
+  chatModalTitle.textContent = `گفتگو با ${userName}`;
+  chatMessages.innerHTML = "";
   chatInput.value = "";
   chatInput.focus();
 
-  // کلید localStorage مخصوص این چت
   const storageKey = `chatMessages_${userId}`;
-
-  // بارگذاری پیام‌ها از localStorage
   const cachedMessages = localStorage.getItem(storageKey);
   if (cachedMessages) {
     renderMessages(JSON.parse(cachedMessages));
   }
 
-  // سپس از سرور پیام‌ها رو بگیر
-  fetch(`/api/chat/messages?userId=${userId}`, { credentials: 'include' })
-    .then(res => res.json())
+  const senderId = window.currentUserId;
+  const receiverId = userId;
+
+  fetch(`/api/chat/messages/?sender_id=${encodeURIComponent(senderId)}&receiver_id=${encodeURIComponent(receiverId)}`, {
+    credentials: 'include'
+  })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`خطا در دریافت پیام‌ها: ${res.status} ${res.statusText}`);
+      }
+      return res.json();
+    })
     .then(data => {
       if (data.messages) {
         localStorage.setItem(storageKey, JSON.stringify(data.messages));
         renderMessages(data.messages);
       }
     })
-    .catch(err => console.error("Error fetching messages:", err));
+    .catch(err => console.error("خطا در واکشی پیام‌ها:", err));
+}
 
-  // تابع نمایش پیام‌ها
-  function renderMessages(messages) {
-    chatMessages.innerHTML = '';
-    messages.forEach(msg => {
-      const msgElem = document.createElement("div");
-      msgElem.classList.add("chat-message", msg.user === CURRENT_USER_EMAIL ? "me" : "other");
-
-      const textSpan = document.createElement("span");
-      textSpan.classList.add("message-text");
-      textSpan.textContent = msg.content;
-
-      const timeSpan = document.createElement("span");
-      timeSpan.classList.add("message-time");
-      timeSpan.textContent = msg.timestamp;
-
-      msgElem.appendChild(textSpan);
-      msgElem.appendChild(timeSpan);
-      chatMessages.appendChild(msgElem);
-    });
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
+// تابع بستن مودال
+function closeModal(modal) {
+  if (!modal) return;
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove("modal-open");
 }
 
   // می‌تونی اینجا لود پیام‌های قبلی رو هم از سرور انجام بدی
@@ -2536,7 +2917,7 @@ function loadMessagesFromLocalStorage(userId) {
 
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-v
+
 
   function loadMessagesFromLocalStorage() {
     const messagesStr = localStorage.getItem("chatMessages");
@@ -2584,78 +2965,101 @@ v
     document.body.classList.remove('modal-open');
   }
 
-  if (closeChatModalBtn) {
-    closeChatModalBtn.addEventListener("click", () => closeModal(chatModal));
-  }
+document.addEventListener("DOMContentLoaded", () => {
+  const chatModal = document.getElementById("chatModal");
 
   if (chatModal) {
-    chatModal.addEventListener("click", e => {
-      if (e.target === chatModal) closeModal(chatModal);
-    });
-    const chatContent = chatModal.querySelector(".modal-content");
-    if (chatContent) {
-      chatContent.addEventListener("click", e => e.stopPropagation());
-    }
-  }
-
-  function appendMessageToChat(content, timestamp, isMe = false) {
-    const msgElem = document.createElement("div");
-    msgElem.classList.add("chat-message");
-    if (isMe) msgElem.classList.add("me");
-
-    const textSpan = document.createElement("span");
-    textSpan.classList.add("message-text");
-    textSpan.textContent = content;
-
-    const timeSpan = document.createElement("span");
-    timeSpan.classList.add("message-time");
-    timeSpan.textContent = timestamp;
-
-    msgElem.appendChild(textSpan);
-    msgElem.appendChild(timeSpan);
-    chatMessages.appendChild(msgElem);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    saveMessagesToLocalStorage();
-  }
-
-  if (chatForm) {
-    chatForm.addEventListener("submit", async e => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const message = chatInput.value.trim();
-      if (message === "") return;
-
-      try {
-        const response = await fetch('/api/chat/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-          },
-          credentials: 'include',
-          body: JSON.stringify({ content: message })
-        });
-
-        if (!response.ok) {
-          alert('خطا در ارسال پیام: ' + (data.error || 'خطای نامشخص'));
-          console.error('Server error:', data);
-          return;
-        }
-
-        // استفاده از تابع appendMessageToChat برای نمایش و ذخیره پیام
-        appendMessageToChat(data.content, data.timestamp, true);
-
-        chatInput.value = "";
-        chatInput.focus();
-
-      } catch (error) {
-        alert('خطا در ارسال پیام. لطفا دوباره تلاش کنید.');
-        console.error('Fetch error:', error);
+    chatModal.addEventListener("click", function (e) {
+      const messageMenu = document.getElementById("messageMenu");
+      if (!e.target.closest("#messageMenu")) {
+        messageMenu.classList.add("hidden");
       }
     });
   }
+});
+
+
+// تابع برای ارسال پیام
+async function sendMessage(event) {
+  event.preventDefault();
+
+  const message = chatInput.value.trim();
+  if (!message) return;
+
+  if (!window.currentUserId || !window.currentChatUserId) {
+    alert("یک کاربر برای چت انتخاب کنید.");
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/chat/messages/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken") // یا getCSRFToken
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        sender_id: window.currentUserId,
+        receiver_id: window.currentChatUserId,
+        message: message
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert("خطا در ارسال پیام: " + (data.error || "خطای نامشخص"));
+      console.error("Server error:", data);
+      return;
+    }
+
+    chatInput.value = "";
+
+    // بارگذاری مجدد پیام‌ها
+    if (typeof loadMessagesFromServer === "function") {
+      loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
+    }
+
+  } catch (error) {
+    alert("خطا در ارسال پیام. لطفا دوباره تلاش کنید.");
+    console.error("Fetch error:", error);
+  }
+}
+
+// فقط یک بار گوش‌دهنده ثبت کن
+if (chatForm && !chatForm.dataset.listenerAdded) {
+  chatForm.addEventListener("submit", sendMessage);
+  chatForm.dataset.listenerAdded = "true";
+}
+
+// کلیک روی دکمه چت برای باز کردن مودال
+document.body.addEventListener("click", (e) => {
+  const btn = e.target.closest(".chat-btn");
+  if (!btn) return;
+
+  const userId = btn.getAttribute("data-user-id");
+  const userName = btn.getAttribute("data-user-name");
+  if (!userId) return alert("کاربر انتخاب نشده!");
+
+  window.currentChatUserId = userId;
+
+  // تنظیم عنوان مودال و باز کردن آن
+  chatModalTitle.textContent = `Chat with ${userName}`;
+  chatModal.style.display = "flex";
+  chatModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+
+  // پاک کردن محتوای قبلی
+  chatInput.value = "";
+  chatMessages.innerHTML = "";
+
+  // بارگذاری پیام‌ها
+  if (typeof loadMessagesFromServer === "function") {
+    loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
+  }
+});
+
 
   // فرضا اگر دکمه بازکردن چت داری
   const openChatModalBtn = document.getElementById("openChatModalBtn");
@@ -2666,141 +3070,177 @@ v
 });
 
 
-document.getElementById('openFriendsModal').addEventListener('click', () => {
-  modals.friends.style.display = 'flex';
-  const friends = getFriends();
-  renderFriendsList(friends);
-});
 
 document.getElementById('closeFriendsModal').addEventListener('click', () => {
   modals.friends.style.display = 'none';
 });
 
+
 document.getElementById('closeUserProfileModal').addEventListener('click', () => {
   modals.userProfile.style.display = 'none';
 });
-
-function renderFriendsList(friends) {
-  friendsList.innerHTML = '';
-  if (!friends || friends.length === 0) {
-    noFriendsMsg.style.display = 'block';
+function fetchMessages(senderId, receiverId) {
+  if (!senderId || !receiverId) {
+    console.error("senderId و receiverId نمی‌توانند خالی باشند.");
     return;
-  } else {
-    noFriendsMsg.style.display = 'none';
   }
-  friends.forEach(friend => {
-    const li = document.createElement('li');
-    const link = document.createElement('a');
-    link.textContent = friend.name;
-    link.href = '#';
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      openUserProfileModal(friend);
-    });
-    li.appendChild(link);
-    friendsList.appendChild(li);
-  });
-}
 
-function openUserProfileModal(friend) {
-  document.getElementById('profileName').textContent = friend.name;
-  document.getElementById('profileDetails').textContent = `User ID: ${friend.id} — اطلاعات بیشتر اینجا بارگذاری می‌شود.`;
-  modals.userProfile.style.display = 'flex';
-}
+  const url = `/api/chat/messages/?sender_id=${encodeURIComponent(senderId)}&receiver_id=${encodeURIComponent(receiverId)}`;
 
-function fetchMessages() {
-  fetch('/api/chat/messages', { credentials: 'include' })
-    .then(res => res.json())
+  fetch(url, { credentials: 'include' })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`خطا در دریافت پیام‌ها: ${res.status} ${res.statusText}`);
+      }
+      return res.json();
+    })
     .then(data => {
       if (data.messages) {
-        // پاک کردن کل پیام‌ها فقط یکبار در ابتدا
         chatMessages.innerHTML = "";
-
         data.messages.forEach(msg => {
-          const msgElem = document.createElement("div");
-          msgElem.classList.add("chat-message");
-
-          // اگر پیام از کاربر خودت هست، کلاس me اضافه کن
-          if (msg.user === CURRENT_USER_EMAIL) {
-            msgElem.classList.add("me");
-          } else {
-            msgElem.classList.add("other");
-          }
-
-          const textSpan = document.createElement("span");
-          textSpan.classList.add("message-text");
-          textSpan.textContent = msg.content;
-
-          const timeSpan = document.createElement("span");
-          timeSpan.classList.add("message-time");
-          // فقط ساعت و دقیقه (بدون ثانیه و تاریخ)
-          timeSpan.textContent = msg.timestamp.slice(11,16);
-
-          msgElem.appendChild(textSpan);
-          msgElem.appendChild(timeSpan);
-          chatMessages.appendChild(msgElem);
+          // ساخت پیام‌ها
         });
-
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
     })
     .catch(err => console.error("Error fetching messages:", err));
 }
 
-  document.getElementById("sendMessageBtn").addEventListener("click", sendMessage);
-
-async function sendMessage() {
-  const content = document.getElementById("messageInput").value.trim();
-  if (!content) return;
-
-  if (!currentChatUserId) {
-    alert("یک کاربر برای چت انتخاب کنید");
-    return;
-  }
-
-  const data = {
-    sender_id: window.currentUserId,
-    receiver_id: currentChatUserId,
-    message: content
-  };
-
-  try {
-    const response = await fetch("/api/chat/messages", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken()  // اضافه کردن توکن CSRF
-      },
-      credentials: "include",
-      body: JSON.stringify(data)
-    });
-
-    if (!response.ok) throw new Error("خطا در ارسال پیام");
-    document.getElementById("messageInput").value = "";
-
-    // بعد از ارسال پیام، مجدد پیام‌ها رو از سرور بگیر
-    loadMessagesFromServer(window.currentUserId, currentChatUserId);
-
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-// تابع گرفتن توکن CSRF از کوکی
-function getCSRFToken() {
+function getCookie(name) {
   let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-      cookie = cookie.trim();
-      if (cookie.startsWith('csrftoken=')) {
-        cookieValue = decodeURIComponent(cookie.substring('csrftoken='.length));
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // آیا کوکی با نام مشخص شروع می‌شود؟
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
         break;
       }
     }
   }
   return cookieValue;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const messageMenu = document.getElementById("messageMenu");
+  let selectedMessageId = null;
+  let selectedMessageElement = null;
+
+  // Right-click handler
+  document.addEventListener("contextmenu", function (e) {
+    const messageEl = e.target.closest(".chat-message.me");
+    if (messageEl) {
+      e.preventDefault();
+      selectedMessageId = messageEl.dataset.id;
+      selectedMessageElement = messageEl;
+
+      // Clear previous selection
+      document.querySelectorAll(".chat-message.me.selected").forEach(el => {
+        el.classList.remove("selected");
+      });
+
+      // Add selection directly to the clicked message
+      messageEl.classList.add("selected");
+
+      // Show dropdown
+      messageMenu.style.top = `${e.pageY}px`;
+      messageMenu.style.left = `${e.pageX}px`;
+      messageMenu.classList.remove("hidden");
+    } else {
+      // Clicked outside message
+      messageMenu.classList.add("hidden");
+      document.querySelectorAll(".chat-message.me.selected").forEach(el => {
+        el.classList.remove("selected");
+      });
+    }
+  });
+
+  // Click anywhere in modal to close menu (if not on the dropdown)
+  document.getElementById("chatModal").addEventListener("click", function (e) {
+    if (!e.target.closest("#messageMenu")) {
+      messageMenu.classList.add("hidden");
+      document.querySelectorAll(".chat-message.me.selected").forEach(el => {
+        el.classList.remove("selected");
+      });
+    }
+  });
+
+  // Delete message
+  document.getElementById("deleteMessage").addEventListener("click", async () => {
+    if (!selectedMessageId) return;
+
+    try {
+      const res = await fetch(`/api/chat/messages/${selectedMessageId}/`, {
+        method: "DELETE",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        selectedMessageElement.remove();
+        messageMenu.classList.add("hidden");
+      } else {
+        const data = await res.json();
+        alert("خطا در حذف پیام: " + (data.error || "نامشخص"));
+      }
+    } catch (err) {
+      console.error("Error deleting message:", err);
+    }
+  });
+
+  // Edit message
+  document.getElementById("editMessage").addEventListener("click", async () => {
+      console.log("Edit clicked"); // برای بررسی اینکه کلیک ثبت شده یا نه
+    if (!selectedMessageId) return;
+    console.log("selectedMessageElement:", selectedMessageElement);
+    const currentText = selectedMessageElement.querySelector(".message-text").textContent;
+    console.log("Current message text:", currentText);
+    const newText = prompt("Edit your message:", currentText);
+    if (newText === null) return;
+
+    try {
+      const res = await fetch(`/api/chat/messages/${selectedMessageId}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        credentials: "include",
+        body: JSON.stringify({ message: newText }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        selectedMessageElement.querySelector(".message-text").textContent = data.message;
+        messageMenu.classList.add("hidden");
+      } else {
+        alert("خطا در ویرایش پیام: " + (data.error || "نامشخص"));
+      }
+    } catch (err) {
+      console.error("Error editing message:", err);
+    }
+  });
+
+  // Helper: CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
 
 
 </script>

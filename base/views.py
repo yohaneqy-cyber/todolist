@@ -1,5 +1,6 @@
 import json
 from django.views import View
+
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from django.template.loader import render_to_string
@@ -29,13 +30,13 @@ from django.db.models.functions import Cast
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.urls import reverse
 from django.conf import settings
-from rest_framework import status 
+from rest_framework import status, permissions, generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship, ChatMessage
-from .serializers import TaskSerializer
+from .serializers import TaskSerializer, ChatMessageSerializers
 from .forms import CustomUserCreationForm, ReminderForm, ChengeForm, RecurringTaskForm, TaskForm, LoginForm, MySetPasswordForm
 
 User = get_user_model()
@@ -851,7 +852,7 @@ class ChatMessageApi(View):
            
         messages = ChatMessage.objects.filter(
             Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)
-        ).order_by('-timestamp')[:50]
+        ).order_by('-timestamp')
 
         data = []
         for msg in reversed(messages):
@@ -867,7 +868,9 @@ class ChatMessageApi(View):
     
     def post(self, request):
         try:
+            print("RAW Body:", request.body)
             data = json.loads(request.body)
+            print("Parsed Data:", data)
             sender_id = data.get('sender_id')
             receiver_id = data.get('receiver_id')
             content = data.get('message', '').strip()
@@ -898,3 +901,30 @@ class ChatMessageApi(View):
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+
+class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ChatMessage.objects.all()
+    serializer_class = ChatMessageSerializers
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # فقط پیام‌هایی که خود کاربر فرستاده
+        return ChatMessage.objects.filter(sender=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        message_text = request.data.get('message', '').strip()
+
+        if not message_text:
+            return Response({'error': 'متن پیام خالی است.'}, status=400)
+
+        instance.message = message_text
+        instance.edited = True
+        instance.save()
+        return Response(self.get_serializer(instance).data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
