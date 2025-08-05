@@ -1,6 +1,5 @@
 import json
 from django.views import View
-
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from django.template.loader import render_to_string
@@ -71,8 +70,9 @@ def task_create(request):
     serializer = TaskSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 def home(request):
