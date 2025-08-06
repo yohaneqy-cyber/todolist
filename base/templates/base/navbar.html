@@ -2055,8 +2055,7 @@ body.logout-modal-open {
 
 
 <!-- منوی کلیک راست -->
-<!-- منوی کلیک راست -->
-<div id="messageMenu" class="context-menu hidden">
+<div id="messageMenu" class="context-menu hidden" style="position: absolute; z-index: 9999;">
   <button id="editMessage" class="context-btn">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 20h9" />
@@ -3814,7 +3813,66 @@ document.addEventListener("DOMContentLoaded", () => {
     closeDeleteModal();
   });
 
-  // کلیک راست روی پیام‌های خودی (کلاس .chat-message.me)
+  // ** باز و بسته شدن منوی کلیک راست با یک بار کلیک (برای موبایل و دسکتاپ) **
+  document.addEventListener("click", (e) => {
+    // اگر کلیک روی پیام خودی بود
+    const messageEl = e.target.closest(".chat-message.me");
+    if (messageEl) {
+      e.preventDefault();
+
+      selectedMessageId = messageEl.dataset.id || null;
+      selectedMessageElement = messageEl;
+
+      if (!selectedMessageId || selectedMessageId === "null") {
+        selectedMessageId = null;
+        selectedMessageElement = null;
+        messageMenu.classList.add("hidden");
+        return;
+      }
+
+      // حذف انتخاب قبلی
+      document.querySelectorAll(".chat-message.me.selected").forEach(el => {
+        el.classList.remove("selected");
+      });
+
+      messageEl.classList.add("selected");
+
+      // تعیین موقعیت منو نزدیک کلیک ولی کنترل شده (اجتناب از خارج شدن از صفحه)
+      const posX = e.pageX;
+      const posY = e.pageY;
+      const menuWidth = messageMenu.offsetWidth;
+      const menuHeight = messageMenu.offsetHeight;
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      let left = posX;
+      let top = posY;
+
+      if (posX + menuWidth > windowWidth) {
+        left = windowWidth - menuWidth - 10;
+      }
+      if (posY + menuHeight > windowHeight) {
+        top = windowHeight - menuHeight - 10;
+      }
+
+      messageMenu.style.left = `${left}px`;
+      messageMenu.style.top = `${top}px`;
+      messageMenu.classList.remove("hidden");
+
+    } else {
+      // اگر کلیک بیرون منو بود، منو را ببند
+      if (!e.target.closest("#messageMenu")) {
+        messageMenu.classList.add("hidden");
+        selectedMessageId = null;
+        selectedMessageElement = null;
+        document.querySelectorAll(".chat-message.me.selected").forEach(el => {
+          el.classList.remove("selected");
+        });
+      }
+    }
+  });
+
+  // جلوگیری از منوی پیش‌فرض کلیک راست و استفاده از منوی ما
   document.addEventListener("contextmenu", (e) => {
     const messageEl = e.target.closest(".chat-message.me");
     if (messageEl) {
@@ -3830,36 +3888,48 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // حذف انتخاب قبلی
       document.querySelectorAll(".chat-message.me.selected").forEach(el => {
         el.classList.remove("selected");
       });
 
       messageEl.classList.add("selected");
 
-      messageMenu.style.top = `${e.pageY}px`;
-      messageMenu.style.left = `${e.pageX}px`;
+      // تعیین موقعیت منو (با همان منطق بالا)
+      const posX = e.pageX;
+      const posY = e.pageY;
+      const menuWidth = messageMenu.offsetWidth;
+      const menuHeight = messageMenu.offsetHeight;
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      let left = posX;
+      let top = posY;
+
+      if (posX + menuWidth > windowWidth) {
+        left = windowWidth - menuWidth - 10;
+      }
+      if (posY + menuHeight > windowHeight) {
+        top = windowHeight - menuHeight - 10;
+      }
+
+      messageMenu.style.left = `${left}px`;
+      messageMenu.style.top = `${top}px`;
       messageMenu.classList.remove("hidden");
-    } else {
-      messageMenu.classList.add("hidden");
-      document.querySelectorAll(".chat-message.me.selected").forEach(el => {
-        el.classList.remove("selected");
-      });
-      selectedMessageId = null;
-      selectedMessageElement = null;
     }
   });
 
-  // کلیک بیرون منو در مودال چت منو را ببند
+  // کلیک بیرون منو داخل مودال چت منو را ببند
   const chatModal = document.getElementById("chatModal");
   if (chatModal) {
     chatModal.addEventListener("click", (e) => {
       if (!e.target.closest("#messageMenu")) {
         messageMenu.classList.add("hidden");
+        selectedMessageId = null;
+        selectedMessageElement = null;
         document.querySelectorAll(".chat-message.me.selected").forEach(el => {
           el.classList.remove("selected");
         });
-        selectedMessageId = null;
-        selectedMessageElement = null;
       }
     });
   }
