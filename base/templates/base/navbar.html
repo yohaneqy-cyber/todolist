@@ -1371,7 +1371,7 @@ body.logout-modal-open {
     }
 
     /* Tabs Buttons */
-    #searchTabBtn, #requestsTabBtn, #friendsTabBtn {
+    #TabBtn, #requestsTabBtn, #friendsTabBtn {
       background-color: #f0f0f0;
       border: 1px solid #ddd;
       border-radius: 6px;
@@ -2611,9 +2611,14 @@ async function sendMessage(event) {
         openModal(modals.friends.modal);
         showSearchTab();
         // ریست سرچ
-        document.getElementById('userSearchInput').value = "";
+        const searchInput = document.getElementById('userSearchInput');
+        searchInput.value = "";
         document.getElementById('userList').innerHTML = "";
-        document.getElementById('userSearchInput').focus();
+
+        // فقط روی دسکتاپ فوکوس کن
+        if (window.innerWidth > 768) {
+          searchInput.focus();
+        }
       });
     }
     if (modals.friends.closeBtn && modals.friends.modal) {
@@ -2622,6 +2627,7 @@ async function sendMessage(event) {
         if (e.target === modals.friends.modal) closeModal(modals.friends.modal);
       });
     }
+
 
     // مدیریت مودال تایید حذف دوست (Unfriend)
     let friendToRemoveId = null;
@@ -3179,16 +3185,24 @@ function openChatModal(userId, userName) {
   chatModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
 
-  if (document.activeElement) {
-    document.activeElement.blur();
-}
+  if (searchInput) {
+      searchInput.blur();
 
-  chatModalTitle.textContent = `گفتگو با ${userName}`;
-  chatMessages.innerHTML = "";
-  chatInput.value = "";
-  if (window.innerWidth > 768) { 
-      chatInput.focus();
+  if (document.activeElement) {
+      document.activeElement.blur();
   }
+
+  // کمی تأخیر بده تا کیبورد بسته بشه
+  setTimeout(() => {
+      chatModalTitle.textContent = `گفتگو با ${userName}`;
+      chatMessages.innerHTML = "";
+      chatInput.value = "";
+
+      // فقط برای دسکتاپ فوکوس کن
+      if (window.innerWidth > 768) { 
+          chatInput.focus();
+      }
+  }, 200); // می‌تونی 200ms هم بزاری برای اطمینان
 
   const storageKey = `chatMessages_${userId}`;
   const cachedMessages = localStorage.getItem(storageKey);
