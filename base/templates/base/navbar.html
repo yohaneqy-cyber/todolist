@@ -7,6 +7,141 @@
 
   <style>
 
+.unfriend-modal .modal-content {
+  max-width: 600px;
+  width: 80vw;
+  max-height: 240px;
+  padding: 0;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.3;
+  overflow-y: hidden;
+}
+
+/* وسط چین کردن چک‌باکس */
+.unfriend-modal .modal-content .checkbox-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 12px 0;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* تیتر و متن مودال */
+.unfriend-modal .modal-content h2 {
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.unfriend-modal .modal-content p {
+  margin-bottom: 12px;
+  font-size: 14px;
+  word-wrap: break-word;
+}
+
+/* تنظیمات دکمه‌ها */
+.unfriend-modal .modal-content .buttons-container {
+  display: flex;
+  justify-content: center;  /* وسط چین کردن کل دکمه ها */
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.unfriend-modal .modal-content .buttons-container button {
+  width: auto !important;
+  min-width: 280px !important; /* عرض بزرگ‌تر */
+  max-width: 220px !important;
+  padding: 10px 12px !important; /* ارتفاع کمی بیشتر */
+  font-size: 14px !important;   /* فونت کوچیک‌تر */
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  line-height: 1.2 !important;
+  height: auto !important;
+  flex: 0 0 auto !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 480px) {
+  .unfriend-modal .modal-content .buttons-container button {
+    font-size: 13px !important;
+    padding: 8px 10px !important; /* ارتفاع موبایل */
+    min-width: 150px !important;
+  }
+}
+
+
+.unfriend-modal .modal-content label {
+  display: flex;
+  justify-content: center;  /* وسط‌چین افقی */
+  align-items: center;      /* وسط‌چین عمودی */
+  gap: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 6px;       /* کاهش فاصله پایین */
+  user-select: none;
+}
+/* رنگ دکمه لغو */
+.unfriend-modal .modal-content .cancel-btn {
+  background-color: #f1f1f1;
+  color: #333;
+}
+
+.unfriend-modal .modal-content .cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* رنگ دکمه تایید */
+.unfriend-modal .modal-content .confirm-btn {
+  background-color: #e53935;
+  color: white;
+}
+
+.unfriend-modal .modal-content .confirm-btn:hover {
+  background-color: #c62828;
+}
+
+/* تنظیمات موبایل */
+@media (max-width: 480px) {
+  .unfriend-modal .modal-content {
+    max-width: 90vw;
+    width: 90vw;
+    max-height: 200px;
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.3;
+    overflow-y: auto;
+  }
+
+  .unfriend-modal .modal-content h2 {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .unfriend-modal .modal-content p {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .unfriend-modal .modal-content .buttons-container button {
+    font-size: 14px !important;
+    padding: 8px 10px !important;
+    min-width: 100px !important;
+  }
+
+  .unfriend-modal .modal-content .checkbox-container {
+    justify-content: center;
+    margin: 10px 0;
+  }
+}
+
 body.dark-mode {
   background-color: #121212;
   color: #eee;
@@ -1973,12 +2108,19 @@ body.logout-modal-open {
   <div class="modal-content">
     <h2 id="deleteMessageTitle">Delete Message</h2>
     <p>Are You Sure To Delete?</p>
+
+    <label style="display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 14px; cursor: pointer;">
+      <input type="checkbox" id="deleteForAllCheckbox" />
+      Delete for <span id="kekewith">all users</span>
+    </label>
+
     <div class="buttons-container">
-      <button class="cancel-btn" id="cancelDeleteMessageBtn" type="button">No</button>
+      <button class="cancel-btn" id="cancelDeleteMessageBtn" type="button">Cancel</button>
       <button class="confirm-btn" id="confirmDeleteMessageBtn" type="button">Yes</button>
     </div>
   </div>
 </div>
+
 
 
 
