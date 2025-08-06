@@ -3179,6 +3179,10 @@ function openChatModal(userId, userName) {
   chatModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
 
+  if (document.activeElement) {
+    document.activeElement.blur();
+}
+
   chatModalTitle.textContent = `گفتگو با ${userName}`;
   chatMessages.innerHTML = "";
   chatInput.value = "";
