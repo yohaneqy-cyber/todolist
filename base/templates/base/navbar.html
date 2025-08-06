@@ -2614,13 +2614,21 @@ async function sendMessage(event) {
     if (modals.friends.openBtn && modals.friends.modal) {
       modals.friends.openBtn.addEventListener('click', e => {
         e.preventDefault();
+
+        // جلوگیری از باز ماندن کیبورد موبایل
+        if (document.activeElement) {
+          document.activeElement.blur();
+        }
+
         openModal(modals.friends.modal);
         showSearchTab();
+
         // ریست سرچ
         const searchInput = document.getElementById('userSearchInput');
         searchInput.value = "";
         document.getElementById('userList').innerHTML = "";
 
+        // فقط روی دسکتاپ فوکوس کن
         if (window.innerWidth > 768) {
           setTimeout(() => {
             searchInput.focus();
@@ -2628,6 +2636,7 @@ async function sendMessage(event) {
         }
       });
     }
+
     if (modals.friends.closeBtn && modals.friends.modal) {
       modals.friends.closeBtn.addEventListener('click', () => closeModal(modals.friends.modal));
       modals.friends.modal.addEventListener('click', e => {
