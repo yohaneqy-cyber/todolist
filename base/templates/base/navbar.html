@@ -2565,11 +2565,17 @@ async function sendMessage(event) {
       await loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
     }
 
+    // فقط روی دسکتاپ فوکوس کن تا کیبورد موبایل ناخواسته باز نشه
+    if (window.innerWidth > 768) {
+      chatInput.focus();
+    }
+
   } catch (error) {
     alert("❌ خطا در ارسال پیام. لطفاً دوباره تلاش کنید.");
     console.error("❌ Fetch error:", error);
   }
 }
+
 
 
   // تابع عمومی برای باز کردن چت از هرجایی
