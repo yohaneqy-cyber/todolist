@@ -1371,7 +1371,7 @@ body.logout-modal-open {
     }
 
     /* Tabs Buttons */
-    #TabBtn, #requestsTabBtn, #friendsTabBtn {
+    #searchTabBtn, #requestsTabBtn, #friendsTabBtn {
       background-color: #f0f0f0;
       border: 1px solid #ddd;
       border-radius: 6px;
@@ -2615,9 +2615,10 @@ async function sendMessage(event) {
         searchInput.value = "";
         document.getElementById('userList').innerHTML = "";
 
-        // فقط روی دسکتاپ فوکوس کن
         if (window.innerWidth > 768) {
-          searchInput.focus();
+          setTimeout(() => {
+            searchInput.focus();
+          }, 100);
         }
       });
     }
@@ -3185,30 +3186,26 @@ function openChatModal(userId, userName) {
   chatModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
 
-  if (searchInput) {
-      searchInput.blur();
+if (document.activeElement) {
+  document.activeElement.blur();
+}
 
-  if (document.activeElement) {
-      document.activeElement.blur();
+chatModalTitle.textContent = `گفتگو با ${userName}`;
+chatMessages.innerHTML = "";
+chatInput.value = "";
+
+setTimeout(() => {
+  if (window.innerWidth > 768) { 
+    chatInput.focus();
   }
-
-  // کمی تأخیر بده تا کیبورد بسته بشه
-  setTimeout(() => {
-      chatModalTitle.textContent = `گفتگو با ${userName}`;
-      chatMessages.innerHTML = "";
-      chatInput.value = "";
-
-      // فقط برای دسکتاپ فوکوس کن
-      if (window.innerWidth > 768) { 
-          chatInput.focus();
-      }
-  }, 200); // می‌تونی 200ms هم بزاری برای اطمینان
 
   const storageKey = `chatMessages_${userId}`;
   const cachedMessages = localStorage.getItem(storageKey);
   if (cachedMessages) {
     renderMessages(JSON.parse(cachedMessages));
   }
+}, 100);  // تأخیر 100 میلی‌ثانیه برای بسته شدن کیبورد موبایل و آماده شدن مودال
+
 
   const senderId = window.currentUserId;
   const receiverId = userId;
