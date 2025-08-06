@@ -2611,31 +2611,37 @@ async function sendMessage(event) {
 
 
     // مدیریت باز و بسته کردن مودال دوستان
-    if (modals.friends.openBtn && modals.friends.modal) {
-      modals.friends.openBtn.addEventListener('click', e => {
-        e.preventDefault();
+if (modals.friends.openBtn && modals.friends.modal) {
+  modals.friends.openBtn.addEventListener('click', e => {
+    e.preventDefault();
 
-        // جلوگیری از باز ماندن کیبورد موبایل
+    // جلوگیری از باز ماندن کیبورد موبایل با تاخیر خیلی کوتاه
+      setTimeout(() => {
         if (document.activeElement) {
           document.activeElement.blur();
         }
-
-        openModal(modals.friends.modal);
-        showSearchTab();
-
-        // ریست سرچ
-        const searchInput = document.getElementById('userSearchInput');
-        searchInput.value = "";
-        document.getElementById('userList').innerHTML = "";
-
-        // فقط روی دسکتاپ فوکوس کن
-        if (window.innerWidth > 768) {
-          setTimeout(() => {
-            searchInput.focus();
-          }, 100);
+        const searchInputEl = document.getElementById('userSearchInput');
+        if (searchInputEl) {
+          searchInputEl.blur();
         }
-      });
-    }
+      }, 0); // 0ms هم کافیه
+
+      openModal(modals.friends.modal);
+      showSearchTab();
+
+      // ریست سرچ
+      const searchInput = document.getElementById('userSearchInput');
+      searchInput.value = "";
+      document.getElementById('userList').innerHTML = "";
+
+      // فقط روی دسکتاپ فوکوس کن
+      if (window.innerWidth > 768) {
+        setTimeout(() => {
+          searchInput.focus();
+        }, 100);
+      }
+    });
+  }
 
     if (modals.friends.closeBtn && modals.friends.modal) {
       modals.friends.closeBtn.addEventListener('click', () => closeModal(modals.friends.modal));
@@ -2643,7 +2649,6 @@ async function sendMessage(event) {
         if (e.target === modals.friends.modal) closeModal(modals.friends.modal);
       });
     }
-
 
     // مدیریت مودال تایید حذف دوست (Unfriend)
     let friendToRemoveId = null;
@@ -3513,10 +3518,49 @@ document.body.addEventListener("click", (e) => {
 
 
   // فرضا اگر دکمه بازکردن چت داری
-  const openChatModalBtn = document.getElementById("openChatModalBtn");
-  if (openChatModalBtn) {
-    openChatModalBtn.addEventListener("click", () => openModal(chatModal));
+document.body.addEventListener("click", (e) => {
+  const btn = e.target.closest(".chat-btn");
+  if (!btn) return;
+
+  // بستن کیبورد و مودال سرچ (اگر باز است)
+  const searchInput = document.getElementById("userSearchInput");
+  if (searchInput) searchInput.blur();
+
+  const friendsModal = document.getElementById("friendsModal");
+  if (friendsModal && friendsModal.style.display === "flex") {
+    friendsModal.style.display = "none";
+    document.body.classList.remove("modal-open");
   }
+
+  const userId = btn.getAttribute("data-user-id");
+  const userName = btn.getAttribute("data-user-name");
+  if (!userId) return alert("کاربر انتخاب نشده!");
+
+  window.currentChatUserId = userId;
+
+  // تنظیم عنوان مودال و باز کردن آن
+  chatModalTitle.textContent = `Chat with ${userName}`;
+  chatModal.style.display = "flex";
+  chatModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+
+  // پاک کردن محتوای قبلی
+  chatInput.value = "";
+  chatMessages.innerHTML = "";
+
+  // بارگذاری پیام‌ها
+  if (typeof loadMessagesFromServer === "function") {
+    loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
+  }
+
+  // فقط روی دسکتاپ فوکوس کن
+  if (window.innerWidth > 768) {
+    setTimeout(() => {
+      chatInput.focus();
+    }, 100);
+  }
+});
+
 
 });
 
