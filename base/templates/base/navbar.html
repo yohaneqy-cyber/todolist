@@ -3753,23 +3753,19 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedMessageElement = null;
   let errorTimeout = null;
 
-  // المان‌های مودال حذف پیام
   const deleteModal = document.getElementById('deleteMessageModal');
   const cancelDeleteBtn = document.getElementById('cancelDeleteMessageBtn');
   const confirmDeleteBtn = document.getElementById('confirmDeleteMessageBtn');
 
-  // نمایش پیام خطا
+  // 📌 تابع نمایش پیام خطا
   function showErrorMessage(message) {
     const errorDiv = document.getElementById("errorMessage");
     if (!errorDiv) return;
-
     const errorText = errorDiv.querySelector("#errorText");
     if (!errorText) return;
-
     errorText.textContent = message;
     errorDiv.style.display = "block";
     errorDiv.style.opacity = 1;
-
     clearTimeout(errorTimeout);
     errorTimeout = setTimeout(() => {
       errorDiv.style.opacity = 0;
@@ -3780,14 +3776,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   }
 
-  // دریافت CSRF Token
+  // 📌 گرفتن CSRF
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
       const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + "=")) {
+      for (let cookie of cookies) {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + "=")) {
           cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
           break;
         }
@@ -3796,106 +3792,83 @@ document.addEventListener("DOMContentLoaded", () => {
     return cookieValue;
   }
 
-  // باز و بسته کردن مودال حذف پیام
-  function openDeleteModal() {
-    deleteModal.style.display = "flex";
-    deleteModal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  }
+  // 📌 تابع تنظیم موقعیت منو (هم دسکتاپ هم موبایل)
+  function setMenuPosition(e) {
+    let clickX, clickY;
+    if (e.touches && e.touches.length > 0) {
+      // 📱 موبایل
+      clickX = e.touches[0].clientX;
+      clickY = e.touches[0].clientY;
+    } else {
+      // 💻 دسکتاپ
+      clickX = e.clientX || e.pageX;
+      clickY = e.clientY || e.pageY;
+    }
 
-  function closeDeleteModal() {
-    deleteModal.style.display = "none";
-    deleteModal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
-
-  cancelDeleteBtn.addEventListener("click", () => {
-    closeDeleteModal();
-  });
-
-  // تابع تعیین موقعیت منو و جلوگیری از خارج شدن از صفحه
-  function setMenuPosition(posX, posY) {
     const menuWidth = messageMenu.offsetWidth;
     const menuHeight = messageMenu.offsetHeight;
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    let left = posX;
-    let top = posY;
-
-    if (posX + menuWidth > windowWidth) {
-      left = windowWidth - menuWidth - 10;
+    if (clickX + menuWidth > windowWidth) {
+      clickX = windowWidth - menuWidth - 10;
     }
-    if (posY + menuHeight > windowHeight) {
-      top = windowHeight - menuHeight - 10;
+    if (clickY + menuHeight > windowHeight) {
+      clickY = windowHeight - menuHeight - 10;
     }
 
-    if (left < 10) left = 10;
-    if (top < 10) top = 10;
-
-    messageMenu.style.left = `${left}px`;
-    messageMenu.style.top = `${top}px`;
+    messageMenu.style.left = `${clickX}px`;
+    messageMenu.style.top = `${clickY}px`;
   }
 
-  // باز و بسته شدن منوی کلیک راست یا کلیک ساده روی پیام خودی
+  // 📌 باز و بسته کردن مودال حذف پیام
+  function openDeleteModal() {
+    deleteModal.style.display = "flex";
+    deleteModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+  function closeDeleteModal() {
+    deleteModal.style.display = "none";
+    deleteModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+  cancelDeleteBtn.addEventListener("click", closeDeleteModal);
+
+  // 📌 باز شدن منو با کلیک (موبایل و دسکتاپ)
   document.addEventListener("click", (e) => {
     const messageEl = e.target.closest(".chat-message.me");
-
     if (messageEl) {
       e.preventDefault();
-
-      const clickedInsideMenu = e.target.closest("#messageMenu");
-      if (clickedInsideMenu) return; // اگر کلیک داخل منو بود کاری نکن
-
-      // اگر منو قبلا برای همین پیام باز بوده، ببندش
-      if (selectedMessageElement === messageEl && !messageMenu.classList.contains("hidden")) {
-        messageMenu.classList.add("hidden");
-        selectedMessageId = null;
-        selectedMessageElement = null;
-        document.querySelectorAll(".chat-message.me.selected").forEach(el => el.classList.remove("selected"));
-        return;
-      }
-
       selectedMessageId = messageEl.dataset.id || null;
       selectedMessageElement = messageEl;
 
       if (!selectedMessageId || selectedMessageId === "null") {
-        selectedMessageId = null;
-        selectedMessageElement = null;
         messageMenu.classList.add("hidden");
         return;
       }
 
-      // حذف انتخاب قبلی و انتخاب پیام جدید
       document.querySelectorAll(".chat-message.me.selected").forEach(el => el.classList.remove("selected"));
       messageEl.classList.add("selected");
 
-      // تنظیم موقعیت منو نزدیک کلیک ولی کنترل شده (اجتناب از خارج شدن از صفحه)
-      setMenuPosition(e.pageX, e.pageY);
+      setMenuPosition(e); // 📌 استفاده از تابع جدید
       messageMenu.classList.remove("hidden");
-    } else {
-      // اگر کلیک بیرون منو بود، منو را ببند
-      if (!e.target.closest("#messageMenu")) {
-        messageMenu.classList.add("hidden");
-        selectedMessageId = null;
-        selectedMessageElement = null;
-        document.querySelectorAll(".chat-message.me.selected").forEach(el => el.classList.remove("selected"));
-      }
+    } else if (!e.target.closest("#messageMenu")) {
+      messageMenu.classList.add("hidden");
+      selectedMessageId = null;
+      selectedMessageElement = null;
+      document.querySelectorAll(".chat-message.me.selected").forEach(el => el.classList.remove("selected"));
     }
   });
 
-  // جلوگیری از منوی پیش‌فرض کلیک راست و استفاده از منوی سفارشی
+  // 📌 باز شدن منو با راست‌کلیک
   document.addEventListener("contextmenu", (e) => {
     const messageEl = e.target.closest(".chat-message.me");
     if (messageEl) {
       e.preventDefault();
-
       selectedMessageId = messageEl.dataset.id || null;
       selectedMessageElement = messageEl;
 
       if (!selectedMessageId || selectedMessageId === "null") {
-        selectedMessageId = null;
-        selectedMessageElement = null;
         messageMenu.classList.add("hidden");
         return;
       }
@@ -3903,12 +3876,12 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".chat-message.me.selected").forEach(el => el.classList.remove("selected"));
       messageEl.classList.add("selected");
 
-      setMenuPosition(e.pageX, e.pageY);
+      setMenuPosition(e); // 📌 استفاده از تابع جدید
       messageMenu.classList.remove("hidden");
     }
   });
 
-  // کلیک بیرون منو داخل مودال چت منو را ببند
+  // 📌 بستن منو وقتی بیرونش کلیک میشه
   const chatModal = document.getElementById("chatModal");
   if (chatModal) {
     chatModal.addEventListener("click", (e) => {
@@ -3921,8 +3894,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // -- بقیه کد ویرایش، حذف و ... بدون تغییر --
-  // این بخش دقیقا کد قبلی شماست و تغییری نکرده است
+  // 📌 ویرایش پیام
   document.getElementById("editMessage").addEventListener("click", () => {
     if (!selectedMessageElement) return;
     messageMenu.classList.add("hidden");
@@ -3930,12 +3902,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const existingEdit = document.querySelector(".edit-inline-wrapper");
     if (existingEdit) {
       const parentMsg = existingEdit.parentElement;
-      const oldTextEl = parentMsg.querySelector(".message-text");
-      const oldTimeEl = parentMsg.querySelector(".message-time");
-      if (oldTextEl && oldTimeEl) {
-        oldTextEl.style.display = "";
-        oldTimeEl.style.display = "";
-      }
+      parentMsg.querySelector(".message-text").style.display = "";
+      parentMsg.querySelector(".message-time").style.display = "";
       existingEdit.remove();
     }
 
@@ -3971,25 +3939,13 @@ document.addEventListener("DOMContentLoaded", () => {
       textarea.style.height = "auto";
       textarea.style.height = textarea.scrollHeight + "px";
     }
-
     textarea.addEventListener("input", autoResize);
     autoResize();
-
-    textarea.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        confirmBtn.click();
-      }
-    });
 
     const confirmBtn = document.createElement("button");
     confirmBtn.className = "edit-confirm-btn";
     confirmBtn.title = "Confirm";
-    confirmBtn.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1e88e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 6L9 17l-5-5" />
-      </svg>
-    `;
+    confirmBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1e88e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5" /></svg>`;
 
     inputWrapper.appendChild(textarea);
     inputWrapper.appendChild(confirmBtn);
@@ -4000,7 +3956,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     wrapper.appendChild(inputWrapper);
     wrapper.appendChild(timeSpan);
-
     selectedMessageElement.appendChild(wrapper);
 
     textarea.focus();
@@ -4015,7 +3970,6 @@ document.addEventListener("DOMContentLoaded", () => {
       textEl.textContent = newText;
       textEl.style.display = "";
       timeEl.style.display = "";
-
       wrapper.remove();
 
       const userId = window.currentChatUserId;
@@ -4036,7 +3990,6 @@ document.addEventListener("DOMContentLoaded", () => {
           showErrorMessage("شناسه پیام نامعتبر است.");
           return;
         }
-
         const response = await fetch(`/api/chat/messages/${selectedMessageId}/`, {
           method: "PATCH",
           headers: {
@@ -4047,48 +4000,29 @@ document.addEventListener("DOMContentLoaded", () => {
           credentials: "include",
           body: JSON.stringify({ message: newText })
         });
-
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("❌ Failed to update on server", errorText);
           showErrorMessage("ویرایش در سرور انجام نشد.");
         }
-      } catch (error) {
-        console.error("❌ Network error while editing:", error);
+      } catch {
         showErrorMessage("خطای شبکه هنگام ویرایش پیام.");
       }
     });
   });
 
-  // حذف پیام - باز کردن مودال حذف سفارشی
+  // 📌 حذف پیام
   document.getElementById("deleteMessage").addEventListener("click", () => {
-    if (!selectedMessageElement) {
-      alert("ابتدا یک پیام را انتخاب کنید.");
-      return;
-    }
-
-    if (!selectedMessageId || selectedMessageId === "null") {
-      alert("شناسه پیام معتبر نیست.");
-      return;
-    }
-
+    if (!selectedMessageElement) return alert("ابتدا یک پیام را انتخاب کنید.");
+    if (!selectedMessageId || selectedMessageId === "null") return alert("شناسه پیام معتبر نیست.");
     openDeleteModal();
     messageMenu.classList.add("hidden");
   });
 
-  // دکمه لغو مودال حذف پیام
-  cancelDeleteBtn.addEventListener("click", () => {
-    closeDeleteModal();
-  });
-
-  // دکمه تایید حذف پیام در مودال
   confirmDeleteBtn.addEventListener("click", async () => {
     if (!selectedMessageElement || !selectedMessageId) {
       alert('هیچ پیامی انتخاب نشده یا شناسه پیام معتبر نیست.');
       closeDeleteModal();
       return;
     }
-
     try {
       const response = await fetch(`/api/chat/messages/${selectedMessageId}/`, {
         method: "DELETE",
@@ -4098,7 +4032,6 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         credentials: "include"
       });
-
       if (response.ok) {
         selectedMessageElement.remove();
         selectedMessageElement = null;
@@ -4107,9 +4040,8 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         showErrorMessage("خطا در حذف پیام.");
       }
-    } catch (error) {
+    } catch {
       showErrorMessage("خطای شبکه در حذف پیام.");
-      console.error(error);
     }
   });
 });
