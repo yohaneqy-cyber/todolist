@@ -3182,7 +3182,9 @@ function openChatModal(userId, userName) {
   chatModalTitle.textContent = `گفتگو با ${userName}`;
   chatMessages.innerHTML = "";
   chatInput.value = "";
-  chatInput.focus();
+  if (window.innerWidth > 768) { 
+      chatInput.focus();
+  }
 
   const storageKey = `chatMessages_${userId}`;
   const cachedMessages = localStorage.getItem(storageKey);
