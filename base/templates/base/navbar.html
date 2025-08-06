@@ -3815,7 +3815,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 document.addEventListener("contextmenu", (e) => {
-  const messageEl = e.target.closest(".chat-message.me");
+  const messageEl = e.target.closest(".chat-message.me"); // پیام‌های خودت
   if (!messageEl) {
     messageMenu.classList.add("hidden");
     document.querySelectorAll(".chat-message.me.selected").forEach(el => el.classList.remove("selected"));
@@ -3839,37 +3839,18 @@ document.addEventListener("contextmenu", (e) => {
   document.querySelectorAll(".chat-message.me.selected").forEach(el => el.classList.remove("selected"));
   messageEl.classList.add("selected");
 
-  // والد موقعیت‌دهی (offsetParent)
-  const offsetParent = messageMenu.offsetParent || document.body;
-  const parentRect = offsetParent.getBoundingClientRect();
-
-  messageMenu.style.visibility = "hidden";
-  messageMenu.style.display = "block";
-  const menuRect = messageMenu.getBoundingClientRect();
-
-  // موقعیت پیام نسبت به viewport
+  const gap = 8; // فاصله کوچک از پیام
   const msgRect = messageEl.getBoundingClientRect();
 
-  // موقعیت پیام نسبت به offsetParent (برای position:absolute)
-  const posX = Math.min(
-    Math.max(msgRect.left - parentRect.left, 10),
-    parentRect.width - menuRect.width - 10
-  );
+  // موقعیت ثابت: همیشه سمت چپ پیام (چون پیام‌ها سمت راست صفحه هستن)
+  const posX = msgRect.left - messageMenu.offsetWidth - gap;
 
-  // سعی می‌کنیم پایین پیام باز بشه
-  let posY = msgRect.bottom - parentRect.top; // پایین پیام نسبت به والد
+  // موقعیت عمودی ثابت برابر با بالای پیام
+  const posY = msgRect.top;
 
-  // اگر پایین پیام بیرون صفحه است (منوی ما از پایین والد بیرون میره)
-  if (posY + menuRect.height > parentRect.height - 10) {
-    // منو رو بالای پیام نمایش بده
-    posY = msgRect.top - parentRect.top - menuRect.height;
-    if (posY < 10) posY = 10; // حداقل فاصله از بالا
-  }
-
+  messageMenu.style.position = "fixed";
   messageMenu.style.left = `${posX}px`;
   messageMenu.style.top = `${posY}px`;
-  messageMenu.style.position = "absolute";
-
   messageMenu.style.visibility = "visible";
   messageMenu.style.display = "block";
   messageMenu.classList.remove("hidden");
