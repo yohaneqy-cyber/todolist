@@ -6,56 +6,6 @@
   <title>MySite</title>
 
   <style>
-/* پس‌زمینه تار و قرارگیری مودال */
-.modal {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10000;
-}
-
-.modal-content {
-  background: white;
-  padding: 20px 30px;
-  border-radius: 10px;
-  max-width: 320px;
-  width: 90%;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0,0,0,0.25);
-}
-
-.modal-buttons {
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-around;
-}
-
-.btn-confirm, .btn-cancel {
-  padding: 10px 20px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.btn-confirm {
-  background-color: #e53935;
-  color: white;
-}
-
-.btn-cancel {
-  background-color: #f1f1f1;
-  color: #333;
-}
-
-#confirmDeleteModal #cancelDeleteBtn:hover {
-  background-color: #ddd;
-}
 
 body.dark-mode {
   background-color: #121212;
@@ -454,9 +404,49 @@ body.dark-mode .chat-message.me {
 
 #userList li {
   display: flex;
-  justify-content: space-between; /* متن سمت چپ، دکمه‌ها سمت راست */
+  justify-content: space-between;
   align-items: center;
+  white-space: nowrap;
+  gap: 12px;
+  padding: 16px 0;   /* جعبه بزرگ‌تر */
+  font-size: 14.2px !important;   /* فونت کوچیک‌تر */
+  min-height: 50px;  /* ارتفاع جعبه بزرگ‌تر */
 }
+
+#userList li span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-grow: 1;
+}
+
+.add-friend-btn {
+  white-space: nowrap;
+  padding: 4px 8px;  /* کوچکتر شدن پدینگ */
+  font-size: 9px;     /* فونت کمی کوچکتر */
+  cursor: pointer;
+  min-width: 70px;    /* عرض کمتر */
+  border-radius: 4px;
+}
+
+.add-friend-btn {
+  white-space: nowrap;
+  padding: 6px 12px;
+  font-size: 14px;       /* فونت قبل کلیک */
+  cursor: pointer;
+  min-width: 90px;
+  border-radius: 4px;
+  transition: font-size 0.3s ease, min-width 0.3s ease;
+}
+
+/* بعد از کلیک، کمی فونت کوچکتر و دکمه کمی بزرگ‌تر */
+.add-friend-btn.disabled, 
+.add-friend-btn:disabled {
+  font-size: 11px;       /* کمی کوچکتر */
+  min-width: 110px;      /* کمی بزرگ‌تر */
+}
+
+
 
 
     body.dark-mode .confirm-btn {
@@ -2624,7 +2614,7 @@ if (modals.friends.openBtn && modals.friends.modal) {
         if (searchInputEl) {
           searchInputEl.blur();
         }
-      }, 0); // 0ms هم کافیه
+      }, 100); // 0ms هم کافیه
 
       openModal(modals.friends.modal);
       showSearchTab();
@@ -3785,9 +3775,17 @@ document.addEventListener("DOMContentLoaded", () => {
     textarea.addEventListener("input", autoResize);
     autoResize();
 
+    textarea.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        confirmBtn.click();
+      }
+    });
+
+
     const confirmBtn = document.createElement("button");
     confirmBtn.className = "edit-confirm-btn";
-    confirmBtn.title = "تأیید";
+    confirmBtn.title = "Confirm";
     confirmBtn.innerHTML = `
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1e88e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 6L9 17l-5-5" />
@@ -4085,10 +4083,17 @@ const textarea = document.querySelector('.edit-textarea');
 textarea.style.height = 'auto';
 textarea.style.height = textarea.scrollHeight + 'px';
 
-textarea.addEventListener('input', () => {
-  textarea.style.height = 'auto';
-  textarea.style.height = textarea.scrollHeight + 'px';
+textarea.addEventListener("input", autoResize);
+autoResize();
+
+textarea.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    confirmBtn.click();
+  }
 });
+
+
 
 
 
