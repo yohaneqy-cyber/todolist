@@ -6,6 +6,39 @@
   <title>MySite</title>
 
   <style>
+@keyframes fadeSlideCollapse {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+    max-height: 1000px; /* فرضی، بزرگ‌تر از هر پیام */
+    margin: 12px 0; /* فاصله پیام‌ها */
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  70% {
+    opacity: 0.3;
+    transform: translateX(-20px);
+    max-height: 1000px;
+    margin: 12px 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50px);
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* کلاس انیمیشن برای پیام */
+.fade-slide-collapse {
+  animation: fadeSlideCollapse 0.4s ease forwards;
+  overflow: hidden;
+}
+
 
 .unfriend-modal .modal-content {
   max-width: 600px;
@@ -2137,6 +2170,8 @@ body.logout-modal-open {
 
 
 <script>
+  const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+
   // تابع گرفتن CSRF Token از کوکی
   window.currentUserId = {% if request.user.is_authenticated %}{{ request.user.id }}{% else %}null{% endif %};
   window.currentUserEmail = {% if request.user.is_authenticated %}"{{ request.user.email|escapejs }}"{% else %}null{% endif %};
@@ -3754,16 +3789,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedMessageElement = null;
   let errorTimeout = null;
 
-  // المان‌های مودال حذف پیام
   const deleteModal = document.getElementById('deleteMessageModal');
   const cancelDeleteBtn = document.getElementById('cancelDeleteMessageBtn');
   const confirmDeleteBtn = document.getElementById('confirmDeleteMessageBtn');
 
-  // نمایش پیام خطا
   function showErrorMessage(message) {
     const errorDiv = document.getElementById("errorMessage");
     if (!errorDiv) return;
-
     const errorText = errorDiv.querySelector("#errorText");
     if (!errorText) return;
 
@@ -3781,7 +3813,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   }
 
-  // دریافت CSRF Token
   function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
@@ -3797,7 +3828,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return cookieValue;
   }
 
-  // باز و بسته کردن مودال حذف پیام
   function openDeleteModal() {
     deleteModal.style.display = "flex";
     deleteModal.setAttribute("aria-hidden", "false");
@@ -3814,18 +3844,114 @@ document.addEventListener("DOMContentLoaded", () => {
     closeDeleteModal();
   });
 
-document.addEventListener("contextmenu", (e) => {
-  const messageEl = e.target.closest(".chat-message.me"); // پیام‌های خودت
-  if (!messageEl) {
+  document.addEventListener("contextmenu", (e) => {
+    const messageEl = e.target.closest(".chat-message");
+    if (!messageEl) {
+      messageMenu.classList.add("hidden");
+      document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+      selectedMessageId = null;
+      selectedMessageElement = null;
+      return;
+    }
+
+    e.preventDefault();
+
+    selectedMessageId = messageEl.dataset.id ?? null;
+    selectedMessageElement = messageEl;
+
+    if (!selectedMessageId || selectedMessageId === "null") {
+      selectedMessageId = null;
+      selectedMessageElement = null;
+      messageMenu.classList.add("hidden");
+      return;
+    }
+
+    document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+    messageEl.classList.add("selected");
+
     messageMenu.classList.add("hidden");
-    document.querySelectorAll(".chat-message.me.selected").forEach(el => el.classList.remove("selected"));
-    selectedMessageId = null;
-    selectedMessageElement = null;
-    return;
+    messageMenu.style.visibility = "hidden";
+    messageMenu.style.display = "block";
+
+    const gapHorizontal = 12; // فاصله افقی مثل قبل
+
+    const msgRect = messageEl.getBoundingClientRect();
+    const menuWidth = messageMenu.offsetWidth;
+    const menuHeight = messageMenu.offsetHeight;
+
+    const gapVertical = 150; // فاصله بزرگ برای همه پیام‌ها
+
+    let posX, posY;
+
+    posY = msgRect.top - menuHeight - gapVertical;
+
+    if (posY < 0) {
+      posY = msgRect.bottom + gapVertical;
+    }
+
+    if (messageEl.classList.contains("me")) {
+      posX = msgRect.left - menuWidth - gapHorizontal;
+      if (posX < 0) posX = gapHorizontal;
+    } else {
+      posX = msgRect.right + gapHorizontal;
+      if (posX + menuWidth > window.innerWidth) {
+        posX = window.innerWidth - menuWidth - gapHorizontal;
+      }
+    }
+
+    messageMenu.style.left = `${posX}px`;
+    messageMenu.style.top = `${posY}px`;
+    messageMenu.style.position = "fixed";
+
+    messageMenu.style.visibility = "visible";
+    messageMenu.classList.remove("hidden");
+  });
+
+  const chatModal = document.getElementById("chatModal");
+  if (chatModal) {
+    chatModal.addEventListener("click", (e) => {
+      if (!e.target.closest("#messageMenu")) {
+        messageMenu.classList.add("hidden");
+        document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+        selectedMessageId = null;
+        selectedMessageElement = null;
+      }
+    });
   }
 
-  e.preventDefault();
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
+if (isMobile) {
+  document.addEventListener("click", (e) => {
+    const messageEl = e.target.closest(".chat-message");
+    if (!messageEl) {
+      messageMenu.classList.add("hidden");
+      document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+      selectedMessageId = null;
+      selectedMessageElement = null;
+      return;
+    }
+    
+    e.preventDefault();
+    openMessageMenuFor(messageEl);
+  });
+} else {
+  document.addEventListener("contextmenu", (e) => {
+    const messageEl = e.target.closest(".chat-message");
+    if (!messageEl) {
+      messageMenu.classList.add("hidden");
+      document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+      selectedMessageId = null;
+      selectedMessageElement = null;
+      return;
+    }
+
+    e.preventDefault();
+    openMessageMenuFor(messageEl);
+  });
+}
+
+function openMessageMenuFor(messageEl) {
   selectedMessageId = messageEl.dataset.id ?? null;
   selectedMessageElement = messageEl;
 
@@ -3836,44 +3962,49 @@ document.addEventListener("contextmenu", (e) => {
     return;
   }
 
-  document.querySelectorAll(".chat-message.me.selected").forEach(el => el.classList.remove("selected"));
+  document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
   messageEl.classList.add("selected");
 
-  const gap = 8; // فاصله کوچک از پیام
+  messageMenu.classList.add("hidden");
+  messageMenu.style.visibility = "hidden";
+  messageMenu.style.display = "block";
+
+  const gapHorizontal = 12; // فاصله افقی مثل قبل
+
   const msgRect = messageEl.getBoundingClientRect();
+  const menuWidth = messageMenu.offsetWidth;
+  const menuHeight = messageMenu.offsetHeight;
 
-  // موقعیت ثابت: همیشه سمت چپ پیام (چون پیام‌ها سمت راست صفحه هستن)
-  const posX = msgRect.left - messageMenu.offsetWidth - gap;
+  const gapVertical = 150; // فاصله بزرگ برای همه پیام‌ها
 
-  // موقعیت عمودی ثابت برابر با بالای پیام
-  const posY = msgRect.top;
+  let posX, posY;
 
-  messageMenu.style.position = "fixed";
+  posY = msgRect.top - menuHeight - gapVertical;
+
+  if (posY < 0) {
+    posY = msgRect.bottom + gapVertical;
+  }
+
+  if (messageEl.classList.contains("me")) {
+    posX = msgRect.left - menuWidth - gapHorizontal;
+    if (posX < 0) posX = gapHorizontal;
+  } else {
+    posX = msgRect.right + gapHorizontal;
+    if (posX + menuWidth > window.innerWidth) {
+      posX = window.innerWidth - menuWidth - gapHorizontal;
+    }
+  }
+
   messageMenu.style.left = `${posX}px`;
   messageMenu.style.top = `${posY}px`;
+  messageMenu.style.position = "fixed";
+
   messageMenu.style.visibility = "visible";
-  messageMenu.style.display = "block";
   messageMenu.classList.remove("hidden");
-});
+}
 
 
 
-  // <-- REPLACED contextmenu EVENT LISTENER END -->
-
-  // کلیک بیرون منو در مودال چت منو را ببند
-  const chatModal = document.getElementById("chatModal");
-  if (chatModal) {
-    chatModal.addEventListener("click", (e) => {
-      if (!e.target.closest("#messageMenu")) {
-        messageMenu.classList.add("hidden");
-        document.querySelectorAll(".chat-message.me.selected").forEach(el => {
-          el.classList.remove("selected");
-        });
-        selectedMessageId = null;
-        selectedMessageElement = null;
-      }
-    });
-  }
 
   // ویرایش پیام
   document.getElementById("editMessage").addEventListener("click", () => {
@@ -4054,14 +4185,20 @@ document.addEventListener("contextmenu", (e) => {
         credentials: "include"
       });
 
-      if (response.ok) {
+    if (response.ok) {
+      selectedMessageElement.classList.add("fade-slide-collapse");
+
+      selectedMessageElement.addEventListener("animationend", () => {
         selectedMessageElement.remove();
         selectedMessageElement = null;
         selectedMessageId = null;
-        closeDeleteModal();
-      } else {
-        showErrorMessage("خطا در حذف پیام.");
-      }
+      }, { once: true });
+
+      closeDeleteModal();
+    } else {
+      showErrorMessage("خطا در حذف پیام.");
+    }
+
     } catch (error) {
       showErrorMessage("خطای شبکه در حذف پیام.");
       console.error(error);
