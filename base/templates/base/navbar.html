@@ -3921,8 +3921,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-// تابع باز کردن منوی پیام (کامل و مشابه آنچه دارید)
-function openMessageMenuForMobile(messageEl) {
+if (isMobile) {
+  document.addEventListener("click", (e) => {
+    const messageEl = e.target.closest(".chat-message");
+    if (!messageEl) {
+      messageMenu.classList.add("hidden");
+      document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+      selectedMessageId = null;
+      selectedMessageElement = null;
+      return;
+    }
+    
+    e.preventDefault();
+    openMessageMenuFor(messageEl);
+  });
+} else {
+  document.addEventListener("contextmenu", (e) => {
+    const messageEl = e.target.closest(".chat-message");
+    if (!messageEl) {
+      messageMenu.classList.add("hidden");
+      document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+      selectedMessageId = null;
+      selectedMessageElement = null;
+      return;
+    }
+
+    e.preventDefault();
+    openMessageMenuFor(messageEl);
+  });
+}
+
+function openMessageMenuFor(messageEl) {
   selectedMessageId = messageEl.dataset.id ?? null;
   selectedMessageElement = messageEl;
 
@@ -3936,17 +3965,22 @@ function openMessageMenuForMobile(messageEl) {
   document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
   messageEl.classList.add("selected");
 
-  // محاسبه موقعیت منو مشابه دسکتاپ
-  const gapHorizontal = 12;
-  const gapVertical = 150;
+  messageMenu.classList.add("hidden");
+  messageMenu.style.visibility = "hidden";
+  messageMenu.style.display = "block";
+
+  const gapHorizontal = 12; // فاصله افقی مثل قبل
 
   const msgRect = messageEl.getBoundingClientRect();
   const menuWidth = messageMenu.offsetWidth;
   const menuHeight = messageMenu.offsetHeight;
 
+  const gapVertical = 150; // فاصله بزرگ برای همه پیام‌ها
+
   let posX, posY;
 
   posY = msgRect.top - menuHeight - gapVertical;
+
   if (posY < 0) {
     posY = msgRect.bottom + gapVertical;
   }
@@ -3968,33 +4002,6 @@ function openMessageMenuForMobile(messageEl) {
   messageMenu.style.visibility = "visible";
   messageMenu.classList.remove("hidden");
 }
-
-// حذف منوی پیام با کلیک بیرون (برای موبایل)
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".chat-message") && !e.target.closest("#messageMenu") && !e.target.closest("#deleteMessageModal")) {
-    messageMenu.classList.add("hidden");
-    document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
-    selectedMessageId = null;
-    selectedMessageElement = null;
-  }
-});
-
-// مدیریت باز کردن منوی پیام بر اساس دستگاه
-if (isMobile) {
-  document.addEventListener("click", (e) => {
-    const messageEl = e.target.closest(".chat-message");
-    if (!messageEl) return;
-    openMessageMenuForMobile(messageEl);
-  });
-} else {
-  document.addEventListener("contextmenu", (e) => {
-    const messageEl = e.target.closest(".chat-message");
-    if (!messageEl) return;
-    e.preventDefault();
-    openMessageMenuForMobile(messageEl);
-  });
-}
-
 
 
 
