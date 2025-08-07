@@ -2936,7 +2936,7 @@ async function sendMessage(event) {
   const messageMenu = document.getElementById("messageMenu");
   const deleteMessageBtn = document.getElementById("deleteMessage");
 
-  let selectedMessageElement = null;
+  let currentMessageIdToDelete = null;
 
   chatMessages.addEventListener("contextmenu", function (e) {
     const messageEl = e.target.closest(".chat-message");
@@ -2944,6 +2944,9 @@ async function sendMessage(event) {
 
     e.preventDefault();
     selectedMessageElement = messageEl;
+
+    // مقدار آیدی پیام رو هم ذخیره کن
+    currentMessageIdToDelete = messageEl.dataset.id;
 
     document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
     messageEl.classList.add("selected");
@@ -2962,62 +2965,61 @@ async function sendMessage(event) {
   });
 
   deleteMessageBtn.addEventListener("click", () => {
-    if (selectedMessageElement) {
-      selectedMessageElement.remove();
-      selectedMessageElement = null;
-      messageMenu.classList.add("hidden");
+    if (!currentMessageIdToDelete) {
+      alert("شناسه پیام برای حذف یافت نشد.");
+      return;
     }
+    messageMenu.classList.add("hidden");
+    document.getElementById('deleteMessageModal').style.display = 'flex';
+    document.body.classList.add('modal1-open');
   });
+
 
 
 
     // جستجوی کاربران با تایمر (debounce)
     let timeout = null;
-    let currentMessageIdToDelete = null;
-
-document.addEventListener('click', function (e) {
-  const deleteBtn = e.target.closest('#deleteMessage');
-  if (deleteBtn) {
-    const messageId = deleteBtn.dataset.messageId;
-    currentMessageIdToDelete = messageId;
-    document.getElementById('deleteMessageModal').style.display = 'flex';
-    document.body.classList.add('modal1-open');
-  }
-});
-
-document.getElementById('cancelDeleteMessageBtn').addEventListener('click', function () {
-  document.getElementById('deleteMessageModal').style.display = 'none';
-  document.body.classList.remove('modal1-open');
-  currentMessageIdToDelete = null;
-});
-
 document.getElementById('confirmDeleteMessageBtn').addEventListener('click', function () {
-  // مودال رو بلافاصله ببند
+  // مودال رو سریع ببند
   document.getElementById('deleteMessageModal').style.display = 'none';
   document.body.classList.remove('modal1-open');
+
+  console.log('آیدی پیام برای حذف:', currentMessageIdToDelete);
+  console.log('توکن CSRF:', getCSRFToken());
 
   const deleteForAll = document.getElementById('deleteForAllCheckbox').checked;
 
-  fetch(`/delete-message/${currentMessageIdToDelete}/`, {
-    method: 'POST',
+  // چون API حذف معمولا فقط DELETE داره و body معمول نیست،
+  // اگه لازم داری delete_for_all رو بفرستی، بهتر به صورت query param ارسال کنی
+  const url = `/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`;
+
+  fetch(url, {
+    method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
       'X-CSRFToken': getCSRFToken(),
-    },
-    body: JSON.stringify({ delete_for_all: deleteForAll })
+    }
+    // بدون body چون DELETE با body استاندارد نیست
   })
   .then(response => {
+    console.log('وضعیت پاسخ:', response.status);
     if (response.ok) {
-      const msgEl = document.querySelector(`[data-message-id="${currentMessageIdToDelete}"]`);
+      // پیام رو از صفحه حذف کن
+      const msgEl = document.querySelector(`[data-id="${currentMessageIdToDelete}"]`);
       if (msgEl) msgEl.remove();
+      currentMessageIdToDelete = null;
     } else {
       console.error("خطا در حذف پیام");
+      alert("حذف پیام موفق نبود.");
     }
   })
   .catch(err => {
     console.error("خطای Fetch:", err);
+    alert("خطا در ارسال درخواست حذف پیام.");
   });
 });
+
+
 
 
 function getCSRFToken() {
