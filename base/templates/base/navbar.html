@@ -3726,7 +3726,7 @@ document.body.addEventListener("click", (e) => {
       chatInput.focus();
     }, 100);
   }
-});
+
 
 
 });
@@ -3783,6 +3783,38 @@ function getCookie(name) {
   }
   return cookieValue;
 }
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+if (isMobile) {
+  document.addEventListener("click", (e) => {
+    const messageEl = e.target.closest(".chat-message");
+    if (!messageEl) {
+      messageMenu.classList.add("hidden");
+      document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+      selectedMessageId = null;
+      selectedMessageElement = null;
+      return;
+    }
+    
+    e.preventDefault();
+    openMessageMenuFor(messageEl);
+  });
+} else {
+  document.addEventListener("contextmenu", (e) => {
+    const messageEl = e.target.closest(".chat-message");
+    if (!messageEl) {
+      messageMenu.classList.add("hidden");
+      document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+      selectedMessageId = null;
+      selectedMessageElement = null;
+      return;
+    }
+
+    e.preventDefault();
+    openMessageMenuFor(messageEl);
+  });
+}
+
 function openMessageMenuFor(messageEl) {
   selectedMessageId = messageEl.dataset.id ?? null;
   selectedMessageElement = messageEl;
@@ -3797,51 +3829,33 @@ function openMessageMenuFor(messageEl) {
   document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
   messageEl.classList.add("selected");
 
-  // ابتدا نمایش موقت منو برای محاسبه اندازه
   messageMenu.classList.add("hidden");
   messageMenu.style.visibility = "hidden";
   messageMenu.style.display = "block";
 
-  const gapHorizontal = 12;
-  const gapVertical = 10; // فاصله کوچک بالای پیام داخل مودال
+  const gapHorizontal = 12; // فاصله افقی مثل قبل
 
   const msgRect = messageEl.getBoundingClientRect();
   const menuWidth = messageMenu.offsetWidth;
   const menuHeight = messageMenu.offsetHeight;
 
+  const gapVertical = 150; // فاصله بزرگ برای همه پیام‌ها
+
   let posX, posY;
 
-  const chatModal = document.getElementById("chatModal");
-  const insideModal = chatModal && chatModal.contains(messageEl);
+  posY = msgRect.top - menuHeight - gapVertical;
 
-  if (insideModal) {
-    // اگر داخل مودال هستیم، منو را بالای پیام و وسط افقی پیام قرار بده
-    posY = msgRect.top - menuHeight - gapVertical;
-    if (posY < 0) {
-      posY = msgRect.bottom + gapVertical;
-    }
-    posX = msgRect.left + (msgRect.width / 2) - (menuWidth / 2);
+  if (posY < 0) {
+    posY = msgRect.bottom + gapVertical;
+  }
 
-    // محدود کردن داخل صفحه
-    if (posX < gapHorizontal) posX = gapHorizontal;
-    if (posX + menuWidth > window.innerWidth - gapHorizontal) posX = window.innerWidth - menuWidth - gapHorizontal;
-
+  if (messageEl.classList.contains("me")) {
+    posX = msgRect.left - menuWidth - gapHorizontal;
+    if (posX < 0) posX = gapHorizontal;
   } else {
-    // خارج مودال: رفتار قبلی (مثلاً کنار پیام سمت چپ یا راست)
-    posY = msgRect.top - menuHeight - gapVertical;
-
-    if (posY < 0) {
-      posY = msgRect.bottom + gapVertical;
-    }
-
-    if (messageEl.classList.contains("me")) {
-      posX = msgRect.left - menuWidth - gapHorizontal;
-      if (posX < 0) posX = gapHorizontal;
-    } else {
-      posX = msgRect.right + gapHorizontal;
-      if (posX + menuWidth > window.innerWidth - gapHorizontal) {
-        posX = window.innerWidth - menuWidth - gapHorizontal;
-      }
+    posX = msgRect.right + gapHorizontal;
+    if (posX + menuWidth > window.innerWidth) {
+      posX = window.innerWidth - menuWidth - gapHorizontal;
     }
   }
 
@@ -3852,10 +3866,6 @@ function openMessageMenuFor(messageEl) {
   messageMenu.style.visibility = "visible";
   messageMenu.classList.remove("hidden");
 }
-
-
-
-
   // ویرایش پیام
   document.getElementById("editMessage").addEventListener("click", () => {
     if (!selectedMessageElement) return;
