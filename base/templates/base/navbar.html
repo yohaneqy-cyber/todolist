@@ -2749,207 +2749,289 @@ async function sendMessage(event) {
   window.openChatModal = openChatModal;
 
 
-  document.addEventListener('DOMContentLoaded', () => {
-    
-    // المان‌های مودال‌ها و دکمه‌ها
-    const modals = {
-      friends: {
-        modal: document.getElementById('friendsModal'),
-        openBtn: document.getElementById('openFriendsModal'),
-        closeBtn: document.getElementById('closeFriendsModal')
-      },
-      confirmUnfriend: {
-        modal: document.getElementById('confirmUnfriendModal'),
-        closeBtn: document.getElementById('closeConfirmUnfriendModal'),
-        cancelBtn: document.getElementById('cancelUnfriendBtn'),
-        confirmBtn: document.getElementById('confirmUnfriendBtn')
-      },
-      userProfile: {
-        modal: document.getElementById('userProfileModal'),
-        closeBtn: document.getElementById('closeUserProfileModal')
-      },
-      logout: {
-        modal: document.getElementById('logoutModal'),
-        openBtn: document.getElementById('openLogoutModal'),
-        closeBtn: document.getElementById('closeLogoutModal'),
-        cancelBtn: document.getElementById('cancelLogoutBtn')
-      }
-    };
+ document.addEventListener('DOMContentLoaded', () => {
+  // ---- مودال‌ها ----
+  const modals = {
+    friends: {
+      modal: document.getElementById('friendsModal'),
+      openBtn: document.getElementById('openFriendsModal'),
+      closeBtn: document.getElementById('closeFriendsModal')
+    },
+    confirmUnfriend: {
+      modal: document.getElementById('confirmUnfriendModal'),
+      closeBtn: document.getElementById('closeConfirmUnfriendModal'),
+      cancelBtn: document.getElementById('cancelUnfriendBtn'),
+      confirmBtn: document.getElementById('confirmUnfriendBtn')
+    },
+    userProfile: {
+      modal: document.getElementById('userProfileModal'),
+      closeBtn: document.getElementById('closeUserProfileModal')
+    },
+    logout: {
+      modal: document.getElementById('logoutModal'),
+      openBtn: document.getElementById('openLogoutModal'),
+      closeBtn: document.getElementById('closeLogoutModal'),
+      cancelBtn: document.getElementById('cancelLogoutBtn')
+    }
+  };
 
-
-    // مدیریت باز و بسته کردن مودال دوستان
-if (modals.friends.openBtn && modals.friends.modal) {
-  modals.friends.openBtn.addEventListener('click', e => {
-    e.preventDefault();
-
-    // جلوگیری از باز ماندن کیبورد موبایل با تاخیر خیلی کوتاه
+  // مدیریت مودال دوستان
+  if (modals.friends.openBtn && modals.friends.modal) {
+    modals.friends.openBtn.addEventListener('click', e => {
+      e.preventDefault();
       setTimeout(() => {
-        if (document.activeElement) {
-          document.activeElement.blur();
-        }
-        const searchInputEl = document.getElementById('userSearchInput');
-        if (searchInputEl) {
-          searchInputEl.blur();
-        }
-      }, 100); // 0ms هم کافیه
+        if (document.activeElement) document.activeElement.blur();
+        const input = document.getElementById('userSearchInput');
+        if (input) input.blur();
+      }, 100);
 
       openModal(modals.friends.modal);
       showSearchTab();
 
-      // ریست سرچ
-      const searchInput = document.getElementById('userSearchInput');
-      searchInput.value = "";
+      const input = document.getElementById('userSearchInput');
+      input.value = "";
       document.getElementById('userList').innerHTML = "";
 
-      // فقط روی دسکتاپ فوکوس کن
       if (window.innerWidth > 768) {
-        setTimeout(() => {
-          searchInput.focus();
-        }, 100);
+        setTimeout(() => input.focus(), 100);
       }
     });
   }
 
-    if (modals.friends.closeBtn && modals.friends.modal) {
-      modals.friends.closeBtn.addEventListener('click', () => closeModal(modals.friends.modal));
-      modals.friends.modal.addEventListener('click', e => {
-        if (e.target === modals.friends.modal) closeModal(modals.friends.modal);
-      });
-    }
+  if (modals.friends.closeBtn && modals.friends.modal) {
+    modals.friends.closeBtn.addEventListener('click', () => closeModal(modals.friends.modal));
+    modals.friends.modal.addEventListener('click', e => {
+      if (e.target === modals.friends.modal) closeModal(modals.friends.modal);
+    });
+  }
 
-    // مدیریت مودال تایید حذف دوست (Unfriend)
-    let friendToRemoveId = null;
-    if (modals.confirmUnfriend.modal) {
-      modals.confirmUnfriend.closeBtn.addEventListener('click', () => closeModal(modals.confirmUnfriend.modal));
-      modals.confirmUnfriend.cancelBtn.addEventListener('click', () => {
+  // مودال تایید Unfriend
+  let friendToRemoveId = null;
+  if (modals.confirmUnfriend.modal) {
+    modals.confirmUnfriend.closeBtn.addEventListener('click', () => closeModal(modals.confirmUnfriend.modal));
+    modals.confirmUnfriend.cancelBtn.addEventListener('click', () => {
+      friendToRemoveId = null;
+      closeModal(modals.confirmUnfriend.modal);
+    });
+    modals.confirmUnfriend.modal.addEventListener('click', e => {
+      if (e.target === modals.confirmUnfriend.modal) {
         friendToRemoveId = null;
         closeModal(modals.confirmUnfriend.modal);
-      });
-      modals.confirmUnfriend.modal.addEventListener('click', e => {
-        if (e.target === modals.confirmUnfriend.modal) {
-          friendToRemoveId = null;
-          closeModal(modals.confirmUnfriend.modal);
-        }
-      });
-      modals.confirmUnfriend.confirmBtn.addEventListener('click', () => {
-        if (!friendToRemoveId) return;
-        fetch(`/unfriend/${friendToRemoveId}/`, {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": getCSRFToken(),
-            "X-Requested-With": "XMLHttpRequest"
-          }
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            closeModal(modals.confirmUnfriend.modal);
-            friendToRemoveId = null;
-            loadFriendsList();
-          } else {
-            alert(data.error || "Failed to unfriend.");
-          }
-        })
-        .catch(() => alert("Network error, please try again."));
-      });
-    }
-
-    // مدیریت مودال پروفایل کاربر
-    if (modals.userProfile.modal && modals.userProfile.closeBtn) {
-      modals.userProfile.closeBtn.addEventListener('click', () => closeModal(modals.userProfile.modal));
-      modals.userProfile.modal.addEventListener('click', e => {
-        if (e.target === modals.userProfile.modal) closeModal(modals.userProfile.modal);
-      });
-    }
-
-    // مدیریت مودال خروج (Logout)
-    if (modals.logout.openBtn && modals.logout.modal) {
-      modals.logout.openBtn.addEventListener('click', e => {
-        e.preventDefault();
-        openModal(modals.logout.modal);
-      });
-    }
-    if (modals.logout.closeBtn) {
-      modals.logout.closeBtn.addEventListener('click', () => closeModal(modals.logout.modal));
-    }
-    if (modals.logout.cancelBtn) {
-      modals.logout.cancelBtn.addEventListener('click', () => closeModal(modals.logout.modal));
-    }
-    if (modals.logout.modal) {
-      modals.logout.modal.addEventListener('click', e => {
-        if (e.target === modals.logout.modal) closeModal(modals.logout.modal);
-      });
-    }
-
-    // بستن مودال‌ها با دکمه Escape
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        Object.values(modals).forEach(({modal}) => {
-          if (modal && modal.style.display === 'flex') {
-            closeModal(modal);
-          }
-        });
       }
     });
+    modals.confirmUnfriend.confirmBtn.addEventListener('click', () => {
+      if (!friendToRemoveId) return;
+      fetch(`/unfriend/${friendToRemoveId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCSRFToken(),
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          closeModal(modals.confirmUnfriend.modal);
+          friendToRemoveId = null;
+          loadFriendsList();
+        } else {
+          alert(data.error || "Failed to unfriend.");
+        }
+      })
+      .catch(() => alert("Network error, please try again."));
+    });
+  }
 
-    // --- بخش تب‌ها (Search, Requests, Friends) ---
-    const searchTabBtn = document.getElementById("searchTabBtn");
-    const requestsTabBtn = document.getElementById("requestsTabBtn");
-    const friendsTabBtn = document.getElementById("friendsTabBtn");
+  // مودال پروفایل
+  if (modals.userProfile.modal && modals.userProfile.closeBtn) {
+    modals.userProfile.closeBtn.addEventListener('click', () => closeModal(modals.userProfile.modal));
+    modals.userProfile.modal.addEventListener('click', e => {
+      if (e.target === modals.userProfile.modal) closeModal(modals.userProfile.modal);
+    });
+  }
 
-    const searchSection = document.getElementById("searchSection");
-    const requestsSection = document.getElementById("requestsSection");
-    const friendsSection = document.getElementById("friendsSection");
+  // مودال خروج
+  if (modals.logout.openBtn && modals.logout.modal) {
+    modals.logout.openBtn.addEventListener('click', e => {
+      e.preventDefault();
+      openModal(modals.logout.modal);
+    });
+  }
 
-    const friendRequestsList = document.getElementById("friendRequestsList");
-    const noRequestsMsg = document.getElementById("noRequestsMsg");
-    const errorLoadingRequests = document.getElementById("errorLoadingRequests");
+  if (modals.logout.closeBtn) {
+    modals.logout.closeBtn.addEventListener('click', () => closeModal(modals.logout.modal));
+  }
 
-    const friendsList = document.getElementById("friendsList");
-    const noFriendsMsg = document.getElementById("noFriendsMsg");
+  if (modals.logout.cancelBtn) {
+    modals.logout.cancelBtn.addEventListener('click', () => closeModal(modals.logout.modal));
+  }
 
-    const searchInput = document.getElementById("userSearchInput");
-    const userList = document.getElementById("userList");
+  if (modals.logout.modal) {
+    modals.logout.modal.addEventListener('click', e => {
+      if (e.target === modals.logout.modal) closeModal(modals.logout.modal);
+    });
+  }
 
-    // نمایش تب‌ها
-    function showSearchTab() {
-      searchSection.style.display = "block";
-      requestsSection.style.display = "none";
-      friendsSection.style.display = "none";
-      searchTabBtn.disabled = true;
-      requestsTabBtn.disabled = false;
-      friendsTabBtn.disabled = false;
-      hideErrorMessage();
+  // بستن مودال با Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      Object.values(modals).forEach(({ modal }) => {
+        if (modal && modal.style.display === 'flex') {
+          closeModal(modal);
+        }
+      });
     }
+  });
 
-    function showRequestsTab() {
-      searchSection.style.display = "none";
-      requestsSection.style.display = "block";
-      friendsSection.style.display = "none";
-      searchTabBtn.disabled = false;
-      requestsTabBtn.disabled = true;
-      friendsTabBtn.disabled = false;
-      loadFriendRequests();
-      hideErrorMessage();
+  // --- تب‌ها ---
+  const searchTabBtn = document.getElementById("searchTabBtn");
+  const requestsTabBtn = document.getElementById("requestsTabBtn");
+  const friendsTabBtn = document.getElementById("friendsTabBtn");
+
+  const searchSection = document.getElementById("searchSection");
+  const requestsSection = document.getElementById("requestsSection");
+  const friendsSection = document.getElementById("friendsSection");
+
+  const searchInput = document.getElementById("userSearchInput");
+  const userList = document.getElementById("userList");
+
+  function showSearchTab() {
+    searchSection.style.display = "block";
+    requestsSection.style.display = "none";
+    friendsSection.style.display = "none";
+    searchTabBtn.disabled = true;
+    requestsTabBtn.disabled = false;
+    friendsTabBtn.disabled = false;
+    hideErrorMessage();
+  }
+
+  function showRequestsTab() {
+    searchSection.style.display = "none";
+    requestsSection.style.display = "block";
+    friendsSection.style.display = "none";
+    searchTabBtn.disabled = false;
+    requestsTabBtn.disabled = true;
+    friendsTabBtn.disabled = false;
+    loadFriendRequests();
+    hideErrorMessage();
+  }
+
+  function showFriendsTab() {
+    searchSection.style.display = "none";
+    requestsSection.style.display = "none";
+    friendsSection.style.display = "block";
+    searchTabBtn.disabled = false;
+    requestsTabBtn.disabled = false;
+    friendsTabBtn.disabled = true;
+    loadFriendsList();
+    hideErrorMessage();
+  }
+
+  searchTabBtn.addEventListener("click", showSearchTab);
+  requestsTabBtn.addEventListener("click", showRequestsTab);
+  friendsTabBtn.addEventListener("click", showFriendsTab);
+
+  // --- کلیک راست روی پیام چت ---
+  const chatMessages = document.getElementById("chatMessages");
+  const messageMenu = document.getElementById("messageMenu");
+  const deleteMessageBtn = document.getElementById("deleteMessage");
+
+  let selectedMessageElement = null;
+
+  chatMessages.addEventListener("contextmenu", function (e) {
+    const messageEl = e.target.closest(".chat-message");
+    if (!messageEl) return;
+
+    e.preventDefault();
+    selectedMessageElement = messageEl;
+
+    document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+    messageEl.classList.add("selected");
+
+    messageMenu.style.left = `${e.clientX}px`;
+    messageMenu.style.top = `${e.clientY}px`;
+    messageMenu.style.position = "fixed";
+    messageMenu.classList.remove("hidden");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!messageMenu.contains(e.target)) {
+      messageMenu.classList.add("hidden");
+      selectedMessageElement = null;
     }
+  });
 
-    function showFriendsTab() {
-      searchSection.style.display = "none";
-      requestsSection.style.display = "none";
-      friendsSection.style.display = "block";
-      searchTabBtn.disabled = false;
-      requestsTabBtn.disabled = false;
-      friendsTabBtn.disabled = true;
-      loadFriendsList();
-      hideErrorMessage();
+  deleteMessageBtn.addEventListener("click", () => {
+    if (selectedMessageElement) {
+      selectedMessageElement.remove();
+      selectedMessageElement = null;
+      messageMenu.classList.add("hidden");
     }
+  });
 
-    searchTabBtn.addEventListener("click", showSearchTab);
-    requestsTabBtn.addEventListener("click", showRequestsTab);
-    friendsTabBtn.addEventListener("click", showFriendsTab);
+
 
     // جستجوی کاربران با تایمر (debounce)
     let timeout = null;
+    let currentMessageIdToDelete = null;
+
+document.addEventListener('click', function (e) {
+  const deleteBtn = e.target.closest('#deleteMessage');
+  if (deleteBtn) {
+    const messageId = deleteBtn.dataset.messageId;
+    currentMessageIdToDelete = messageId;
+    document.getElementById('deleteMessageModal').style.display = 'flex';
+    document.body.classList.add('modal1-open');
+  }
+});
+
+document.getElementById('cancelDeleteMessageBtn').addEventListener('click', function () {
+  document.getElementById('deleteMessageModal').style.display = 'none';
+  document.body.classList.remove('modal1-open');
+  currentMessageIdToDelete = null;
+});
+
+document.getElementById('confirmDeleteMessageBtn').addEventListener('click', function () {
+  // مودال رو بلافاصله ببند
+  document.getElementById('deleteMessageModal').style.display = 'none';
+  document.body.classList.remove('modal1-open');
+
+  const deleteForAll = document.getElementById('deleteForAllCheckbox').checked;
+
+  fetch(`/delete-message/${currentMessageIdToDelete}/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCSRFToken(),
+    },
+    body: JSON.stringify({ delete_for_all: deleteForAll })
+  })
+  .then(response => {
+    if (response.ok) {
+      const msgEl = document.querySelector(`[data-message-id="${currentMessageIdToDelete}"]`);
+      if (msgEl) msgEl.remove();
+    } else {
+      console.error("خطا در حذف پیام");
+    }
+  })
+  .catch(err => {
+    console.error("خطای Fetch:", err);
+  });
+});
+
+
+function getCSRFToken() {
+  const name = 'csrftoken';
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.startsWith(name + '=')) {
+      return decodeURIComponent(cookie.substring(name.length + 1));
+    }
+  }
+  return '';
+}
+
 searchInput.addEventListener("input", function() {
   clearTimeout(timeout);
   const query = this.value.trim();
@@ -3833,16 +3915,13 @@ function openMessageMenuFor(messageEl) {
   messageMenu.style.visibility = "hidden";
   messageMenu.style.display = "block";
 
-  const gapHorizontal = 12; // فاصله افقی مثل قبل
-
+  const gapHorizontal = 12;
   const msgRect = messageEl.getBoundingClientRect();
   const menuWidth = messageMenu.offsetWidth;
   const menuHeight = messageMenu.offsetHeight;
-
-  const gapVertical = 150; // فاصله بزرگ برای همه پیام‌ها
+  const gapVertical = 150;
 
   let posX, posY;
-
   posY = msgRect.top - menuHeight - gapVertical;
 
   if (posY < 0) {
@@ -3866,6 +3945,7 @@ function openMessageMenuFor(messageEl) {
   messageMenu.style.visibility = "visible";
   messageMenu.classList.remove("hidden");
 }
+
   // ویرایش پیام
   document.getElementById("editMessage").addEventListener("click", () => {
     if (!selectedMessageElement) return;
