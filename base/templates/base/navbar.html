@@ -31,37 +31,27 @@
   background-size: cover;
   background-position: center center;
 
-  /* New width */
-  width: 100%; /* or try a fixed size like 1200px */
-  max-width: 1700px; /* optional, keeps it from being too wide */
-  margin: 0 auto; /* center horizontally */
+  /* Width control */
+  width: 100%;
+  max-width: 1700px;
+  margin: 0 auto;
 }
-
-
 
 /* Scrollbar styling */
 #chatMessages::-webkit-scrollbar {
   width: 10px;
 }
-
 #chatMessages::-webkit-scrollbar-track {
   background: #f0f0f0;
   border-radius: 12px;
 }
-
-#chatMessages::-webkit-scrollbar-thumb {
-  background-color: #aaa;
-  border-radius: 12px;
-  border: 3px solid #f0f0f0;
-}
-
-
 #chatMessages::-webkit-scrollbar-thumb {
   background-color: #bbb;
   border-radius: 8px;
   border: 2px solid #f0f0f0;
 }
 
+/* Modal container */
 .chat-modal {
   position: fixed;
   z-index: 9999;
@@ -76,36 +66,43 @@
   backdrop-filter: blur(2px);
 }
 
+/* Modal content desktop */
 .chat-modal-content {
-  width: 700px !important;         /* عرض ثابت بر حسب پیکسل */
-  height: 850px !important;        /* ارتفاع ثابت بر حسب پیکسل */
+  width: 700px !important;
+  height: 850px !important;
   background-color: white;
   padding: 20px;
-  transform: scale(1);  /* مهم برای جلوگیری از تغییر مقیاس */
+  transform: scale(1);
   font-size: 14px;
-  max-width: 95vw !important;      /* برای جلوگیری از خروج از صفحه در صفحات کوچکتر */
+  max-width: 95vw !important;
   max-height: 95vh;
   overflow: hidden;
   border-radius: 12px;
 }
 
-
+/* Tablet */
 @media (max-width: 1024px) {
   .chat-modal-content {
-    width: 90vw;
-    height: auto;
+    width: 90vw !important;
+    height: auto !important;
     max-height: 90vh;
   }
 }
 
-/* Mobile screens */
+/* Mobile */
 @media (max-width: 600px) {
   .chat-modal-content {
-    width: 95vw;
-    height: auto;
+    width: 95vw !important;
+    height: auto !important;
     max-height: 85vh;
     padding: 16px;
     font-size: 14px;
+  }
+
+  #chatMessages {
+    min-height: 60vh; /* smaller height on phones */
+    background-size: contain; /* prevent over-zooming background */
+    background-position: center center;
   }
 }
 
