@@ -6,6 +6,198 @@
   <title>MySite</title>
 
   <style>
+
+  
+
+
+#chatMessages {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background-color: #f9f9f9;
+  border: 1.5px solid #ccc;
+  border-radius: 12px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #333;
+  max-height: 100vh;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  min-height: 690px;
+
+  /* Background image */
+  background-image: url('/static/images/chat.png') !important;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+
+  /* New width */
+  width: 100%; /* or try a fixed size like 1200px */
+  max-width: 1700px; /* optional, keeps it from being too wide */
+  margin: 0 auto; /* center horizontally */
+}
+
+
+
+/* Scrollbar styling */
+#chatMessages::-webkit-scrollbar {
+  width: 10px;
+}
+
+#chatMessages::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 12px;
+}
+
+#chatMessages::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 12px;
+  border: 3px solid #f0f0f0;
+}
+
+
+#chatMessages::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 8px;
+  border: 2px solid #f0f0f0;
+}
+
+.chat-modal {
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+}
+
+.chat-modal-content {
+  width: 700px !important;         /* عرض ثابت بر حسب پیکسل */
+  height: 850px !important;        /* ارتفاع ثابت بر حسب پیکسل */
+  background-color: white;
+  padding: 20px;
+  transform: scale(1);  /* مهم برای جلوگیری از تغییر مقیاس */
+  font-size: 14px;
+  max-width: 95vw !important;      /* برای جلوگیری از خروج از صفحه در صفحات کوچکتر */
+  max-height: 95vh;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+
+  @media (max-width: 600px) {
+  .chat-modal-content {
+    padding: 16px;
+    font-size: 14px;
+    max-width: 95%;
+  }
+}
+
+/* Dark mode for chat modal */
+body.dark-mode #chatModal {
+  background-color: rgba(20, 20, 20, 0.9);
+}
+
+body.dark-mode .chat-modal-content {
+  background-color: #222;
+  color: #eee;
+  border: 1px solid #444;
+}
+
+body.dark-mode #chatMessages {
+  background-color: #1a1a1a;
+  border-color: #333;
+  color: #ddd;
+  scrollbar-color: #555 #222;
+}
+
+/* Scrollbar styles for chatMessages in dark mode */
+body.dark-mode #chatMessages::-webkit-scrollbar {
+  width: 8px;
+}
+
+body.dark-mode #chatMessages::-webkit-scrollbar-track {
+  background: #222;
+}
+
+body.dark-mode #chatMessages::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 4px;
+}
+
+body.dark-mode #chatInput {
+  background-color: #333;
+  border: 1px solid #555;
+  color: #eee;
+}
+
+body.dark-mode #chatInput::placeholder {
+  color: #999;
+}
+
+body.dark-mode #chatForm button {
+  background-color: #1565c0;
+  color: #eee;
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode #chatForm button:hover {
+  background-color: #0d3d73;
+}
+
+body.dark-mode .close {
+  color: #bbb;
+  background: transparent;
+  font-size: 28px;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+body.dark-mode .close:hover {
+  color: white;
+}
+
+.chat-message.them {
+  pointer-events: none !important; /* disables right-click and all events */
+}
+
+  @keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.message-fade-out {
+  animation: fadeOut 0.3s ease forwards;
+}
+
+
+  @keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+.message-fade-out {
+  animation: fadeOut 0.3s ease forwards;
+}
+
 @keyframes fadeSlideCollapse {
   0% {
     opacity: 1;
@@ -266,25 +458,24 @@ body.dark-mode .my-message.selected {
 }
 
 .edit-textarea {
-  width: 85% !important;
-  min-height: 30px !important;
-  height: auto !important;
-  resize: none !important;
-  overflow: hidden !important;
-  white-space: normal !important;
-  word-wrap: break-word !important;
-  word-break: break-word !important;
-  padding: 4px 20px 4px 6px !important;
-  border: 1px solid #ccc !important;
-  border-radius: 4px !important;
-  box-sizing: border-box !important;
-  background: #fff !important;
-  color: #000 !important;
-  line-height: 1.4 !important;
-  font-family: Arial, sans-serif !important;
-  letter-spacing: normal !important;
-  word-spacing: normal !important;
+  width: 85%;
+  min-height: 30px;
+  resize: none;
+  overflow: hidden;
+  overflow-y: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 4px 20px 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background: #fff;
+  color: #000;
+  line-height: 1.4;
+  font-family: Arial, sans-serif;
 }
+
+
 
 /* تایم استمپ داخل ویرایش: زیر اینپوت باشه */
 .edit-inline-wrapper > .message-time {
@@ -435,6 +626,7 @@ body.dark-mode #chatModalTitle {
   text-align: left !important;
   box-shadow: 0 2px 6px rgba(76,175,80,0.4);
   justify-content: flex-end;
+  
 }
 
 /* پیام دیگران */
@@ -644,6 +836,7 @@ body.dark-mode .confirm-btn:active {
 .context-menu {
   position: absolute;
   z-index: 20000;
+  white-space: nowrap; /* جلوگیری از شکستن خطوط */
   background-color: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 10px;
@@ -2074,14 +2267,16 @@ body.logout-modal-open {
     </div>
   </div>
 
-<div id="chatModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="chatModalTitle" style="display:none;">
-  <div class="modal-content" style="max-width: 400px; max-height: 80vh; display: flex; flex-direction: column;">
+<div id="chatModal" class="chat-modal" style="display:none;">
+  <div class="chat-modal-content" style="display: flex; flex-direction: column; height: 90vh; max-width: 400px;">
     <button id="closeChatModal" class="close" aria-label="Close">&times;</button>
     <h2 id="chatModalTitle">Chat with</h2>
-    <div id="chatMessages" style="flex-grow: 1; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; background: #f9f9f9; border-radius: 8px;"></div>
-    <form id="chatForm" style="display: flex; gap: 8px;">
-      <input type="text" id="chatInput" placeholder="Type a message..." style="flex-grow: 1; padding: 8px; border-radius: 4px; border: 1px solid #ccc;" autocomplete="off" />
-      <button type="submit" style="padding: 8px 12px; border-radius: 4px; border: none; background-color: #1e88e5; color: white; cursor: pointer;">Send</button>
+    <div id="chatMessages" style="flex-grow: 1; overflow-y: auto; padding: 16px; background: #f0f0f0; border-radius: 12px;">
+      <!-- پیام‌ها اینجا -->
+    </div>
+    <form id="chatForm" style="display: flex; gap: 8px; margin-top: 8px;">
+      <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" style="flex-grow: 1; padding: 12px; border-radius: 20px; border: 1px solid #ccc;" />
+      <button type="submit" style="padding: 12px 16px; border-radius: 20px; border: none; background-color: #1e88e5; color: white; cursor: pointer;">Send</button>
     </form>
   </div>
 </div>
@@ -2119,7 +2314,7 @@ body.logout-modal-open {
 
 <!-- پیام با قابلیت ویرایش -->
 <!-- پیام با قابلیت ویرایش -->
-<div class="message my-message" data-id="{{ message.id }}">
+<div class="message my-message" data-id="{{ message.id }}" data-receiver-name="{{ message.receiver.username }}">
   <p class="message-text">{{ message.message }}</p>
 
   <!-- ورودی ویرایش با تیک داخل input -->
@@ -2137,6 +2332,7 @@ body.logout-modal-open {
 
 
 
+
 <div id="deleteMessageModal" class="modal unfriend-modal" role="dialog" aria-modal="true" aria-labelledby="deleteMessageTitle" aria-hidden="true" style="display:none;">
   <div class="modal-content">
     <h2 id="deleteMessageTitle">Delete Message</h2>
@@ -2144,8 +2340,9 @@ body.logout-modal-open {
 
     <label style="display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 14px; cursor: pointer;">
       <input type="checkbox" id="deleteForAllCheckbox" />
-      Delete for <span id="kekewith">all users</span>
+      Delete for <span id="kekewith">this user</span>
     </label>
+
 
     <div class="buttons-container">
       <button class="cancel-btn" id="cancelDeleteMessageBtn" type="button">Cancel</button>
@@ -2155,17 +2352,13 @@ body.logout-modal-open {
 </div>
 
 
-
-
-
-
-
   {% block content %}{% endblock %}
 
 <script>
   window.currentUserId = {% if request.user.is_authenticated %}{{ request.user.id }}{% else %}null{% endif %};
   window.currentUserEmail = {% if request.user.is_authenticated %}"{{ request.user.email|escapejs }}"{% else %}null{% endif %};
   window.currentChatUserId = {{ chat_user.id|default:"null" }};
+  window.currentUserEmail = "{{ request.user.email|escapejs }}";
 </script>
 
 
@@ -2196,30 +2389,7 @@ function getCSRFToken() {
 
   // ذخیره پیام‌ها در localStorage
 // ذخیره پیام‌ها در localStorage
-function saveMessagesToLocalStorage(userId) {
-  if (!userId) return;
-
-  const chatMessages = document.getElementById("chatMessages");
-  if (!chatMessages) return;
-
-  const messages = [];
-  chatMessages.querySelectorAll(".chat-message").forEach((msgElem, index) => {
-    const content = msgElem.querySelector(".message-text")?.textContent || "";
-    const timestamp = msgElem.querySelector(".message-time")?.textContent || "";
-    const isMe = msgElem.classList.contains("me");
-
-    const rawId = msgElem.dataset.id;
-    const id = rawId && !rawId.startsWith("local-") ? parseInt(rawId) : null;
-
-    messages.push({ id, content, timestamp, isMe });
-  });
-
-  localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
-}
-
-
-// بارگذاری پیام‌ها از localStorage
-function loadMessagesFromLocalStorage(userId) {
+function loadMessagesFromLocalStorage(userId, receiverName) {
   if (!userId) return;
   const chatMessages = document.getElementById("chatMessages");
   if (!chatMessages) return;
@@ -2232,27 +2402,31 @@ function loadMessagesFromLocalStorage(userId) {
 
   messages.forEach((msg, index) => {
     const msgElem = document.createElement("div");
-    msgElem.classList.add("chat-message");
-    if (msg.isMe) msgElem.classList.add("me");
-    else msgElem.classList.add("them");
 
-    // ✅ اضافه کردن index و id برای ویرایش
+    // تعیین کلاس بر اساس sender
+    msgElem.classList.add("message");
+    if (msg.isMe) {
+      msgElem.classList.add("my-message");
+    } else {
+      msgElem.classList.add("their-message");
+    }
+
+    // اضافه کردن index و id
     msgElem.dataset.index = index;
-    msgElem.dataset.id = msg.id ?? `local-${index}`;  // اگر msg.id نبود، local
+    msgElem.dataset.id = msg.id ?? `local-${index}`;
 
-    const contentWrapper = document.createElement("div");
-    contentWrapper.classList.add("message-content");
+    // ✨ اضافه کردن data-receiver-name برای منوی راست‌کلیک
+    msgElem.dataset.receiverName = receiverName;
 
-    const textSpan = document.createElement("span");
-    textSpan.classList.add("message-text");
-    textSpan.textContent = msg.content;
+    const textP = document.createElement("p");
+    textP.classList.add("message-text");
+    textP.textContent = msg.content;
 
     const timeSpan = document.createElement("span");
     timeSpan.classList.add("message-time");
     timeSpan.textContent = msg.timestamp;
 
-    contentWrapper.appendChild(textSpan);
-    msgElem.appendChild(contentWrapper);
+    msgElem.appendChild(textP);
     msgElem.appendChild(timeSpan);
 
     chatMessages.appendChild(msgElem);
@@ -2261,60 +2435,6 @@ function loadMessagesFromLocalStorage(userId) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// ✅ بارگذاری پیام‌ها از سرور و اضافه کردن شناسه‌ها برای ویرایش
-async function loadMessagesFromServer(senderId, receiverId) {
-  try {
-    console.log(`📡 Fetching: /api/chat/messages/?sender_id=${senderId}&receiver_id=${receiverId}`);
-
-    const response = await fetch(`/api/chat/messages/?sender_id=${senderId}&receiver_id=${receiverId}`, {
-      credentials: 'include'
-    });
-
-    if (!response.ok) {
-      console.error(`❌ وضعیت درخواست: ${response.status}`);
-      throw new Error('خطا در دریافت پیام‌ها');
-    }
-
-    const data = await response.json();
-    const messages = data.messages || [];
-
-    const chatMessages = document.getElementById("chatMessages");
-    chatMessages.innerHTML = "";
-
-    messages.forEach((msg, index) => {
-      const msgElem = document.createElement("div");
-      msgElem.classList.add("chat-message");
-
-      // ✅ اضافه کردن شناسه و ایندکس
-      msgElem.dataset.id = msg.id;
-      msgElem.dataset.index = index;
-
-      if (msg.sender === window.currentUserEmail) {
-        msgElem.classList.add("me");
-      } else {
-        msgElem.classList.add("them");
-      }
-
-      const textSpan = document.createElement("span");
-      textSpan.classList.add("message-text");
-      textSpan.textContent = msg.message;
-
-      const timeSpan = document.createElement("span");
-      timeSpan.classList.add("message-time");
-      timeSpan.textContent = msg.timestamp;
-
-      msgElem.appendChild(textSpan);
-      msgElem.appendChild(timeSpan);
-      chatMessages.appendChild(msgElem);
-    });
-
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    saveMessagesToLocalStorage(receiverId);
-
-  } catch (error) {
-    console.error("❌ خطا در loadMessagesFromServer:", error);
-  }
-}
 
 // ✅ ذخیره پیام‌ها در localStorage با id
 function saveMessagesToLocalStorage(userId) {
@@ -2337,80 +2457,32 @@ function saveMessagesToLocalStorage(userId) {
 }
 
 // ✅ بارگذاری پیام‌ها از localStorage با id و index
-function loadMessagesFromLocalStorage(userId) {
-  if (!userId) return;
-  const chatMessages = document.getElementById("chatMessages");
-  if (!chatMessages) return;
+let selectedMessage = null;
 
+
+// Delete Message with Fade-Out
+function deleteSelectedMessage(userId) {
+  if (!selectedMessage || !userId) return;
+
+  const index = parseInt(selectedMessage.dataset.index);
   const stored = localStorage.getItem(`chatMessages_${userId}`);
   if (!stored) return;
 
   const messages = JSON.parse(stored);
-  chatMessages.innerHTML = "";
+  messages.splice(index, 1);
+  localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
 
-  messages.forEach((msg, index) => {
-    const msgElem = document.createElement("div");
-    msgElem.classList.add("chat-message");
-    if (msg.isMe) msgElem.classList.add("me");
-    else msgElem.classList.add("them");
+  // Fade-out animation before removing from DOM
+  selectedMessage.style.transition = "opacity 0.4s ease";
+  selectedMessage.style.opacity = "0";
+  setTimeout(() => {
+    selectedMessage.remove();
+    selectedMessage = null;
+  }, 400);
 
-    msgElem.dataset.id = msg.id || `local-${index}`;
-    msgElem.dataset.index = index;
-
-    const textSpan = document.createElement("span");
-    textSpan.classList.add("message-text");
-    textSpan.textContent = msg.content;
-
-    const timeSpan = document.createElement("span");
-    timeSpan.classList.add("message-time");
-    timeSpan.textContent = msg.timestamp;
-
-    msgElem.appendChild(textSpan);
-    msgElem.appendChild(timeSpan);
-
-    chatMessages.appendChild(msgElem);
-  });
-
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  document.getElementById("messageMenu")?.classList.add("hidden");
 }
 
-
-function loadMessagesFromLocalStorage(userId) {
-  if (!userId) return;
-  const chatMessages = document.getElementById("chatMessages");
-  if (!chatMessages) return;
-
-  const stored = localStorage.getItem(`chatMessages_${userId}`);
-  if (!stored) return;
-
-  const messages = JSON.parse(stored);
-  chatMessages.innerHTML = "";
-
-  messages.forEach((msg, index) => {
-    const msgElem = document.createElement("div");
-    msgElem.classList.add("chat-message");
-    if (msg.isMe) msgElem.classList.add("me");
-    else msgElem.classList.add("them");
-
-    // 🔧 مهم: اضافه کردن index و id
-    msgElem.dataset.index = index;
-    msgElem.dataset.id = msg.id ? msg.id : `local-${index}`;
-
-    const textSpan = document.createElement("span");
-    textSpan.classList.add("message-text");
-    textSpan.textContent = msg.content;
-
-    const timeSpan = document.createElement("span");
-    timeSpan.classList.add("message-time");
-    timeSpan.textContent = msg.timestamp;
-
-    msgElem.appendChild(textSpan);
-    msgElem.appendChild(timeSpan);
-    chatMessages.appendChild(msgElem);
-  });
-
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
 
 
 async function loadMessagesFromServer(senderId, receiverId) {
@@ -2441,11 +2513,12 @@ async function loadMessagesFromServer(senderId, receiverId) {
       msgElem.dataset.index = index;
 
       // آیا پیام مال کاربر فعلیه؟
-      if (msg.sender === window.currentUserEmail) {
+      if ((msg.sender || "").trim().toLowerCase() === (window.currentUserEmail || "").trim().toLowerCase()) {
         msgElem.classList.add("me");
       } else {
         msgElem.classList.add("them");
       }
+
 
       const textSpan = document.createElement("span");
       textSpan.classList.add("message-text");
@@ -2656,7 +2729,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!btn) return;
 
     const userId = parseInt(btn.getAttribute("data-user-id"));
-    const userName = btn.getAttribute("data-user-name") || "User";
+    setDeleteTargetName(username || 'this user');
 
     if (isNaN(userId)) return alert("کاربر انتخاب نشده!");
 
@@ -2751,6 +2824,7 @@ async function sendMessage(event) {
 
  document.addEventListener('DOMContentLoaded', () => {
   // ---- مودال‌ها ----
+
   const modals = {
     friends: {
       modal: document.getElementById('friendsModal'),
@@ -2932,10 +3006,128 @@ async function sendMessage(event) {
   friendsTabBtn.addEventListener("click", showFriendsTab);
 
   // --- کلیک راست روی پیام چت ---
+const chatMessages = document.getElementById("chatMessages");
+const messageMenu = document.getElementById("messageMenu");
+const deleteMessageBtn = document.getElementById("deleteMessage");
+const cancelDeleteBtn = document.getElementById("cancelDeleteMessageBtn");
+
+let selectedMessageElement = null;
+let currentMessageIdToDelete = null;
+
+// راست‌کلیک روی پیام‌ها
+chatMessages.addEventListener("contextmenu", function (e) {
+  const messageEl = e.target.closest(".chat-message");
+  if (!messageEl) return;
+
+  e.preventDefault();
+
+  selectedMessageElement = messageEl;
+
+  // ذخیره آیدی پیام برای حذف
+  currentMessageIdToDelete = messageEl.dataset.id;
+
+  // دریافت نام طرف مقابل از data attribute
+  const receiverName = messageEl.dataset.receiverName || "this user";
+
+  // جایگزین کردن نام طرف مقابل در span مودال
+  const kekewithSpan = document.getElementById("kekewith");
+  if (kekewithSpan) {
+    kekewithSpan.textContent = receiverName;
+  }
+
+  // انتخاب پیام (هایلایت کردن)
+  document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+  messageEl.classList.add("selected");
+
+  // نمایش منوی راست‌کلیک کنار موس
+  messageMenu.style.left = `${e.clientX}px`;
+  messageMenu.style.top = `${e.clientY}px`;
+  messageMenu.style.position = "fixed";
+  messageMenu.classList.remove("hidden");
+});
+
+// کلیک بیرون منوی راست‌کلیک باعث بسته شدن منو و لغو انتخاب پیام می‌شود
+document.addEventListener("click", (e) => {
+  if (!messageMenu.contains(e.target)) {
+    messageMenu.classList.add("hidden");
+    selectedMessageElement = null;
+  }
+});
+
+// فقط یکبار listener به دکمه کنسل اضافه کن
+cancelDeleteBtn.addEventListener("click", () => {
+  document.getElementById('deleteMessageModal').style.display = 'none';
+  document.body.classList.remove('modal1-open');
+  selectedMessageElement = null;
+  currentMessageIdToDelete = null;
+});
+
+// وقتی دکمه حذف پیام کلیک شد
+deleteMessageBtn.addEventListener("click", () => {
+  if (!currentMessageIdToDelete) {
+    alert("شناسه پیام برای حذف یافت نشد.");
+    return;
+  }
+  // کلیک روی دکمه YES برای حذف پیام
+const confirmDeleteBtn = document.getElementById('confirmDeleteMessageBtn');
+confirmDeleteBtn.addEventListener('click', () => {
+  if (!currentMessageIdToDelete) return;
+
+  const deleteForAll = document.getElementById('deleteForAllCheckbox').checked;
+
+  // بستن مودال
+  document.getElementById('deleteMessageModal').style.display = 'none';
+  document.body.classList.remove('modal1-open');
+
+  // درخواست حذف
+  fetch(`/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCSRFToken(),
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      // حذف از DOM با انیمیشن
+      const msgEl = document.querySelector(`[data-id="${currentMessageIdToDelete}"]`);
+      if (msgEl) {
+        msgEl.classList.add('message-fade-out');
+        setTimeout(() => msgEl.remove(), 300); // مدت زمان fadeOut
+      }
+    } else {
+      alert("حذف پیام موفق نبود.");
+    }
+    currentMessageIdToDelete = null;
+  })
+  .catch(err => {
+    console.error("خطا در حذف:", err);
+    alert("خطا در ارسال درخواست.");
+  });
+});
+
+  messageMenu.classList.add("hidden");
+  document.getElementById('deleteMessageModal').style.display = 'flex';
+  document.body.classList.add('modal1-open');
+});
+
+
+
+
+
+    // جستجوی کاربران با تایمر (debounce)
+    let timeout = null;
+document.addEventListener('DOMContentLoaded', () => {
   const chatMessages = document.getElementById("chatMessages");
   const messageMenu = document.getElementById("messageMenu");
   const deleteMessageBtn = document.getElementById("deleteMessage");
+  const cancelDeleteBtn = document.getElementById("cancelDeleteMessageBtn");
+  const confirmDeleteMessageBtn = document.getElementById('confirmDeleteMessageBtn');
+  const deleteMessageModal = document.getElementById('deleteMessageModal');
+  const deleteForAllCheckbox = document.getElementById('deleteForAllCheckbox');
+  const kekewithSpan = document.getElementById("kekewith");
 
+  let selectedMessageElement = null;
   let currentMessageIdToDelete = null;
 
   chatMessages.addEventListener("contextmenu", function (e) {
@@ -2943,10 +3135,14 @@ async function sendMessage(event) {
     if (!messageEl) return;
 
     e.preventDefault();
-    selectedMessageElement = messageEl;
 
-    // مقدار آیدی پیام رو هم ذخیره کن
+    selectedMessageElement = messageEl;
     currentMessageIdToDelete = messageEl.dataset.id;
+
+    const receiverName = messageEl.dataset.receiverName || "this user";
+    if (kekewithSpan) {
+      kekewithSpan.textContent = receiverName;
+    }
 
     document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
     messageEl.classList.add("selected");
@@ -2961,7 +3157,15 @@ async function sendMessage(event) {
     if (!messageMenu.contains(e.target)) {
       messageMenu.classList.add("hidden");
       selectedMessageElement = null;
+      currentMessageIdToDelete = null;
     }
+  });
+
+  cancelDeleteBtn.addEventListener("click", () => {
+    deleteMessageModal.style.display = 'none';
+    document.body.classList.remove('modal1-open');
+    selectedMessageElement = null;
+    currentMessageIdToDelete = null;
   });
 
   deleteMessageBtn.addEventListener("click", () => {
@@ -2969,70 +3173,75 @@ async function sendMessage(event) {
       alert("شناسه پیام برای حذف یافت نشد.");
       return;
     }
+
     messageMenu.classList.add("hidden");
-    document.getElementById('deleteMessageModal').style.display = 'flex';
+    deleteMessageModal.style.display = 'flex';
     document.body.classList.add('modal1-open');
+
+    if (deleteForAllCheckbox) {
+      deleteForAllCheckbox.checked = false;
+    }
   });
 
+  confirmDeleteMessageBtn.addEventListener('click', () => {
+    console.log("دکمه تایید حذف کلیک شد");
 
-
-
-    // جستجوی کاربران با تایمر (debounce)
-    let timeout = null;
-document.getElementById('confirmDeleteMessageBtn').addEventListener('click', function () {
-  // مودال رو سریع ببند
-  document.getElementById('deleteMessageModal').style.display = 'none';
-  document.body.classList.remove('modal1-open');
-
-  console.log('آیدی پیام برای حذف:', currentMessageIdToDelete);
-  console.log('توکن CSRF:', getCSRFToken());
-
-  const deleteForAll = document.getElementById('deleteForAllCheckbox').checked;
-
-  // چون API حذف معمولا فقط DELETE داره و body معمول نیست،
-  // اگه لازم داری delete_for_all رو بفرستی، بهتر به صورت query param ارسال کنی
-  const url = `/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`;
-
-  fetch(url, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCSRFToken(),
+    if (!currentMessageIdToDelete) {
+      alert("شناسه پیام برای حذف یافت نشد.");
+      return;
     }
-    // بدون body چون DELETE با body استاندارد نیست
-  })
-  .then(response => {
-    console.log('وضعیت پاسخ:', response.status);
-    if (response.ok) {
-      // پیام رو از صفحه حذف کن
-      const msgEl = document.querySelector(`[data-id="${currentMessageIdToDelete}"]`);
-      if (msgEl) msgEl.remove();
-      currentMessageIdToDelete = null;
-    } else {
-      console.error("خطا در حذف پیام");
-      alert("حذف پیام موفق نبود.");
-    }
-  })
-  .catch(err => {
-    console.error("خطای Fetch:", err);
-    alert("خطا در ارسال درخواست حذف پیام.");
+
+    deleteMessageModal.style.display = 'none';
+    document.body.classList.remove('modal1-open');
+
+    const deleteForAll = deleteForAllCheckbox ? deleteForAllCheckbox.checked : false;
+    const url = `/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`;
+
+    console.log("در حال ارسال درخواست حذف به:", url);
+
+    fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      credentials: 'include',
+    })
+    .then(response => {
+      console.log("وضعیت پاسخ:", response.status);
+      if (response.ok) {
+        if (selectedMessageElement) {
+          selectedMessageElement.remove();
+        }
+        selectedMessageElement = null;
+        currentMessageIdToDelete = null;
+      } else {
+        response.text().then(text => {
+          console.error("خطای سرور:", text);
+          alert("حذف پیام موفق نبود.");
+        });
+      }
+    })
+    .catch(err => {
+      console.error("خطای Fetch:", err);
+      alert("خطا در ارسال درخواست حذف پیام.");
+    });
   });
 });
 
-
-
-
 function getCSRFToken() {
-  const name = 'csrftoken';
-  const cookies = document.cookie.split(';');
-  for (let cookie of cookies) {
-    cookie = cookie.trim();
-    if (cookie.startsWith(name + '=')) {
-      return decodeURIComponent(cookie.substring(name.length + 1));
-    }
+  const name = 'csrftoken=';
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i].trim();
+    if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
   }
   return '';
 }
+
+
+
 
 searchInput.addEventListener("input", function() {
   clearTimeout(timeout);
@@ -3529,34 +3738,6 @@ function closeModal(modal) {
   document.body.classList.remove("modal-open");
 }
 
-// بارگذاری پیام‌ها از localStorage و نمایش در مودال چت
-function loadMessagesFromLocalStorage() {
-  const chatMessages = document.getElementById("chatMessages");
-  chatMessages.innerHTML = ''; // ابتدا پاک می‌کنیم
-
-  const messages = JSON.parse(localStorage.getItem('chatMessages')) || [];
-  messages.forEach(msg => {
-    const msgElem = document.createElement("div");
-    msgElem.classList.add("chat-message");
-    if(msg.isMe) msgElem.classList.add("me");
-
-    const textSpan = document.createElement("span");
-    textSpan.classList.add("message-text");
-    textSpan.textContent = msg.content;
-
-    const timeSpan = document.createElement("span");
-    timeSpan.classList.add("message-time");
-    timeSpan.textContent = msg.timestamp;
-
-    msgElem.appendChild(textSpan);
-    msgElem.appendChild(timeSpan);
-
-    chatMessages.appendChild(msgElem);
-  });
-
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
 document.addEventListener("DOMContentLoaded", () => {document.addEventListener("DOMContentLoaded", () => {
   const chatModal = document.getElementById("chatModal");
   const closeChatModalBtn = document.getElementById("closeChatModal");
@@ -3592,68 +3773,6 @@ document.addEventListener("DOMContentLoaded", () => {document.addEventListener("
   });
 });
 
-
-function loadMessagesFromLocalStorage(userId) {
-    const messagesStr = localStorage.getItem(`chatMessages_${userId}`);
-    if (!messagesStr) return;
-
-    const messages = JSON.parse(messagesStr);
-    const chatMessages = document.getElementById("chatMessages");
-    chatMessages.innerHTML = "";
-
-    messages.forEach(msg => {
-        const msgElem = document.createElement("div");
-        msgElem.classList.add("chat-message");
-        if (msg.isMe) msgElem.classList.add("me");
-        else {
-          msgElem.classList.add("them")
-        }
-        const textSpan = document.createElement("span");
-        textSpan.classList.add("message-text");
-        textSpan.textContent = msg.content;
-
-        const timeSpan = document.createElement("span");
-        timeSpan.classList.add("message-time");
-        timeSpan.textContent = msg.timestamp;
-
-        msgElem.appendChild(textSpan);
-        msgElem.appendChild(timeSpan);
-
-        chatMessages.appendChild(msgElem);
-    });
-
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-
-  function loadMessagesFromLocalStorage() {
-    const messagesStr = localStorage.getItem("chatMessages");
-    if (!messagesStr) return;
-    const messages = JSON.parse(messagesStr);
-
-    chatMessages.innerHTML = "";
-    messages.forEach(msg => {
-      const msgElem = document.createElement("div");
-      msgElem.classList.add("chat-message");
-      if (msg.isMe) msgElem.classList.add("me");
-      else {
-        msgElem.classList.add('them')
-      }
-      const textSpan = document.createElement("span");
-      textSpan.classList.add("message-text");
-      textSpan.textContent = msg.content;
-
-      const timeSpan = document.createElement("span");
-      timeSpan.classList.add("message-time");
-      timeSpan.textContent = msg.timestamp;
-
-      msgElem.appendChild(textSpan);
-      msgElem.appendChild(timeSpan);
-
-      chatMessages.appendChild(msgElem);
-    });
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
 
   function openModal(modal) {
     if (!modal) return;
@@ -3844,7 +3963,16 @@ function fetchMessages(senderId, receiverId) {
       if (data.messages) {
         chatMessages.innerHTML = "";
         data.messages.forEach(msg => {
-          // ساخت پیام‌ها
+          console.log("📨 msg.sender:", msg.sender);
+          console.log("🙋 currentUserEmail:", window.currentUserEmail);
+
+          const isMine = msg.sender === window.currentUserEmail;
+
+          const messageDiv = document.createElement("div");
+          messageDiv.className = `message ${isMine ? "mine" : "theirs"}`;
+          messageDiv.textContent = msg.text;
+
+          chatMessages.appendChild(messageDiv);
         });
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
@@ -3948,119 +4076,119 @@ function openMessageMenuFor(messageEl) {
   messageMenu.classList.remove("hidden");
 }
 
-  // ویرایش پیام
-  document.getElementById("editMessage").addEventListener("click", () => {
-    if (!selectedMessageElement) return;
-    messageMenu.classList.add("hidden");
+document.getElementById("editMessage").addEventListener("click", () => {
+  console.time("editMessageClick");
 
-    const existingEdit = document.querySelector(".edit-inline-wrapper");
-    if (existingEdit) {
-      const parentMsg = existingEdit.parentElement;
-      const oldTextEl = parentMsg.querySelector(".message-text");
-      const oldTimeEl = parentMsg.querySelector(".message-time");
-      if (oldTextEl && oldTimeEl) {
-        oldTextEl.style.display = "";
-        oldTimeEl.style.display = "";
-      }
-      existingEdit.remove();
+  if (!selectedMessageElement) {
+    console.timeEnd("editMessageClick");
+    return;
+  }
+
+  messageMenu.classList.add("hidden");
+
+  const existingEdit = document.querySelector(".edit-inline-wrapper");
+  if (existingEdit) {
+    const parentMsg = existingEdit.parentElement;
+    const oldTextEl = parentMsg.querySelector(".message-text");
+    const oldTimeEl = parentMsg.querySelector(".message-time");
+    if (oldTextEl && oldTimeEl) {
+      oldTextEl.style.display = "";
+      oldTimeEl.style.display = "";
+    }
+    existingEdit.remove();
+  }
+
+  const textEl = selectedMessageElement.querySelector(".message-text");
+  const timeEl = selectedMessageElement.querySelector(".message-time");
+  if (!textEl || !timeEl) {
+    console.timeEnd("editMessageClick");
+    return;
+  }
+
+  const originalText = textEl.textContent;
+  const originalTime = timeEl.textContent;
+
+  textEl.style.display = "none";
+  timeEl.style.display = "none";
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "edit-inline-wrapper";
+
+  const inputWrapper = document.createElement("div");
+  inputWrapper.className = "edit-input-wrapper";
+
+  const textarea = document.createElement("textarea");
+  textarea.value = originalText;
+  textarea.className = "edit-textarea";
+
+  // استایل‌ها
+  textarea.style.width = "85%";
+  textarea.style.minHeight = "30px";
+  textarea.style.resize = "none";
+  textarea.style.overflow = "hidden";
+  textarea.style.padding = "4px 20px 4px 6px";
+  textarea.style.fontSize = "12px";
+  textarea.style.border = "1px solid #ccc";
+  textarea.style.borderRadius = "4px";
+
+  // دکمه تایید
+  const confirmBtn = document.createElement("button");
+  confirmBtn.className = "edit-confirm-btn";
+  confirmBtn.title = "Confirm";
+  confirmBtn.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1e88e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  `;
+
+  function autoResize() {
+    textarea.style.height = "auto";
+    const maxHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
+    textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + "px";
+  }
+  autoResize();
+  textarea.addEventListener("input", autoResize);
+
+  textarea.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      confirmBtn.click();
+    }
+  });
+
+  inputWrapper.appendChild(textarea);
+  inputWrapper.appendChild(confirmBtn);
+
+  const timeSpan = document.createElement("span");
+  timeSpan.className = "message-time";
+  timeSpan.textContent = originalTime;
+
+  wrapper.appendChild(inputWrapper);
+  wrapper.appendChild(timeSpan);
+
+  selectedMessageElement.appendChild(wrapper);
+
+  textarea.focus();
+
+  confirmBtn.addEventListener("click", () => {
+    const newText = textarea.value.trim();
+    if (!newText) {
+      alert("متن پیام نمی‌تواند خالی باشد.");
+      return;
     }
 
-    const textEl = selectedMessageElement.querySelector(".message-text");
-    const timeEl = selectedMessageElement.querySelector(".message-time");
-    if (!textEl || !timeEl) return;
+    // سریع UI رو به‌روزرسانی کن
+    textEl.textContent = newText;
+    textEl.style.display = "";
+    timeEl.style.display = "";
+    wrapper.remove();
 
-    const originalText = textEl.textContent;
-    const originalTime = timeEl.textContent;
-
-    textEl.style.display = "none";
-    timeEl.style.display = "none";
-
-    const wrapper = document.createElement("div");
-    wrapper.className = "edit-inline-wrapper";
-
-    const inputWrapper = document.createElement("div");
-    inputWrapper.className = "edit-input-wrapper";
-
-    const textarea = document.createElement("textarea");
-    textarea.value = originalText;
-    textarea.className = "edit-textarea";
-    textarea.style.width = "85%";
-    textarea.style.minHeight = "30px";
-    textarea.style.resize = "none";
-    textarea.style.overflow = "hidden";
-    textarea.style.padding = "4px 20px 4px 6px";
-    textarea.style.fontSize = "12px";
-    textarea.style.border = "1px solid #ccc";
-    textarea.style.borderRadius = "4px";
-
-    function autoResize() {
-      textarea.style.height = "auto";
-      textarea.style.height = textarea.scrollHeight + "px";
-    }
-
-    textarea.addEventListener("input", autoResize);
-    autoResize();
-
-    textarea.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        confirmBtn.click();
-      }
-    });
-
-
-    const confirmBtn = document.createElement("button");
-    confirmBtn.className = "edit-confirm-btn";
-    confirmBtn.title = "Confirm";
-    confirmBtn.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1e88e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 6L9 17l-5-5" />
-      </svg>
-    `;
-
-    inputWrapper.appendChild(textarea);
-    inputWrapper.appendChild(confirmBtn);
-
-    const timeSpan = document.createElement("span");
-    timeSpan.className = "message-time";
-    timeSpan.textContent = originalTime;
-
-    wrapper.appendChild(inputWrapper);
-    wrapper.appendChild(timeSpan);
-
-    selectedMessageElement.appendChild(wrapper);
-
-    textarea.focus();
-
-    confirmBtn.addEventListener("click", async () => {
-      const newText = textarea.value.trim();
-      if (!newText) {
-        alert("متن پیام نمی‌تواند خالی باشد.");
-        return;
-      }
-
-      textEl.textContent = newText;
-      textEl.style.display = "";
-      timeEl.style.display = "";
-
-      wrapper.remove();
-
-      const userId = window.currentChatUserId;
-      if (userId) {
-        const stored = localStorage.getItem(`chatMessages_${userId}`);
-        if (stored) {
-          const messages = JSON.parse(stored);
-          const msgIndex = messages.findIndex(msg => msg.id == selectedMessageId);
-          if (msgIndex !== -1) {
-            messages[msgIndex].content = newText;
-            localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
-          }
-        }
-      }
-
+    // ارسال درخواست async بدون await برای سریع بودن UI
+    (async () => {
       try {
-        if (!selectedMessageId || selectedMessageId === "null") {
-          showErrorMessage("شناسه پیام نامعتبر است.");
+        const selectedMessageId = selectedMessageElement?.dataset?.id;
+        if (!selectedMessageId) {
+          alert("شناسه پیام نامعتبر است.");
           return;
         }
 
@@ -4076,16 +4204,26 @@ function openMessageMenuFor(messageEl) {
         });
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("❌ Failed to update on server", errorText);
-          showErrorMessage("ویرایش در سرور انجام نشد.");
+          let errorText = await response.text();
+          try {
+            const errorJson = JSON.parse(errorText);
+            errorText = errorJson.detail || JSON.stringify(errorJson);
+          } catch {}
+          console.error("❌ ویرایش در سرور انجام نشد:", errorText);
+          alert("ویرایش در سرور انجام نشد: " + errorText);
         }
       } catch (error) {
-        console.error("❌ Network error while editing:", error);
-        showErrorMessage("خطای شبکه هنگام ویرایش پیام.");
+        console.error("❌ خطای شبکه هنگام ویرایش:", error);
+        alert("خطای شبکه هنگام ویرایش پیام.");
       }
-    });
+    })();
   });
+
+  console.timeEnd("editMessageClick");
+});
+
+
+
 
   // حذف پیام - باز کردن مودال حذف سفارشی
   document.getElementById("deleteMessage").addEventListener("click", () => {
@@ -4311,7 +4449,6 @@ function sendMessageViaSocket(message) {
   }
 }
 
-
 const textarea = document.querySelector('.edit-textarea');
 textarea.style.height = 'auto';
 textarea.style.height = textarea.scrollHeight + 'px';
@@ -4325,9 +4462,6 @@ textarea.addEventListener("keydown", (e) => {
     confirmBtn.click();
   }
 });
-
-
-
 
 
 </script>
