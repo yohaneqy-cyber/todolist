@@ -56,11 +56,11 @@
 
 /* لیست پیام‌ها */
 #chatMessages {
-  position: relative; /* برای کنترل absolute داخلی */
+  position: relative;
   flex-grow: 1;
   overflow-y: auto;
   padding: 24px;
-  padding-bottom: 80px; /* فضای خالی برای فرم */
+  padding-bottom: 80px;
   background-color: #f9f9f9;
   border: 1.5px solid #ccc;
   border-radius: 12px;
@@ -72,14 +72,13 @@
   word-wrap: break-word;
   min-height: 100%;
   display: flex;
-  flex-direction: column-reverse; /* پیام‌ها از پایین چیده می‌شن */
-  overflow-y: auto;
+  flex-direction: column-reverse;
 
-  /* تصویر پس‌زمینه */
-  background-image: url('/static/images/chat.png') !important;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center center;
+  /* Background with tiled SVG pattern */
+  background-image: url('https://blog.1a23.com/wp-content/uploads/sites/2/2020/02/pattern-3.svg');
+  background-repeat: repeat;
+  background-size: 100px 100px; /* fixed tile size */
+  background-position: top left;
 
   /* عرض */
   width: 100%;
@@ -131,16 +130,6 @@
   border-radius: 12px;
 }
 
-
-/* Tablet */
-@media (max-width: 1024px) {
-  .chat-modal-content {
-    width: 90vw !important;
-    height: auto !important;
-    max-height: 90vh;
-  }
-}
-
 /* Mobile */
 @media (max-width: 600px) {
   .chat-modal-content {
@@ -151,10 +140,18 @@
     font-size: 14px;
   }
 
+
   #chatMessages {
     min-height: 60vh; /* smaller height on phones */
     background-size: contain; /* prevent over-zooming background */
     background-position: center center;
+  }
+    #chatInput {
+    padding: 10px;
+    font-size: 14px;
+  }
+    #chatForm button {
+    padding: 10px 12px;
   }
 }
 
