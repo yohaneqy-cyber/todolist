@@ -3049,133 +3049,16 @@ async function sendMessage(event) {
   friendsTabBtn.addEventListener("click", showFriendsTab);
 
   // --- کلیک راست روی پیام چت ---
-const chatMessages = document.getElementById("chatMessages");
-const messageMenu = document.getElementById("messageMenu");
-const deleteMessageBtn = document.getElementById("deleteMessage");
-const cancelDeleteBtn = document.getElementById("cancelDeleteMessageBtn");
-
-let selectedMessageElement = null;
-let currentMessageIdToDelete = null;
-
-// راست‌کلیک روی پیام‌ها
-chatMessages.addEventListener("contextmenu", function (e) {
-  const messageEl = e.target.closest(".chat-message");
-  if (!messageEl) return;
-
-  e.preventDefault();
-
-  selectedMessageElement = messageEl;
-
-  // ذخیره آیدی پیام برای حذف
-  currentMessageIdToDelete = messageEl.dataset.id;
-
-  // دریافت نام طرف مقابل از data attribute
-  const receiverName = messageEl.dataset.receiverName || "this user";
-
-  // جایگزین کردن نام طرف مقابل در span مودال
-  const kekewithSpan = document.getElementById("kekewith");
-  if (kekewithSpan) {
-    kekewithSpan.textContent = receiverName;
-  }
-
-  // انتخاب پیام (هایلایت کردن)
-  document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
-  messageEl.classList.add("selected");
-
-  // نمایش منوی راست‌کلیک کنار موس
-  messageMenu.style.left = `${e.clientX}px`;
-  messageMenu.style.top = `${e.clientY}px`;
-  messageMenu.style.position = "fixed";
-  messageMenu.classList.remove("hidden");
-});
-
-// کلیک بیرون منوی راست‌کلیک باعث بسته شدن منو و لغو انتخاب پیام می‌شود
-document.addEventListener("click", (e) => {
-  if (!messageMenu.contains(e.target)) {
-    messageMenu.classList.add("hidden");
-    selectedMessageElement = null;
-  }
-});
-
-// فقط یکبار listener به دکمه کنسل اضافه کن
-cancelDeleteBtn.addEventListener("click", () => {
-  document.getElementById('deleteMessageModal').style.display = 'none';
-  document.body.classList.remove('modal1-open');
-  selectedMessageElement = null;
-  currentMessageIdToDelete = null;
-});
-
-// وقتی دکمه حذف پیام کلیک شد
-deleteMessageBtn.addEventListener("click", () => {
-  if (!currentMessageIdToDelete) {
-    alert("شناسه پیام برای حذف یافت نشد.");
-    return;
-  }
-  // کلیک روی دکمه YES برای حذف پیام
-const confirmDeleteBtn = document.getElementById('confirmDeleteMessageBtn');
-confirmDeleteBtn.addEventListener('click', () => {
-  if (!currentMessageIdToDelete) return;
-
-  const deleteForAll = document.getElementById('deleteForAllCheckbox').checked;
-
-  // بستن مودال
-  document.getElementById('deleteMessageModal').style.display = 'none';
-  document.body.classList.remove('modal1-open');
-
-  // درخواست حذف
-    fetch(`/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCSRFToken(),
-      }
-    })
-    .then(response => {
-      if (response.ok) {
-        // حذف از DOM با انیمیشن
-        const msgEl = document.querySelector(`[data-id="${currentMessageIdToDelete}"]`);
-        if (msgEl) {
-          msgEl.classList.add('message-fade-out');
-          setTimeout(() => msgEl.remove(), 300); // مدت زمان fadeOut
-        }
-      } else {
-        alert("حذف پیام موفق نبود.");
-      }
-      currentMessageIdToDelete = null;
-      selectedMessageElement = null;
-    })
-    .catch(err => {
-      console.error("خطا در حذف:", err);
-      alert("خطا در ارسال درخواست.");
-      currentMessageIdToDelete = null;
-      selectedMessageElement = null;
-    });
-});
-
-  messageMenu.classList.add("hidden");
-  document.getElementById('deleteMessageModal').style.display = 'flex';
-  document.body.classList.add('modal1-open');
-});
-
-
-
-
-
-    // جستجوی کاربران با تایمر (debounce)
-    let timeout = null;
-document.addEventListener('DOMContentLoaded', () => {
   const chatMessages = document.getElementById("chatMessages");
   const messageMenu = document.getElementById("messageMenu");
   const deleteMessageBtn = document.getElementById("deleteMessage");
   const cancelDeleteBtn = document.getElementById("cancelDeleteMessageBtn");
-  const confirmDeleteMessageBtn = document.getElementById('confirmDeleteMessageBtn');
-  const deleteMessageModal = document.getElementById('deleteMessageModal');
-  const deleteForAllCheckbox = document.getElementById('deleteForAllCheckbox');
-  const kekewithSpan = document.getElementById("kekewith");
+  const confirmDeleteBtn = document.getElementById('confirmDeleteMessageBtn'); // دکمه تایید حذف پیام
 
   let selectedMessageElement = null;
   let currentMessageIdToDelete = null;
 
+  // راست‌کلیک روی پیام‌ها
   chatMessages.addEventListener("contextmenu", function (e) {
     const messageEl = e.target.closest(".chat-message");
     if (!messageEl) return;
@@ -3183,97 +3066,178 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
 
     selectedMessageElement = messageEl;
+
+    // ذخیره آیدی پیام برای حذف
     currentMessageIdToDelete = messageEl.dataset.id;
 
+    // دریافت نام طرف مقابل از data attribute
     const receiverName = messageEl.dataset.receiverName || "this user";
+
+    // جایگزین کردن نام طرف مقابل در span مودال
+    const kekewithSpan = document.getElementById("kekewith");
     if (kekewithSpan) {
       kekewithSpan.textContent = receiverName;
     }
 
+    // انتخاب پیام (هایلایت کردن)
     document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
     messageEl.classList.add("selected");
 
+    // نمایش منوی راست‌کلیک کنار موس
     messageMenu.style.left = `${e.clientX}px`;
     messageMenu.style.top = `${e.clientY}px`;
     messageMenu.style.position = "fixed";
     messageMenu.classList.remove("hidden");
   });
 
+  // کلیک بیرون منوی راست‌کلیک باعث بسته شدن منو و لغو انتخاب پیام می‌شود
   document.addEventListener("click", (e) => {
     if (!messageMenu.contains(e.target)) {
       messageMenu.classList.add("hidden");
       selectedMessageElement = null;
-      currentMessageIdToDelete = null;
     }
   });
 
+  // فقط یکبار listener به دکمه کنسل اضافه کن
   cancelDeleteBtn.addEventListener("click", () => {
-    deleteMessageModal.style.display = 'none';
+    // بستن مودال حذف پیام
+    document.getElementById('deleteMessageModal').style.display = 'none';
     document.body.classList.remove('modal1-open');
     selectedMessageElement = null;
     currentMessageIdToDelete = null;
   });
 
+  // وقتی دکمه حذف پیام کلیک شد
   deleteMessageBtn.addEventListener("click", () => {
     if (!currentMessageIdToDelete) {
       alert("شناسه پیام برای حذف یافت نشد.");
       return;
     }
-
+    // مخفی کردن منوی راست کلیک
     messageMenu.classList.add("hidden");
-    deleteMessageModal.style.display = 'flex';
-    document.body.classList.add('modal1-open');
 
-    if (deleteForAllCheckbox) {
-      deleteForAllCheckbox.checked = false;
-    }
+    // نمایش مودال حذف پیام
+    document.getElementById('deleteMessageModal').style.display = 'flex';
+    document.body.classList.add('modal1-open');
   });
 
-  confirmDeleteMessageBtn.addEventListener('click', () => {
-    console.log("دکمه تایید حذف کلیک شد");
-
+  // **نکته مهم:** این Listener فقط یکبار ثبت می‌شود، داخل DOMContentLoaded
+  confirmDeleteBtn.addEventListener('click', () => {
     if (!currentMessageIdToDelete) {
       alert("شناسه پیام برای حذف یافت نشد.");
       return;
     }
 
-    deleteMessageModal.style.display = 'none';
+    // بستن مودال حذف پیام
+    document.getElementById('deleteMessageModal').style.display = 'none';
     document.body.classList.remove('modal1-open');
 
-    const deleteForAll = deleteForAllCheckbox ? deleteForAllCheckbox.checked : false;
-    const url = `/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`;
+    // گرفتن مقدار چک‌باکس حذف برای همه
+    const deleteForAll = deleteForAllCheckbox.checked;
 
-    console.log("در حال ارسال درخواست حذف به:", url);
-
-    fetch(url, {
+    // ارسال درخواست حذف به سرور با fetch
+    fetch(`/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': getCSRFToken(),
-      },
-      credentials: 'include',
-    })
-    .then(response => {
-      console.log("وضعیت پاسخ:", response.status);
-      if (response.ok) {
-        if (selectedMessageElement) {
-          selectedMessageElement.remove();
-        }
-        selectedMessageElement = null;
-        currentMessageIdToDelete = null;
-      } else {
-        response.text().then(text => {
-          console.error("خطای سرور:", text);
-          alert("حذف پیام موفق نبود.");
-        });
       }
     })
-    .catch(err => {
-      console.error("خطای Fetch:", err);
-      alert("خطا در ارسال درخواست حذف پیام.");
-    });
+      .then(async response => {
+        let data = null;
+        const contentType = response.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+          data = await response.json().catch(() => null);
+        } else {
+          data = await response.text().catch(() => null);
+        }
+
+        if (response.ok) {
+          // موفقیت حذف پیام: حذف پیام از DOM با افکت
+          const msgEl = document.querySelector(`[data-id="${currentMessageIdToDelete}"]`);
+          if (msgEl) {
+            msgEl.classList.add('message-fade-out');
+            setTimeout(() => msgEl.remove(), 300);
+          }
+        } else {
+          // خطا در حذف پیام: نمایش پیام خطا
+          console.error("خطای حذف پیام:", data);
+          alert(typeof data === "string" ? data : "حذف پیام موفق نبود.");
+        }
+
+        // پاکسازی متغیرهای مربوط به پیام انتخاب شده
+        currentMessageIdToDelete = null;
+        selectedMessageElement = null;
+      })
+      .catch(err => {
+        // خطا در ارسال درخواست حذف
+        console.error("خطا در ارسال درخواست حذف:", err);
+        alert("خطا در ارسال درخواست.");
+        currentMessageIdToDelete = null;
+        selectedMessageElement = null;
+      });
+  });
+
+
+
+
+
+
+    // جستجوی کاربران با تایمر (debounce)
+    let timeout = null;
+
+
+const confirmDeleteMessageBtn = document.getElementById('confirmDeleteMessageBtn');
+const deleteForAllCheckbox = document.getElementById('deleteForAllCheckbox');
+
+confirmDeleteMessageBtn.addEventListener('click', () => {
+  if (!currentMessageIdToDelete) {
+    alert("شناسه پیام برای حذف یافت نشد.");
+    return;
+  }
+
+  confirmDeleteMessageBtn.disabled = true;
+
+  // بستن مودال حذف پیام
+  document.getElementById('deleteMessageModal').style.display = 'none';
+  document.body.classList.remove('modal1-open');
+
+  const deleteForAll = deleteForAllCheckbox ? deleteForAllCheckbox.checked : false;
+  const url = `/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`;
+
+  fetch(url, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCSRFToken(),
+    }
+  })
+  .then(async response => {
+    confirmDeleteMessageBtn.disabled = false;
+    if (response.ok) {
+      const msgEl = document.querySelector(`[data-id="${currentMessageIdToDelete}"]`);
+      if (msgEl) {
+        msgEl.classList.add('message-fade-out');
+        setTimeout(() => msgEl.remove(), 300);
+      }
+    } else if (response.status === 404) {
+      alert("پیام قبلاً حذف شده است.");
+    } else {
+      alert("حذف پیام موفق نبود.");
+    }
+    currentMessageIdToDelete = null;
+  })
+  .catch(() => {
+    alert("خطا در ارسال درخواست حذف.");
+    confirmDeleteMessageBtn.disabled = false;
+    currentMessageIdToDelete = null;
   });
 });
+
+
+
+
 
 function getCSRFToken() {
   const name = 'csrftoken=';
