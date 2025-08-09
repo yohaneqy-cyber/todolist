@@ -4086,7 +4086,10 @@ function openMessageMenuFor(messageEl) {
   messageMenu.classList.remove("hidden");
 }
 
-document.getElementById("editMessage").addEventListener("click", () => {
+const editBtn = document.getElementById("editMessage");
+
+function onEditMessageClick(e) {
+  e.preventDefault();
   console.time("editMessageClick");
 
   if (!selectedMessageElement) {
@@ -4230,7 +4233,11 @@ document.getElementById("editMessage").addEventListener("click", () => {
   });
 
   console.timeEnd("editMessageClick");
-});
+}
+
+editBtn.addEventListener("click", onEditMessageClick);
+editBtn.addEventListener("touchstart", onEditMessageClick);
+
 
 
 
