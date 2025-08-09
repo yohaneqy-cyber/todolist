@@ -90,11 +90,22 @@
 }
 
 
-  @media (max-width: 600px) {
+@media (max-width: 1024px) {
   .chat-modal-content {
+    width: 90vw;
+    height: auto;
+    max-height: 90vh;
+  }
+}
+
+/* Mobile screens */
+@media (max-width: 600px) {
+  .chat-modal-content {
+    width: 95vw;
+    height: auto;
+    max-height: 85vh;
     padding: 16px;
     font-size: 14px;
-    max-width: 95%;
   }
 }
 
