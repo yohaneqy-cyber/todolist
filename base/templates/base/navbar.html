@@ -3937,6 +3937,21 @@ const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/
 let selectedMessageId = null;
 let selectedMessageElement = null;
 
+document.addEventListener("contextmenu", (e) => {
+  const messageEl = e.target.closest(".chat-message");
+  if (!messageEl) {
+    messageMenu.classList.add("hidden");
+    document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+    selectedMessageId = null;
+    selectedMessageElement = null;
+    return;
+  }
+
+  e.preventDefault();
+  openMessageMenuFor(messageEl);
+});
+
+
 function openMessageMenuFor(messageEl) {
   selectedMessageId = messageEl.dataset.id ?? null;
   selectedMessageElement = messageEl;
