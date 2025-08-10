@@ -941,22 +941,22 @@ def get_user_profile(request, user_id):
 from pathlib import Path
 from PIL import Image
 
-
 def save_resized_images(image_path):
     sizes = [56, 112, 224]
     image_path = Path(image_path)
     original = Image.open(image_path)
 
+    # تبدیل به RGB اگر تصویر حالت شفاف (alpha) داشته باشه
     if original.mode in ("RGBA", "P"):
-        original = original.convert("RGBA")
-    else:
         original = original.convert("RGB")
 
     for size in sizes:
         resized = original.resize((size, size), Image.LANCZOS)
-        
-        new_filename = f"{image_path.stem}_{size}.png"  # PNG برای کیفیت بهتر تست
-        new_path = image_path.parent / new_filename
 
-        resized.save(new_path, optimize=True)
+        new_filename = f"{image_path.stem}_{size}{image_path.suffix}"
+        new_path = image_path.parent / new_filename
+        
+        # هنگام ذخیره کیفیت JPG رو تنظیم کن
+        resized.save(new_path, quality=95, optimize=True)
         print(f"Saved resized image: {new_path}")
+
