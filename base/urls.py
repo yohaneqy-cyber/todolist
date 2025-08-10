@@ -44,4 +44,6 @@ urlpatterns = [
     path('user_profile_ajax/<int:user_id>/', views.user_profile_ajax, name='user_profile_ajax'),
     path('api/chat/messages/', views.ChatMessageApi.as_view(), name='chat-messages-api'),
     path('api/chat/messages/<int:pk>/', views.MessageUpdateDeleteView.as_view(), name='chat-message-edit-delete'),
+    path('api/user/profile/<int:user_id>/', views.get_user_profile, name='get_user_profile'),
+
 ]

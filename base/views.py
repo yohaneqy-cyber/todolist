@@ -1,4 +1,5 @@
 import json
+from PIL import Image
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
@@ -35,7 +36,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship, ChatMessage
-from .serializers import TaskSerializer, ChatMessageSerializers
+from .serializers import TaskSerializer, ChatMessageSerializers, UserSerializer
 from .forms import CustomUserCreationForm, ReminderForm, ChengeForm, RecurringTaskForm, TaskForm, LoginForm, MySetPasswordForm
 
 User = get_user_model()
@@ -928,3 +929,34 @@ class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_profile(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    serializer = UserSerializer(user, context={'request': request})
+    return Response(serializer.data)
+
+from pathlib import Path
+from PIL import Image
+
+
+def save_resized_images(image_path):
+    sizes = [56, 112, 224]
+    image_path = Path(image_path)
+    original = Image.open(image_path)
+
+    if original.mode in ("RGBA", "P"):
+        original = original.convert("RGBA")
+    else:
+        original = original.convert("RGB")
+
+    for size in sizes:
+        resized = original.resize((size, size), Image.LANCZOS)
+        
+        new_filename = f"{image_path.stem}_{size}.png"  # PNG برای کیفیت بهتر تست
+        new_path = image_path.parent / new_filename
+
+        resized.save(new_path, optimize=True)
+        print(f"Saved resized image: {new_path}")

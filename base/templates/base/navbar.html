@@ -7,6 +7,86 @@
 
   <style>
 
+#chatUserProfile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 12px 20px;
+  background: transparent; /* بک‌گراند شفاف */
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  max-width: 100%;
+  user-select: none;
+  cursor: default;
+  will-change: box-shadow; /* برای بهبود روان بودن انیمیشن */
+  
+}
+
+#chatUserProfile img#chatUserAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.8),
+    0 0 8px rgba(74, 144, 226, 0.6);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  backface-visibility: hidden; /* رفع مشکل لرزش انیمیشن */
+  will-change: transform, box-shadow;
+}
+
+#chatUserProfile:hover img#chatUserAvatar {
+  transform: scale(1.12);
+  box-shadow:
+    0 0 22px rgba(255, 255, 255, 1),
+    0 0 14px rgba(74, 144, 226, 0.85);
+}
+
+#chatUserProfile #chatUserNameAvatar {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+  user-select: text; /* کاربر بتونه اسم رو کپی کنه */
+  letter-spacing: 0.03em; /* کمی فاصله حرفی برای خوانایی */
+  line-height: 1.2;
+}
+
+@media (max-width: 480px) {
+  #chatUserProfile {
+    gap: 12px;
+    padding: 10px 14px;
+  }
+
+  #chatUserProfile img#chatUserAvatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  #chatUserProfile #chatUserNameAvatar {
+    font-size: 1.1rem;
+    max-width: 120px;
+  }
+}
+
+#chat_user_avatar {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  width: 320px !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+  padding: 12px !important;
+  z-index: 10000 !important;
+}
+
 
 
 /* فرم چت */
@@ -2292,20 +2372,38 @@ body.logout-modal-open {
 
 
   <!-- User profile modal -->
-  <div id="userProfileModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="userProfileTitle" style="display:none;">
-    <div class="modal-content">
-      <span id="closeUserProfileModal" class="close" role="button" aria-label="Close">&times;</span>
-      <div id="userProfileContent">
-        <!-- اطلاعات پروفایل کاربر اینجا بارگذاری می‌شود -->
-      </div>
+<div id="userProfileModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="userProfileTitle" style="display:none;">
+  <div class="modal-content">
+    <span id="closeUserProfileModal" class="close" role="button" aria-label="Close">&times;</span>
+    <div id="userProfileContent">
+      <!-- اطلاعات پروفایل کاربر اینجا بارگذاری می‌شود -->
     </div>
   </div>
+</div>
 
 <div id="chatModal" class="chat-modal" style="display:none;">
   <div class="chat-modal-content">
-    <button id="closeChatModal" class="close" aria-label="Close">&times;</button>
-    <h2 id="chatModalTitle">Chat with</h2>
     
+    <div id="chatUserProfile" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+      <img 
+        id="chatUserAvatar" 
+        src="" 
+        alt="User Avatar"
+        style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 0 12px rgba(255,255,255,0.8), 0 0 8px rgba(74,144,226,0.6);" 
+      />
+      <div>
+        <span id="chatUserNameAvatar" style="font-weight: 600;"></span>
+      </div>
+    </div>
+
+
+    
+    <button id="closeChatModal" class="close" aria-label="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" >
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+        
     <!-- بخش پیام‌ها -->
     <div id="chatMessages">
       <!-- پیام‌ها اینجا قرار می‌گیرند -->
@@ -2587,36 +2685,10 @@ async function loadMessagesFromServer(senderId, receiverId) {
 }
 
 
-  // باز کردن مودال چت
-function openChatModal(userId, userName) {
-  window.currentChatUserId = userId;
 
-  const chatModal = document.getElementById("chatModal");
-  if (!chatModal) return;
 
-  // تغییر عنوان مودال به نام کاربر
-  const chatModalTitle = document.getElementById("chatModalTitle");
-  if (chatModalTitle) chatModalTitle.textContent = `${userName}`;
 
-  // نمایش مودال
-  chatModal.style.display = "flex";
-  chatModal.setAttribute("aria-hidden", "false");
 
-  // جلوگیری از اسکرول پس‌زمینه
-  document.body.classList.add("modal-open");
-
-  // پاک کردن ورودی
-  const chatInput = document.getElementById("chatInput");
-  if (chatInput) chatInput.value = "";
-
-  // پاک‌سازی پیام‌های قدیمی
-  const chatMessages = document.getElementById("chatMessages");
-  if (chatMessages) chatMessages.innerHTML = "";
-
-  // ✅ بارگذاری پیام‌ها: اول localStorage، بعد server
-  loadMessagesFromLocalStorage(userId);
-  loadMessagesFromServer(window.currentUserId, userId);
-}
 
 
   // بستن مودال چت
@@ -2659,7 +2731,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatForm = document.getElementById("chatForm");
   const chatInput = document.getElementById("chatInput");
   const chatMessages = document.getElementById("chatMessages");
-  const chatModalTitle = document.getElementById("chatModalTitle");
 
   // شناسه کاربر فعلی (حتماً این مقدار را در قالب خود مقداردهی کنید)
   window.currentUserId = window.currentUserId || null;
@@ -2778,7 +2849,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.currentChatUserId = userId;
 
-    chatModalTitle.textContent = `${userName}`;
     chatModal.style.display = "flex";
     chatModal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
@@ -3592,58 +3662,112 @@ function renderMessages(messages) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// تابع باز کردن مودال چت با یک کاربر
+let windowCurrentChatUserId = null;
+
 function openChatModal(userId, userName) {
-  const chatModal = document.getElementById("chatModal");
-  const chatModalTitle = document.getElementById("chatModalTitle");
-  const chatMessages = document.getElementById("chatMessages");
-  const chatInput = document.getElementById("chatInput");
+  windowCurrentChatUserId = parseInt(userId);
 
-  chatModal.style.display = "flex";
-  chatModal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("modal-open");
+  if (!window.currentUserId || !windowCurrentChatUserId) {
+    console.error("❌ شناسه کاربر یا مخاطب تعریف نشده است.");
+    return;
+  }
 
-if (document.activeElement) {
-  document.activeElement.blur();
+  // نمایش مودال
+  document.getElementById("chatModal").style.display = "flex";
+
+  // بارگذاری پیام‌ها با fetch
+  loadMessages(window.currentUserId, windowCurrentChatUserId);
+
+  // بارگذاری پروفایل کاربر (مثلاً توی عکس و نام بالای مودال)
+  loadUserProfile(userId, userName);
 }
 
-chatModalTitle.textContent = `گفتگو با ${userName}`;
-chatMessages.innerHTML = "";
-chatInput.value = "";
-
-setTimeout(() => {
-  if (window.innerWidth > 768) { 
-    chatInput.focus();
-  }
-
-  const storageKey = `chatMessages_${userId}`;
-  const cachedMessages = localStorage.getItem(storageKey);
-  if (cachedMessages) {
-    renderMessages(JSON.parse(cachedMessages));
-  }
-}, 100);  // تأخیر 100 میلی‌ثانیه برای بسته شدن کیبورد موبایل و آماده شدن مودال
-
-
-  const senderId = window.currentUserId;
-  const receiverId = userId;
+function loadMessages(senderId, receiverId) {
+  const chatMessages = document.getElementById("chatMessages");
+  chatMessages.innerHTML = "در حال بارگذاری پیام‌ها...";
 
   fetch(`/api/chat/messages/?sender_id=${encodeURIComponent(senderId)}&receiver_id=${encodeURIComponent(receiverId)}`, {
     credentials: 'include'
   })
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`خطا در دریافت پیام‌ها: ${res.status} ${res.statusText}`);
-      }
-      return res.json();
-    })
-    .then(data => {
-      if (data.messages) {
-        localStorage.setItem(storageKey, JSON.stringify(data.messages));
-        renderMessages(data.messages);
-      }
-    })
-    .catch(err => console.error("خطا در واکشی پیام‌ها:", err));
+  .then(res => {
+    if (!res.ok) throw new Error(`خطا در دریافت پیام‌ها: ${res.status} ${res.statusText}`);
+    return res.json();
+  })
+  .then(data => {
+    chatMessages.innerHTML = "";
+    if (data.messages && data.messages.length) {
+      renderMessages(data.messages);
+    } else {
+      chatMessages.innerHTML = "<p>هیچ پیامی موجود نیست.</p>";
+    }
+  })
+  .catch(err => {
+    console.error("خطا در واکشی پیام‌ها:", err);
+    chatMessages.innerHTML = "<p>خطا در بارگذاری پیام‌ها.</p>";
+  });
 }
+
+function loadUserProfile(userId, fallbackName) {
+  const chatUserAvatar = document.getElementById("chatUserAvatar");
+  const chatUserNameAvatar = document.getElementById("chatUserNameAvatar");
+
+  const profileUrl = `/api/user/profile/${userId}/`;
+  console.log("📡 Fetching profile from:", profileUrl);
+
+  fetch(profileUrl, {
+    headers: { 
+      "X-Requested-With": "XMLHttpRequest",
+      "Accept": "application/json"
+    },
+    credentials: "include",
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`خطا در دریافت پروفایل: ${res.status} ${res.statusText}`);
+    return res.json();
+  })
+  .then(data => {
+    console.log("✅ پروفایل دریافت شد:", data);
+    let avatarUrl = data.avatar_url || null;
+    if (avatarUrl && !avatarUrl.startsWith('http')) {
+      avatarUrl = window.location.origin + avatarUrl;
+    }
+    if (!avatarUrl || avatarUrl.trim() === "") {
+      avatarUrl = `${window.location.origin}/media/avatars/default-avatar.png`;
+    }
+    chatUserAvatar.src = avatarUrl;
+    chatUserNameAvatar.textContent = data.name || fallbackName || "کاربر";
+  })
+  .catch(err => {
+    console.error("⚠ خطا در واکشی پروفایل:", err);
+    chatUserAvatar.src = `${window.location.origin}/media/avatars/default-avatar.png`;
+    chatUserNameAvatar.textContent = fallbackName || "کاربر";
+  });
+}
+
+
+
+// فرض می‌کنیم این تابع از قبل دارید که پیام‌ها را در بخش chatMessages رندر می‌کند
+function renderMessages(messages) {
+  const chatMessages = document.getElementById("chatMessages");
+  chatMessages.innerHTML = ""; // پاکسازی
+
+  messages.forEach(msg => {
+    const msgElem = document.createElement("div");
+    msgElem.classList.add("chat-message");
+    msgElem.classList.add(msg.sender === window.currentUserId ? "me" : "them");
+
+    const textSpan = document.createElement("span");
+    textSpan.classList.add("message-text");
+    textSpan.textContent = msg.message;
+
+    msgElem.appendChild(textSpan);
+    chatMessages.appendChild(msgElem);
+  });
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+
 
 // تابع بستن مودال
 function closeModal(modal) {
@@ -3808,7 +3932,6 @@ document.body.addEventListener("click", (e) => {
   window.currentChatUserId = userId;
 
   // تنظیم عنوان مودال و باز کردن آن
-  chatModalTitle.textContent = `${userName}`;
   chatModal.style.display = "flex";
   chatModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
@@ -3846,10 +3969,7 @@ document.body.addEventListener("click", (e) => {
   window.currentChatUserId = userId;
 
   // تنظیم عنوان مودال و باز کردن آن
-  chatModalTitle.textContent = `${userName}`;
-  chatModal.style.display = "flex";
-  chatModal.setAttribute("aria-hidden", "false");
-  document.body.classList.add("modal-open");
+
 
   // پاک کردن محتوای قبلی
   chatInput.value = "";
@@ -4333,72 +4453,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-let chatSocket = null;
-let windowCurrentChatUserId = null;
-
-// تابع باز کردن مودال و ساخت اتصال وب‌سوکت
-function openChatModal(userId, userName) {
-  windowCurrentChatUserId = parseInt(userId);
-  
-  if (!window.currentUserId || !windowCurrentChatUserId) {
-    console.error("❌ شناسه کاربر یا مخاطب تعریف نشده است.");
-    return;
-  }
-
-  // نمایش مودال
-  document.getElementById("chatModalTitle").textContent = `${userName}`;
-  document.getElementById("chatModal").style.display = "flex";
-
-  // ساخت اتصال WebSocket
-  const roomName = [window.currentUserId, windowCurrentChatUserId].sort().join("_");
-  chatSocket = new WebSocket(
-    (window.location.protocol === "https:" ? "wss://" : "ws://") +
-    window.location.host +
-    `/ws/chat/${roomName}/`
-  );
-
-  chatSocket.onopen = () => {
-    console.log("✅ WebSocket connected.");
-  };
-
-  chatSocket.onmessage = (e) => {
-    const data = JSON.parse(e.data);
-    const chatMessages = document.getElementById("chatMessages");
-
-    const msgElem = document.createElement("div");
-    msgElem.classList.add("chat-message");
-    msgElem.classList.add(data.sender_id == window.currentUserId ? "me" : "them");
-
-    const textSpan = document.createElement("span");
-    textSpan.classList.add("message-text");
-    textSpan.textContent = data.message;
-
-    msgElem.appendChild(textSpan);
-    chatMessages.appendChild(msgElem);
-
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  };
-
-  chatSocket.onclose = () => {
-    console.warn("⚠ WebSocket connection closed.");
-  };
-
-  chatSocket.onerror = (err) => {
-    console.error("❌ WebSocket error:", err);
-  };
-}
-
-// ارسال پیام
-function sendMessageViaSocket(message) {
-  if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-    chatSocket.send(JSON.stringify({
-      message: message,
-      sender_id: window.currentUserId
-    }));
-  } else {
-    alert("ارتباط با سرور قطع شده است.");
-  }
-}
 
 const textarea = document.querySelector('.edit-textarea');
 textarea.style.height = 'auto';
