@@ -3168,11 +3168,6 @@ confirmDeleteMessageBtn.addEventListener('click', () => {
     currentMessageIdToDelete = null;
   });
 });
-
-
-
-
-
 function getCSRFToken() {
   const name = 'csrftoken=';
   const decodedCookie = decodeURIComponent(document.cookie);
@@ -3183,8 +3178,6 @@ function getCSRFToken() {
   }
   return '';
 }
-
-
 
 
 searchInput.addEventListener("input", function() {
@@ -4176,47 +4169,66 @@ editBtn.addEventListener("click", onEditMessageClick);
 editBtn.addEventListener("touchstart", onEditMessageClick);
 
 
+// فرض می‌گیریم این متغیر سراسری در بالا تعریف شده:
+let currentMessageIdToDelete = null;
 
+function openDeleteModal() {
+  if (!selectedMessageId) {
+    alert("شناسه پیام معتبر نیست.");
+    return;
+  }
+  currentMessageIdToDelete = selectedMessageId;
+  document.getElementById('deleteMessageModal').style.display = 'flex';
+  document.body.classList.add('modal1-open');
+}
 
+function closeDeleteModal() {
+  document.getElementById('deleteMessageModal').style.display = 'none';
+  document.body.classList.remove('modal1-open');
+  currentMessageIdToDelete = null;
+}
 
-  // حذف پیام - باز کردن مودال حذف سفارشی
-  document.getElementById("deleteMessage").addEventListener("click", () => {
-    if (!selectedMessageElement) {
-      alert("ابتدا یک پیام را انتخاب کنید.");
-      return;
-    }
+deleteMessageBtn.addEventListener("click", (e) => {
+  e.preventDefault();
 
-    if (!selectedMessageId || selectedMessageId === "null") {
-      alert("شناسه پیام معتبر نیست.");
-      return;
-    }
+  if (!selectedMessageElement) {
+    alert("ابتدا یک پیام را انتخاب کنید.");
+    return;
+  }
 
-    // باز کردن مودال حذف پیام
+  if (!selectedMessageId || selectedMessageId === "null") {
+    alert("شناسه پیام معتبر نیست.");
+    return;
+  }
 
-  });
+  openDeleteModal();
+});
 
-  // دکمه لغو مودال حذف پیام
-  cancelDeleteBtn.addEventListener("click", () => {
+// دکمه لغو مودال
+cancelDeleteBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  closeDeleteModal();
+});
+
+// دکمه تایید حذف پیام
+confirmDeleteBtn.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  if (!selectedMessageElement || !currentMessageIdToDelete) {
+    alert("هیچ پیامی انتخاب نشده یا شناسه پیام معتبر نیست.");
     closeDeleteModal();
-  });
+    return;
+  }
 
-  // دکمه تایید حذف پیام در مودال
-  confirmDeleteBtn.addEventListener("click", async () => {
-    if (!selectedMessageElement || !selectedMessageId) {
-      alert('هیچ پیامی انتخاب نشده یا شناسهشناسه پیام معتبر نیست.');
-      closeDeleteModal();
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/chat/messages/${selectedMessageId}/`, {
-        method: "DELETE",
-        headers: {
-          "X-CSRFToken": getCookie("csrftoken"),
-          "X-Requested-With": "XMLHttpRequest"
-        },
-        credentials: "include"
-      });
+  try {
+    const response = await fetch(`/api/chat/messages/${currentMessageIdToDelete}/`, {
+      method: "DELETE",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: "include"
+    });
 
     if (response.ok) {
       selectedMessageElement.classList.add("fade-slide-collapse");
@@ -4225,18 +4237,19 @@ editBtn.addEventListener("touchstart", onEditMessageClick);
         selectedMessageElement.remove();
         selectedMessageElement = null;
         selectedMessageId = null;
+        currentMessageIdToDelete = null;
       }, { once: true });
 
       closeDeleteModal();
     } else {
       showErrorMessage("خطا در حذف پیام.");
     }
+  } catch (error) {
+    showErrorMessage("خطای شبکه در حذف پیام.");
+    console.error(error);
+  }
+});
 
-    } catch (error) {
-      showErrorMessage("خطای شبکه در حذف پیام.");
-      console.error(error);
-    }
-  });
 });
 
 
