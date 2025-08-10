@@ -3099,89 +3099,19 @@ async function sendMessage(event) {
   });
 
   // فقط یکبار listener به دکمه کنسل اضافه کن
-  cancelDeleteBtn.addEventListener("click", () => {
-    // بستن مودال حذف پیام
-    document.getElementById('deleteMessageModal').style.display = 'none';
-    document.body.classList.remove('modal1-open');
-    selectedMessageElement = null;
-    currentMessageIdToDelete = null;
-  });
-
-  // وقتی دکمه حذف پیام کلیک شد
-  deleteMessageBtn.addEventListener("click", () => {
-    if (!currentMessageIdToDelete) {
-      alert("شناسه پیام برای حذف یافت نشد.");
-      return;
-    }
-    // مخفی کردن منوی راست کلیک
-    messageMenu.classList.add("hidden");
-
-    // نمایش مودال حذف پیام
-    document.getElementById('deleteMessageModal').style.display = 'flex';
-    document.body.classList.add('modal1-open');
-  });
-
-  // **نکته مهم:** این Listener فقط یکبار ثبت می‌شود، داخل DOMContentLoaded
-  confirmDeleteBtn.addEventListener('click', () => {
-    if (!currentMessageIdToDelete) {
-      alert("شناسه پیام برای حذف یافت نشد.");
-      return;
-    }
-
-    // بستن مودال حذف پیام
-    document.getElementById('deleteMessageModal').style.display = 'none';
-    document.body.classList.remove('modal1-open');
-
-    // گرفتن مقدار چک‌باکس حذف برای همه
-    const deleteForAll = deleteForAllCheckbox.checked;
-
-    // ارسال درخواست حذف به سرور با fetch
-    fetch(`/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCSRFToken(),
-      }
-    })
-.then(async response => {
-  let data = null;
-  const contentType = response.headers.get("content-type") || "";
-
-  try {
-    if (contentType.includes("application/json")) {
-      data = await response.json();
-    } else if (contentType) {
-      data = await response.text();
-    }
-  } catch (e) {
-    // اگر پاسخی نبود یا فرمت درست نبود، خطا رو نادیده بگیر
-    data = null;
-  }
-
-  if (response.ok) {
-    // حذف پیام از DOM با افکت
-    const msgEl = document.querySelector(`[data-id="${currentMessageIdToDelete}"]`);
-    if (msgEl) {
-      msgEl.classList.add('message-fade-out');
-      setTimeout(() => msgEl.remove(), 300);
-    }
-  } else {
-    console.error("خطای حذف پیام:", data);
-    alert(typeof data === "string" ? data : "حذف پیام موفق نبود.");
-  }
-
-  // پاکسازی متغیرها
-  currentMessageIdToDelete = null;
-  selectedMessageElement = null;
-})
-.catch(err => {
-  console.error("خطا در ارسال درخواست حذف:", err);
-  alert("خطا در ارسال درخواست.");
-  currentMessageIdToDelete = null;
-  selectedMessageElement = null;
+cancelDeleteBtn.addEventListener("click", () => {
+  closeDeleteModal();
 });
 
-  });
+deleteMessageBtn.addEventListener("click", () => {
+  if (!currentMessageIdToDelete) {
+    alert("شناسه پیام برای حذف یافت نشد.");
+    return;
+  }
+  messageMenu.classList.add("hidden");
+  document.getElementById('deleteMessageModal').style.display = 'flex';
+  document.body.classList.add('modal1-open');
+});
 
 
 
@@ -4273,7 +4203,7 @@ editBtn.addEventListener("touchstart", onEditMessageClick);
   // دکمه تایید حذف پیام در مودال
   confirmDeleteBtn.addEventListener("click", async () => {
     if (!selectedMessageElement || !selectedMessageId) {
-      alert('هیچ پیامی انتخاب نشده یا شناسه پیام معتبر نیست.');
+      alert('هیچ پیامی انتخاب نشده یا شناسهشناسه پیام معتبر نیست.');
       closeDeleteModal();
       return;
     }
