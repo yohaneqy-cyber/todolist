@@ -2487,7 +2487,7 @@ function saveMessagesToLocalStorage(userId) {
   if (!chatMessages) return;
 
   const messages = [];
-  chatMessages.querySelectorAll(".chat-message").forEach(msgElem => {
+  chatMessages.querySelectorAll(".message.my-message").forEach(msgElem => {
     const content = msgElem.querySelector(".message-text")?.textContent || "";
     const timestamp = msgElem.querySelector(".message-time")?.textContent || "";
     const isMe = msgElem.classList.contains("me");
@@ -3758,7 +3758,7 @@ document.addEventListener("DOMContentLoaded", () => {document.addEventListener("
   function saveMessagesToLocalStorage(userId) {
     if (!userId) return; // اگه کاربر انتخاب نشده، ذخیره نکن
     const messages = [];
-    chatMessages.querySelectorAll(".chat-message").forEach(msgElem => {
+    chatMessages.querySelectorAll(".message.my-message").forEach(msgElem => {
       messages.push({
         content: msgElem.querySelector(".message-text").textContent,
         timestamp: msgElem.querySelector(".message-time").textContent,
