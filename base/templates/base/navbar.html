@@ -4005,235 +4005,149 @@ function getCookie(name) {
   }
   return cookieValue;
 }
+
+let currentMessageIdToDelete = null;
+
+// تشخیص موبایل
 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
+// باز کردن منوی حذف پیام روی دسکتاپ (کلیک راست) یا موبایل (تاچ)
 if (isMobile) {
-  document.addEventListener("click", (e) => {
+  chatMessages.addEventListener("touchstart", function (e) {
     const messageEl = e.target.closest(".chat-message");
-    if (!messageEl) {
-      messageMenu.classList.add("hidden");
-      document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
-      selectedMessageId = null;
-      selectedMessageElement = null;
-      return;
-    }
-    
+    if (!messageEl) return;
+
     e.preventDefault();
-    openMessageMenuFor(messageEl);
+
+    selectedMessageElement = messageEl;
+    currentMessageIdToDelete = messageEl.dataset.id;
+
+    const receiverName = messageEl.dataset.receiverName || "this user";
+    const kekewithSpan = document.getElementById("kekewith");
+    if (kekewithSpan) {
+      kekewithSpan.textContent = receiverName;
+    }
+
+    document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+    messageEl.classList.add("selected");
+
+    // باز کردن منو وسط صفحه موبایل
+    messageMenu.style.left = "50%";
+    messageMenu.style.top = "50%";
+    messageMenu.style.transform = "translate(-50%, -50%)";
+    messageMenu.style.position = "fixed";
+    messageMenu.classList.remove("hidden");
   });
 } else {
-  document.addEventListener("contextmenu", (e) => {
+  chatMessages.addEventListener("contextmenu", function (e) {
     const messageEl = e.target.closest(".chat-message");
-    if (!messageEl) {
-      messageMenu.classList.add("hidden");
-      document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
-      selectedMessageId = null;
-      selectedMessageElement = null;
-      return;
-    }
+    if (!messageEl) return;
 
     e.preventDefault();
-    openMessageMenuFor(messageEl);
+
+    selectedMessageElement = messageEl;
+    currentMessageIdToDelete = messageEl.dataset.id;
+
+    const receiverName = messageEl.dataset.receiverName || "this user";
+    const kekewithSpan = document.getElementById("kekewith");
+    if (kekewithSpan) {
+      kekewithSpan.textContent = receiverName;
+    }
+
+    document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+    messageEl.classList.add("selected");
+
+    messageMenu.style.left = `${e.clientX}px`;
+    messageMenu.style.top = `${e.clientY}px`;
+    messageMenu.style.transform = "none";
+    messageMenu.style.position = "fixed";
+    messageMenu.classList.remove("hidden");
   });
 }
 
-function openMessageMenuFor(messageEl) {
-  selectedMessageId = messageEl.dataset.id ?? null;
-  selectedMessageElement = messageEl;
-
-  if (!selectedMessageId || selectedMessageId === "null") {
-    selectedMessageId = null;
-    selectedMessageElement = null;
+// بستن منوی راست کلیک با کلیک یا تاچ بیرون منو
+document.addEventListener("click", (e) => {
+  if (!messageMenu.contains(e.target)) {
     messageMenu.classList.add("hidden");
+    selectedMessageElement = null;
+  }
+});
+document.addEventListener("touchstart", (e) => {
+  if (!messageMenu.contains(e.target)) {
+    messageMenu.classList.add("hidden");
+    selectedMessageElement = null;
+  }
+});
+
+// دکمه کنسل حذف پیام
+cancelDeleteBtn.addEventListener("click", () => {
+  document.getElementById('deleteMessageModal').style.display = 'none';
+  document.body.classList.remove('modal1-open');
+  selectedMessageElement = null;
+  currentMessageIdToDelete = null;
+});
+
+// دکمه حذف پیام (نمایش مودال حذف)
+deleteMessageBtn.addEventListener("click", () => {
+  if (!currentMessageIdToDelete) {
+    alert("شناسه پیام برای حذف یافت نشد.");
     return;
   }
-
-  document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
-  messageEl.classList.add("selected");
-
   messageMenu.classList.add("hidden");
-  messageMenu.style.visibility = "hidden";
-  messageMenu.style.display = "block";
+  document.getElementById('deleteMessageModal').style.display = 'flex';
+  document.body.classList.add('modal1-open');
+});
 
-  const gapHorizontal = 12;
-  const msgRect = messageEl.getBoundingClientRect();
-  const menuWidth = messageMenu.offsetWidth;
-  const menuHeight = messageMenu.offsetHeight;
-  const gapVertical = 150;
-
-  let posX, posY;
-  posY = msgRect.top - menuHeight - gapVertical;
-
-  if (posY < 0) {
-    posY = msgRect.bottom + gapVertical;
-  }
-
-  if (messageEl.classList.contains("me")) {
-    posX = msgRect.left - menuWidth - gapHorizontal;
-    if (posX < 0) posX = gapHorizontal;
-  } else {
-    posX = msgRect.right + gapHorizontal;
-    if (posX + menuWidth > window.innerWidth) {
-      posX = window.innerWidth - menuWidth - gapHorizontal;
-    }
-  }
-
-  messageMenu.style.left = `${posX}px`;
-  messageMenu.style.top = `${posY}px`;
-  messageMenu.style.position = "fixed";
-
-  messageMenu.style.visibility = "visible";
-  messageMenu.classList.remove("hidden");
-}
-
-const editBtn = document.getElementById("editMessage");
-
-function onEditMessageClick(e) {
-  e.preventDefault();
-  console.time("editMessageClick");
-
-  if (!selectedMessageElement) {
-    console.timeEnd("editMessageClick");
+// دکمه تایید حذف پیام (ارسال درخواست حذف)
+confirmDeleteBtn.addEventListener('click', () => {
+  if (!currentMessageIdToDelete) {
+    alert("شناسه پیام برای حذف یافت نشد.");
     return;
   }
 
-  messageMenu.classList.add("hidden");
+  document.getElementById('deleteMessageModal').style.display = 'none';
+  document.body.classList.remove('modal1-open');
 
-  const existingEdit = document.querySelector(".edit-inline-wrapper");
-  if (existingEdit) {
-    const parentMsg = existingEdit.parentElement;
-    const oldTextEl = parentMsg.querySelector(".message-text");
-    const oldTimeEl = parentMsg.querySelector(".message-time");
-    if (oldTextEl && oldTimeEl) {
-      oldTextEl.style.display = "";
-      oldTimeEl.style.display = "";
+  const deleteForAll = deleteForAllCheckbox.checked;
+
+  fetch(`/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCSRFToken(),  // تابع گرفتن CSRF را حتما داشته باش
     }
-    existingEdit.remove();
-  }
+  })
+    .then(async response => {
+      let data = null;
+      const contentType = response.headers.get("content-type");
 
-  const textEl = selectedMessageElement.querySelector(".message-text");
-  const timeEl = selectedMessageElement.querySelector(".message-time");
-  if (!textEl || !timeEl) {
-    console.timeEnd("editMessageClick");
-    return;
-  }
-
-  const originalText = textEl.textContent;
-  const originalTime = timeEl.textContent;
-
-  textEl.style.display = "none";
-  timeEl.style.display = "none";
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "edit-inline-wrapper";
-
-  const inputWrapper = document.createElement("div");
-  inputWrapper.className = "edit-input-wrapper";
-
-  const textarea = document.createElement("textarea");
-  textarea.value = originalText;
-  textarea.className = "edit-textarea";
-
-  // استایل‌ها
-  textarea.style.width = "85%";
-  textarea.style.minHeight = "30px";
-  textarea.style.resize = "none";
-  textarea.style.overflow = "hidden";
-  textarea.style.padding = "4px 20px 4px 6px";
-  textarea.style.fontSize = "12px";
-  textarea.style.border = "1px solid #ccc";
-  textarea.style.borderRadius = "4px";
-
-  // دکمه تایید
-  const confirmBtn = document.createElement("button");
-  confirmBtn.className = "edit-confirm-btn";
-  confirmBtn.title = "Confirm";
-  confirmBtn.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1e88e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M20 6L9 17l-5-5" />
-    </svg>
-  `;
-
-  function autoResize() {
-    textarea.style.height = "auto";
-    const maxHeight = parseInt(window.getComputedStyle(textarea).lineHeight) || 20;
-    textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + "px";
-  }
-  autoResize();
-  textarea.addEventListener("input", autoResize);
-
-  textarea.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      confirmBtn.click();
-    }
-  });
-
-  inputWrapper.appendChild(textarea);
-  inputWrapper.appendChild(confirmBtn);
-
-  const timeSpan = document.createElement("span");
-  timeSpan.className = "message-time";
-  timeSpan.textContent = originalTime;
-
-  wrapper.appendChild(inputWrapper);
-  wrapper.appendChild(timeSpan);
-
-  selectedMessageElement.appendChild(wrapper);
-
-  textarea.focus();
-
-  confirmBtn.addEventListener("click", () => {
-    const newText = textarea.value.trim();
-    if (!newText) {
-      alert("متن پیام نمی‌تواند خالی باشد.");
-      return;
-    }
-
-    // سریع UI رو به‌روزرسانی کن
-    textEl.textContent = newText;
-    textEl.style.display = "";
-    timeEl.style.display = "";
-    wrapper.remove();
-
-    // ارسال درخواست async بدون await برای سریع بودن UI
-    (async () => {
-      try {
-        const selectedMessageId = selectedMessageElement?.dataset?.id;
-        if (!selectedMessageId) {
-          alert("شناسه پیام نامعتبر است.");
-          return;
-        }
-
-        const response = await fetch(`/api/chat/messages/${selectedMessageId}/`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
-            "X-Requested-With": "XMLHttpRequest"
-          },
-          credentials: "include",
-          body: JSON.stringify({ message: newText })
-        });
-
-        if (!response.ok) {
-          let errorText = await response.text();
-          try {
-            const errorJson = JSON.parse(errorText);
-            errorText = errorJson.detail || JSON.stringify(errorJson);
-          } catch {}
-          console.error("❌ ویرایش در سرور انجام نشد:", errorText);
-          alert("ویرایش در سرور انجام نشد: " + errorText);
-        }
-      } catch (error) {
-        console.error("❌ خطای شبکه هنگام ویرایش:", error);
-        alert("خطای شبکه هنگام ویرایش پیام.");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json().catch(() => null);
+      } else {
+        data = await response.text().catch(() => null);
       }
-    })();
-  });
 
-  console.timeEnd("editMessageClick");
-}
+      if (response.ok) {
+        const msgEl = document.querySelector(`[data-id="${currentMessageIdToDelete}"]`);
+        if (msgEl) {
+          msgEl.classList.add('message-fade-out');
+          setTimeout(() => msgEl.remove(), 300);
+        }
+      } else {
+        console.error("خطای حذف پیام:", data);
+        alert(typeof data === "string" ? data : "حذف پیام موفق نبود.");
+      }
+
+      currentMessageIdToDelete = null;
+      selectedMessageElement = null;
+    })
+    .catch(err => {
+      console.error("خطا در ارسال درخواست حذف:", err);
+      alert("خطا در ارسال درخواست.");
+      currentMessageIdToDelete = null;
+      selectedMessageElement = null;
+    });
+});
 
 editBtn.addEventListener("click", onEditMessageClick);
 editBtn.addEventListener("touchstart", onEditMessageClick);
