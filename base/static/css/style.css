@@ -2985,3 +2985,20 @@ textarea[name="bio"] {
     padding: 12px 14px;
   }
 }
+
+@media (hover: none), (pointer: coarse) {
+  /* Disable pointer hover effects */
+  * {
+    pointer-events: auto !important; /* ensure normal clicks still work */
+    transition: none !important;      /* remove transition effects */
+  }
+
+  /* For elements that have hover styles, override them */
+  a:hover, button:hover, .hover-effect:hover, /* add your hover classes/selectors here */ {
+    color: inherit !important;
+    background: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    text-decoration: none !important;
+  }
+}

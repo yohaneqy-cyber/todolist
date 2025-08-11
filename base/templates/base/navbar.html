@@ -6,6 +6,7 @@
   <title>MySite</title>
   {% load static %}
   <style>
+  
 #closeChatModal {
   position: absolute;
   top: 12px;
@@ -15,8 +16,8 @@
   cursor: pointer;
   padding: 4px;
   display: flex;
-  align-items: left;
-  justify-content: left;
+  align-items: right;
+  justify-content: right;
 }
 
 #closeChatModal svg {
@@ -37,9 +38,14 @@
   max-width: 100%;
   user-select: none;
   cursor: default;
-  will-change: box-shadow; /* برای بهبود روان بودن انیمیشن */
-  
+  will-change: box-shadow;
+
+  /* Add these for horizontal centering */
+  justify-content: center;    /* centers items inside flex container */
+  margin-left: auto;
+  margin-right: auto;
 }
+
 
 #chatUserProfile img#chatUserAvatar {
   width: 56px;
@@ -2326,6 +2332,22 @@ body.logout-modal-open {
   }
 }
 
+@media (hover: none), (pointer: coarse) {
+  /* Disable pointer hover effects */
+  * {
+    pointer-events: auto !important; /* ensure normal clicks still work */
+    transition: none !important;      /* remove transition effects */
+  }
+
+  /* For elements that have hover styles, override them */
+  a:hover, button:hover, .hover-effect:hover, /* add your hover classes/selectors here */ {
+    color: inherit !important;
+    background: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    text-decoration: none !important;
+  }
+}
 
 
 
@@ -2456,12 +2478,7 @@ body.logout-modal-open {
       </div>
     </div>
 
-    <button id="closeChatModal" class="close" aria-label="Close">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-    </button>
+    <button id="closeChatModal" class="close" aria-label="Close">&times;</button>
 
 
 
