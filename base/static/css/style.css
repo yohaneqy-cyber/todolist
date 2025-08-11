@@ -2986,15 +2986,15 @@ textarea[name="bio"] {
   }
 }
 @media (hover: none), (pointer: coarse) {
-  a:hover, button:hover, .hover-effect:hover,
-  a:active, .hover-effect:active {
+  button:hover, .hover-effect:hover,
+  .hover-effect:active {
     background: none !important;
     color: inherit !important;
     box-shadow: none !important;
     transform: none !important;
   }
 
-  button, a {
+  button {
     -webkit-tap-highlight-color: transparent;
     outline: none;
     touch-action: manipulation;
