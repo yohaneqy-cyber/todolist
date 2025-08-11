@@ -18,6 +18,13 @@ class ChatMessageSerializers(serializers.ModelSerializer):
         read_only_fields = ['id', 'sender', 'receiver', 'timestamp', 'edited', 'status', 'avatar_url']
 
 
+    def get_avatar_url(self, obj):
+        request = self.context.get('request')
+        if obj.avatar and hasattr(obj.avatar, 'url'):
+            return request.build_absolute_uri(obj.avatar.url)
+        return request.build_absolute_uri('/media/avatars/default-avatar.png')
+
+
 class UserSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField()
 

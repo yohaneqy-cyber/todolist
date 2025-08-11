@@ -6,24 +6,29 @@
   <title>MySite</title>
   {% load static %}
   <style>
-  
 #closeChatModal {
   position: absolute;
   top: 12px;
-  left: 12px;
+  right: 12px; /* از left به right تغییر دادم */
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 0;
+  margin: 0;
+  width: 32px;
+  height: 32px;
   display: flex;
-  align-items: right;
-  justify-content: right;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
 }
 
 #closeChatModal svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   stroke: currentColor;
+  pointer-events: none;
+  user-select: none;
 }
 
 
@@ -61,12 +66,13 @@
   will-change: transform, box-shadow;
 }
 
-#chatUserProfile:hover img#chatUserAvatar {
+#chatUserProfile img#chatUserAvatar:hover {
   transform: scale(1.12);
   box-shadow:
     0 0 22px rgba(255, 255, 255, 1),
     0 0 14px rgba(74, 144, 226, 0.85);
 }
+
 
 #chatUserProfile #chatUserNameAvatar {
   font-weight: 700;
@@ -2466,14 +2472,15 @@ body.logout-modal-open {
     <div id="chatUserProfile" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
       <img 
         id="chatUserAvatar" 
-        src="{{ user.avatar_url|default:'/static/default-avatar.png' }}" 
+        src="/static/default-avatar.png" 
         alt="User Avatar"
-        data-user-id="{{ user.id }}"
+        data-user-id=""
         style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 0 12px rgba(255,255,255,0.8), 0 0 8px rgba(74,144,226,0.6); cursor: pointer;" 
       />
       <div>
-        <span id="chatUserNameAvatar" style="font-weight: 600;">{{ user.username }}</span>
+        <span id="chatUserNameAvatar" style="font-weight: 600;">کاربر</span>
       </div>
+
     </div>
 
     <button id="closeChatModal" class="close" aria-label="Close">&times;</button>
@@ -2863,6 +2870,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatInput = document.getElementById("chatInput");
   const chatMessages = document.getElementById("chatMessages");
 
+  const chatUserAvatar = document.getElementById("chatUserAvatar");
+  const chatUserNameAvatar = document.getElementById("chatUserNameAvatar");
+
   // شناسه کاربر فعلی (حتماً این مقدار را در قالب خود مقداردهی کنید)
   window.currentUserId = window.currentUserId || null;
   window.currentChatUserId = null;
@@ -2883,7 +2893,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // ذخیره پیام‌ها در localStorage
   function saveMessagesToLocalStorage(userId) {
     if (!userId) return;
-
     if (!chatMessages) return;
 
     const messages = [];
@@ -2891,53 +2900,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const content = msgElem.querySelector(".message-text")?.textContent || "";
       const timestamp = msgElem.querySelector(".message-time")?.textContent || "";
       const isMe = msgElem.classList.contains("me");
-
       const rawId = msgElem.dataset.id;
       const id = rawId && !rawId.startsWith("local-") ? parseInt(rawId) : null;
-
       messages.push({ id, content, timestamp, isMe });
     });
 
     localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
   }
-
-  // بسته شدن مودال چت و ذخیره پیام‌ها
-document.addEventListener("DOMContentLoaded", () => {
-  // کدهای قبلی شما
-  const chatModal = document.getElementById("chatModal");
-  const closeBtn = document.getElementById("closeChatModal");
-
-  function saveMessagesToLocalStorage(userId) {
-    // تعریف تابع ذخیره پیام‌ها در localStorage
-    // ... (تابع خودتون رو اینجا بذارید)
-  }
-
-  function closeChatModal() {
-    if (window.currentChatUserId) {
-      saveMessagesToLocalStorage(window.currentChatUserId);
-    }
-    chatModal.style.display = "none";
-    chatModal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-open");
-  }
-
-  if (closeBtn) closeBtn.addEventListener("click", closeChatModal);
-
-  // اینجا اضافه می‌کنیم بسته شدن مودال پروفایل با کلیک روی بک‌گراند
-  const userProfileModal = document.getElementById("userProfileModal");
-
-  if (userProfileModal) {
-    userProfileModal.addEventListener("click", (event) => {
-      if (event.target === userProfileModal) {
-        userProfileModal.style.display = "none";
-        userProfileModal.setAttribute("aria-hidden", "true");
-        window.location.href = "/";  // هدایت به صفحه اصلی
-      }
-    });
-  }
-
-  // بقیه کدهای شما...
-});
 
   // ارسال پیام جدید
   async function sendMessage(event) {
@@ -2981,7 +2950,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof loadMessagesFromServer === "function") {
         loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
       }
-
     } catch (error) {
       alert("خطا در ارسال پیام. لطفا دوباره تلاش کنید.");
       console.error("Fetch error:", error);
@@ -3000,11 +2968,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!btn) return;
 
     const userId = parseInt(btn.getAttribute("data-user-id"));
-    setDeleteTargetName(username || 'this user');
+    const username = btn.getAttribute("data-user-name");
+    const avatarUrl = btn.getAttribute("data-user-avatar") || '/static/default-avatar.png';
 
     if (isNaN(userId)) return alert("کاربر انتخاب نشده!");
 
     window.currentChatUserId = userId;
+
+    // بروزرسانی اطلاعات بالای مودال چت
+    if (chatUserAvatar) {
+      chatUserAvatar.src = avatarUrl;
+      chatUserAvatar.setAttribute("data-user-id", userId);
+    }
+    if (chatUserNameAvatar) {
+      chatUserNameAvatar.textContent = username || "کاربر";
+    }
 
     chatModal.style.display = "flex";
     chatModal.setAttribute("aria-hidden", "false");
@@ -3018,7 +2996,25 @@ document.addEventListener("DOMContentLoaded", () => {
       loadMessagesFromServer(window.currentUserId, userId);
     }
   });
+
+  // بستن مودال چت
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      if (window.currentChatUserId) {
+        saveMessagesToLocalStorage(window.currentChatUserId);
+      }
+      chatModal.style.display = "none";
+      chatModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+
+      if (chatMessages) chatMessages.innerHTML = "";
+      if (chatInput) chatInput.value = "";
+
+      window.currentChatUserId = null;
+    });
+  }
 });
+
 
 
 

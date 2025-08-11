@@ -960,3 +960,12 @@ def save_resized_images(image_path):
         resized.save(new_path, quality=95, optimize=True)
         print(f"Saved resized image: {new_path}")
 
+
+def navbar_view(request, partner_id=None):
+    chat_partner = None
+    if partner_id:
+        chat_partner = get_object_or_404(User, id=partner_id)
+    return render(request, 'navbar.html', {
+        'chat_partner': chat_partner,
+        'user': request.user,
+    })
