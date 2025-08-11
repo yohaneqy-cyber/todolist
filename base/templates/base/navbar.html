@@ -4,14 +4,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MySite</title>
-
+  {% load static %}
   <style>
+#closeChatModal {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: left;
+  justify-content: left;
+}
+
+#closeChatModal svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+}
+
 
 #chatUserProfile {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 5px !important;
   padding: 12px 20px;
   background: transparent; /* بک‌گراند شفاف */
   transition: box-shadow 0.3s ease, background-color 0.3s ease;
@@ -154,17 +173,27 @@
   display: flex;
   flex-direction: column-reverse;
 
-  /* Background with tiled SVG pattern */
-  background-image: url('https://blog.1a23.com/wp-content/uploads/sites/2/2020/02/pattern-3.svg');
-  background-repeat: repeat;
-  background-size: 100px 100px; /* fixed tile size */
-  background-position: top left;
+  /* پس‌زمینه */
+  background-image: url("{% static 'images/chat.jpg' %}");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
 
-  /* عرض */
   width: 100%;
   max-width: 2000px;
   margin: 0 auto;
 }
+
+/* ریسپانسیو برای موبایل */
+@media (max-width: 480px) {
+  #chatMessages {
+    padding: 16px 12px 70px !important; /* کاهش پدینگ برای موبایل */
+    font-size: 16px !important;         /* فونت کمی کوچکتر */
+    background-position: center center !important; /* حفظ موقعیت پس‌زمینه */
+    background-size: cover !important;  /* حفظ اندازه پس‌زمینه */
+  }
+}
+
 
 /* اسکرول‌بار */
 #chatMessages::-webkit-scrollbar {
@@ -2039,23 +2068,54 @@ body.logout-modal-open {
 }
 
     /* بکگراند تاریک و کل فضای صفحه */
-  #userProfileModal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none; /* فقط یک بار و درست استفاده کن */
-    justify-content: center;
-    align-items: center;
-    z-index: 100000; /* کمتر از modal-content ولی بیشتر از بقیه */
+#userProfileModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;           /* کل عرض صفحه */
+  height: 100vh;          /* کل ارتفاع صفحه */
+  background-color: rgba(0, 0, 0, 0.5); /* پس‌زمینه تار */
+  display: none;          /* پیش‌فرض مخفی */
+  justify-content: center;
+  align-items: center;
+  z-index: 100000;
 }
+
+#userProfileModal .modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  position: relative;
+}
+
+/* دکمه بستن */
+#closeUserProfileModal {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 24px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #333;
+}
+#closeUserProfileModal:hover {
+  color: #000;
+}
+
+/* وقتی مودال باز است، اسکرول صفحه غیرفعال می‌شود */
+body.modal-open {
+  overflow: hidden;
+}
+
 
   #userProfileModal.show {
     display: flex;
   }
-
+s
 
   #userProfileModal > .modal-content {
     background-color: white;
@@ -2383,26 +2443,30 @@ body.logout-modal-open {
 
 <div id="chatModal" class="chat-modal" style="display:none;">
   <div class="chat-modal-content">
-    
     <div id="chatUserProfile" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
       <img 
         id="chatUserAvatar" 
-        src="" 
+        src="{{ user.avatar_url|default:'/static/default-avatar.png' }}" 
         alt="User Avatar"
-        style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 0 12px rgba(255,255,255,0.8), 0 0 8px rgba(74,144,226,0.6);" 
+        data-user-id="{{ user.id }}"
+        style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 0 12px rgba(255,255,255,0.8), 0 0 8px rgba(74,144,226,0.6); cursor: pointer;" 
       />
       <div>
-        <span id="chatUserNameAvatar" style="font-weight: 600;"></span>
+        <span id="chatUserNameAvatar" style="font-weight: 600;">{{ user.username }}</span>
       </div>
     </div>
 
-
-    
     <button id="closeChatModal" class="close" aria-label="Close">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" >
-        <polyline points="15 18 9 12 15 6"></polyline>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
       </svg>
     </button>
+
+
+
+
+
         
     <!-- بخش پیام‌ها -->
     <div id="chatMessages">
@@ -2690,34 +2754,86 @@ async function loadMessagesFromServer(senderId, receiverId) {
 
 
 
+document.addEventListener("DOMContentLoaded", () => {
+  const chatUserAvatar = document.getElementById("chatUserAvatar");
+  const userProfileModal = document.getElementById('userProfileModal');
+  const contentContainer = document.getElementById('userProfileContent');
+  const closeUserProfileModalBtn = document.getElementById('closeUserProfileModal');
 
-  // بستن مودال چت
-function closeChatModal() {
-  console.log("closeChatModal called");
-
-  const chatModal = document.getElementById("chatModal");
-  if (!chatModal) return;
-
-  // ذخیره پیام‌ها در localStorage برای user فعلی چت
-  if (window.currentChatUserId) {
-    saveMessagesToLocalStorage(window.currentChatUserId);
+  function openUserProfileModal() {
+    if (userProfileModal) {
+      userProfileModal.style.display = "flex";  // flex برای وسط چین
+      userProfileModal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    }
   }
 
-  // بستن مودال و ریست تنظیمات
-  chatModal.style.display = "none";
-  chatModal.setAttribute("aria-hidden", "true");
-  document.body.classList.remove("modal-open");
+  function closeUserProfileModal() {
+    if (userProfileModal) {
+      userProfileModal.style.display = "none";
+      userProfileModal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+      if(contentContainer) contentContainer.innerHTML = ""; // خالی کردن محتوا
+    }
+  }
 
-  // پاک کردن پیام‌ها و ورودی چت
-  const chatMessages = document.getElementById("chatMessages");
-  if (chatMessages) chatMessages.innerHTML = "";
+  if (closeUserProfileModalBtn) {
+    closeUserProfileModalBtn.addEventListener("click", closeUserProfileModal);
+  }
 
-  const chatInput = document.getElementById("chatInput");
-  if (chatInput) chatInput.value = "";
+  if (chatUserAvatar) {
+    chatUserAvatar.style.cursor = "pointer";
+    chatUserAvatar.addEventListener("click", () => {
+      const userId = chatUserAvatar.getAttribute("data-user-id");
+      if (!userId) {
+        console.error("User ID not found!");
+        return;
+      }
 
-  // حذف کاربر فعلی چت
-  window.currentChatUserId = null;
-}
+      fetch(`/user_profile_ajax/${userId}/`, {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.text();
+      })
+      .then(html => {
+        if (contentContainer) {
+          contentContainer.innerHTML = html;
+          openUserProfileModal();
+        } else {
+          console.error('Element with id "userProfileContent" not found.');
+        }
+      })
+      .catch(err => {
+        console.error("Fetch error:", err);
+      });
+    });
+  }
+
+  // بستن مودال با کلیک روی پس‌زمینه
+  if(userProfileModal) {
+    userProfileModal.addEventListener("click", (e) => {
+      if(e.target === userProfileModal) {
+        closeUserProfileModal();
+      }
+    });
+  }
+
+  // بستن مودال با کلید Esc
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && userProfileModal.style.display === 'flex') {
+      closeUserProfileModal();
+    }
+  });
+});
+
+
+
+
 
 
 
@@ -2771,6 +2887,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // بسته شدن مودال چت و ذخیره پیام‌ها
+document.addEventListener("DOMContentLoaded", () => {
+  // کدهای قبلی شما
+  const chatModal = document.getElementById("chatModal");
+  const closeBtn = document.getElementById("closeChatModal");
+
+  function saveMessagesToLocalStorage(userId) {
+    // تعریف تابع ذخیره پیام‌ها در localStorage
+    // ... (تابع خودتون رو اینجا بذارید)
+  }
+
   function closeChatModal() {
     if (window.currentChatUserId) {
       saveMessagesToLocalStorage(window.currentChatUserId);
@@ -2781,6 +2907,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (closeBtn) closeBtn.addEventListener("click", closeChatModal);
+
+  // اینجا اضافه می‌کنیم بسته شدن مودال پروفایل با کلیک روی بک‌گراند
+  const userProfileModal = document.getElementById("userProfileModal");
+
+  if (userProfileModal) {
+    userProfileModal.addEventListener("click", (event) => {
+      if (event.target === userProfileModal) {
+        userProfileModal.style.display = "none";
+        userProfileModal.setAttribute("aria-hidden", "true");
+        window.location.href = "/";  // هدایت به صفحه اصلی
+      }
+    });
+  }
+
+  // بقیه کدهای شما...
+});
 
   // ارسال پیام جدید
   async function sendMessage(event) {
@@ -3709,6 +3851,7 @@ function loadMessages(senderId, receiverId) {
 
 function loadUserProfile(userId, fallbackName) {
   const chatUserAvatar = document.getElementById("chatUserAvatar");
+  
   const chatUserNameAvatar = document.getElementById("chatUserNameAvatar");
 
   const profileUrl = `/api/user/profile/${userId}/`;
