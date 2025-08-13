@@ -4423,93 +4423,54 @@ editBtn.addEventListener("touchstart", onEditMessageClick);
 
 
 // فرض می‌گیریم این متغیر سراسری در بالا تعریف شده:
-  const cancelDeleteBtn = document.getElementById("cancelDeleteMessageBtn");
-  const confirmDeleteBtn = document.getElementById("confirmDeleteMessageBtn");
-  const deleteMessageBtn = document.getElementById("deleteMessageBtn"); // فرض می‌کنیم این هم دارید
+const cancelDeleteBtn  = document.getElementById("cancelDeleteMessageBtn");
+const confirmDeleteBtn = document.getElementById("confirmDeleteMessageBtn");
 
-  let currentMessageIdToDelete = null;
+let currentMessageIdToDelete = null;
 
-  function openDeleteModal() {
-    if (!selectedMessageId) {
-      alert("شناسه پیام معتبر نیست.");
-      return;
-    }
-    currentMessageIdToDelete = selectedMessageId;
-    document.getElementById('deleteMessageModal').style.display = 'flex';
-    document.body.classList.add('modal1-open');
+// --- Helpers ---
+function openDeleteModal() {
+  if (!selectedMessageElement) {
+    alert("ابتدا یک پیام را انتخاب کنید.");
+    return;
   }
-
-  function closeDeleteModal() {
-    document.getElementById('deleteMessageModal').style.display = 'none';
-    document.body.classList.remove('modal1-open');
-    currentMessageIdToDelete = null;
+  const msgId = selectedMessageElement.getAttribute("data-id");
+  if (!msgId) {
+    alert("شناسه پیام معتبر نیست.");
+    return;
   }
+  currentMessageIdToDelete = msgId;
 
-  // دکمه حذف پیام
-  if (deleteMessageBtn) {
-    deleteMessageBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      if (!selectedMessageElement) {
-        alert("ابتدا یک پیام را انتخاب کنید.");
-        return;
-      }
-      if (!selectedMessageId || selectedMessageId === "null") {
-        alert("شناسه پیام معتبر نیست.");
-        return;
-      }
-      openDeleteModal();
-    });
-  }
+  const modal = document.getElementById('deleteMessageModal');
+  modal.style.display = 'flex';
+  document.body.classList.add('modal1-open');
+}
 
-  // دکمه لغو
-  if (cancelDeleteBtn) {
-    cancelDeleteBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      closeDeleteModal();
-    });
-  }
+function closeDeleteModal() {
+  const modal = document.getElementById('deleteMessageModal');
+  modal.style.display = 'none';
+  document.body.classList.remove('modal1-open');
+  currentMessageIdToDelete = null;
+}
 
-  // دکمه تایید حذف
-  if (confirmDeleteBtn) {
-    confirmDeleteBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
+// --- Ensure single binding for Cancel/Confirm ---
+function onCancelDelete(e) {
+  e.preventDefault();
+  closeDeleteModal();
+}
 
-      if (!selectedMessageElement || !currentMessageIdToDelete) {
-        alert("هیچ پیامی انتخاب نشده یا شناسه پیام معتبر نیست.");
-        closeDeleteModal();
-        return;
-      }
 
-      try {
-        const response = await fetch(`/api/chat/messages/${currentMessageIdToDelete}/`, {
-          method: "DELETE",
-          headers: {
-            "X-CSRFToken": getCookie("csrftoken"),
-            "X-Requested-With": "XMLHttpRequest"
-          },
-          credentials: "include"
-        });
 
-        if (response.ok) {
-          selectedMessageElement.classList.add("fade-slide-collapse");
+// قبل از وصل کردن، هر لیسنر قبلی رو بردار
+if (cancelDeleteBtn) {
+  cancelDeleteBtn.removeEventListener("click", onCancelDelete);
+  cancelDeleteBtn.addEventListener("click", onCancelDelete);
+}
+if (confirmDeleteBtn) {
+  confirmDeleteBtn.removeEventListener("click", onConfirmDelete);
+  confirmDeleteBtn.addEventListener("click", onConfirmDelete);
+}
 
-          selectedMessageElement.addEventListener("animationend", () => {
-            selectedMessageElement.remove();
-            selectedMessageElement = null;
-            selectedMessageId = null;
-            currentMessageIdToDelete = null;
-          }, { once: true });
-
-          closeDeleteModal();
-        } else {
-          alert("خطا در حذف پیام.");
-        }
-      } catch (error) {
-        alert("خطای شبکه در حذف پیام.");
-        console.error(error);
-      }
-    });
-  }
 });
 
 

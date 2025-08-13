@@ -1,3 +1,22 @@
+.add-buttons-container {
+  display: flex;           /* نمایش افقی */
+  justify-content: center; /* وسط‌چین کردن افقی */
+  gap: 10px;               /* فاصله بین دکمه‌ها */
+  margin-bottom: 16px;     /* فاصله پایین کانتینر */
+}
+
+.add-btn {
+  padding: 8px 16px;
+  background-color: #2980b9;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.add-btn:hover {
+  background-color: #1f6391;
+}
 
 body.dark-mode {
   background-color: #121212 !important;
