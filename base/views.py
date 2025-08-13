@@ -905,6 +905,7 @@ class ChatMessageApi(View):
 
 
 class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    
     queryset = ChatMessage.objects.all()
     serializer_class = ChatMessageSerializers
     permission_classes = [IsAuthenticated]
@@ -914,7 +915,9 @@ class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         return ChatMessage.objects.filter(sender=self.request.user)
 
     def update(self, request, *args, **kwargs):
+        print("User editing:", request.user)
         instance = self.get_object()
+        print("Editing message id:", instance.id, "sender:", instance.sender)
         message_text = request.data.get('message', '').strip()
 
         if not message_text:
@@ -924,6 +927,7 @@ class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         instance.edited = True
         instance.save()
         return Response(self.get_serializer(instance).data)
+
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -938,34 +942,33 @@ def get_user_profile(request, user_id):
     serializer = UserSerializer(user, context={'request': request})
     return Response(serializer.data)
 
-from pathlib import Path
 from PIL import Image
+from pathlib import Path
+import os
 
-def save_resized_images(image_path):
-    sizes = [56, 112, 224]
-    image_path = Path(image_path)
-    original = Image.open(image_path)
+def save_resized_avatars(image_path, user_id):
+    sizes = [56, 112]
+    avatars_dir = Path("media/avatars")
+    os.makedirs(avatars_dir, exist_ok=True)
 
-    # تبدیل به RGB اگر تصویر حالت شفاف (alpha) داشته باشه
-    if original.mode in ("RGBA", "P"):
-        original = original.convert("RGB")
+    img = Image.open(image_path)
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGBA")
+
+    w, h = img.size
+    min_side = min(w, h)
+    left = (w - min_side) // 2
+    top = (h - min_side) // 2
+    img = img.crop((left, top, left + min_side, top + min_side))
+
+    base_name = f"user-avatar-{user_id}"
 
     for size in sizes:
-        resized = original.resize((size, size), Image.LANCZOS)
-
-        new_filename = f"{image_path.stem}_{size}{image_path.suffix}"
-        new_path = image_path.parent / new_filename
-        
-        # هنگام ذخیره کیفیت JPG رو تنظیم کن
-        resized.save(new_path, quality=95, optimize=True)
-        print(f"Saved resized image: {new_path}")
+        resized = img.resize((size, size), Image.LANCZOS)
+        new_filename = f"{base_name}-{size}.webp"
+        new_path = avatars_dir / new_filename
+        resized.save(new_path, format='WEBP', quality=85, method=6)
+    
+    return base_name
 
 
-def navbar_view(request, partner_id=None):
-    chat_partner = None
-    if partner_id:
-        chat_partner = get_object_or_404(User, id=partner_id)
-    return render(request, 'navbar.html', {
-        'chat_partner': chat_partner,
-        'user': request.user,
-    })

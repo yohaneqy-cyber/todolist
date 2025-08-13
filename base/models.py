@@ -36,7 +36,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
-
+    avatar_base_name = models.CharField(max_length=255, blank=True, null=True)
     friends = models.ManyToManyField("self", blank=True, symmetrical=True)
 
     USERNAME_FIELD = 'email'
