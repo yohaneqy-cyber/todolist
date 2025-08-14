@@ -3038,3 +3038,17 @@ textarea[name="bio"] {
   }
 }
 
+@media (max-width: 480px) {
+  .add-buttons-container {
+    flex-wrap: nowrap; 
+    justify-content: center; /* وسط چین کردن در موبایل */
+    overflow-x: auto; 
+  }
+
+  .add-btn {
+    flex: 1 1 auto; 
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 20px;
+  }
+}
