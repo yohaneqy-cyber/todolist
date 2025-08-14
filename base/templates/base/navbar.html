@@ -6,6 +6,49 @@
   <title>MySite</title>
   {% load static %}
   <style>
+
+  @keyframes slideDownHide {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(50px); opacity: 0; }
+}
+
+@keyframes slideUpShow {
+  0% { transform: translateY(50px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.animate-hide {
+  animation: slideDownHide 0.3s forwards;
+}
+
+.animate-show {
+  animation: slideUpShow 0.3s forwards;
+}
+
+/* انیمیشن مخفی شدن فرم چت به پایین */
+.chatForm-hidden {
+  transform: translateY(150%);
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+/* حالت عادی فرم */
+#chatForm {
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+#chatOptionsBtn {
+  position: absolute;
+  top: 12px;   /* فاصله از بالای مودال */
+  left: 12px;  /* فاصله از سمت چپ مودال */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  z-index: 1002; /* بالاتر از بقیه عناصر */
+}
+
+
 #closeChatModal {
   position: absolute;
   top: 12px;
@@ -2487,6 +2530,44 @@ body.logout-modal-open {
     <button id="closeChatModal" class="close" aria-label="Close">&times;</button>
 
 
+    <button id="chatOptionsBtn" style="background:none; border:none; cursor:pointer; padding:4px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+        <circle cx="12" cy="5" r="2"/>
+        <circle cx="12" cy="12" r="2"/>
+        <circle cx="12" cy="19" r="2"/>
+      </svg>
+    </button>
+
+<button id="unblockBtn" style="
+    display: none;
+    position: absolute;
+    top: 14px;   /* 30px from top */
+    left: 60px;  /* 30px from left */
+    padding: 8px 14px;
+    background: #1E90FF; /* Dodger Blue */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgba(30,144,255,0.4);
+    transition: all 0.2s ease-in-out;
+">
+    Unblock User
+</button>
+
+
+<style>
+#unblockBtn:hover {
+    background: #1C86EE; /* Slightly darker blue on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(30,144,255,0.5);
+}
+#unblockBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 5px rgba(30,144,255,0.3);
+}
+</style>
 
 
 
@@ -2801,12 +2882,227 @@ async function loadMessagesFromServer(senderId = null, receiverId = null) {
 
 
 
-
 document.addEventListener("DOMContentLoaded", () => {
   const chatUserAvatar = document.getElementById("chatUserAvatar");
   const userProfileModal = document.getElementById('userProfileModal');
   const contentContainer = document.getElementById('userProfileContent');
   const closeUserProfileModalBtn = document.getElementById('closeUserProfileModal');
+  const chatOptionsBtn = document.getElementById("chatOptionsBtn");
+  const chatModalContent = chatOptionsBtn.closest(".chat-modal-content");
+
+  // ایجاد منوی Dropdown داخل مودال
+  const dropdownMenu = document.createElement("div");
+  dropdownMenu.id = "chatDropdownMenu";
+  dropdownMenu.style.position = "absolute";
+  dropdownMenu.style.background = "#fff";
+  dropdownMenu.style.border = "1px solid #ccc";
+  dropdownMenu.style.borderRadius = "8px";
+  dropdownMenu.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+  dropdownMenu.style.padding = "4px 0";
+  dropdownMenu.style.display = "none";
+  dropdownMenu.style.minWidth = "160px";
+  dropdownMenu.style.zIndex = "1001";
+
+  // آیتم‌ها
+  const options = [
+    { 
+      text: "Block This User",
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
+             </svg>`,
+      onClick: () => {
+        if(window.currentChatUserId){
+          blockUser(window.currentChatUserId);
+        } else {
+          alert("No user selected to block.");
+        }
+      }
+    },
+    { 
+      text: "Mute Chat",   
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"></line>
+             </svg>`
+    },
+    { 
+      text: "Delete Chat",
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6"/>
+              <path d="M14 11v6"/>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+             </svg>`
+    },
+    { 
+      text: "Report User",
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="2"/>
+              <path d="M10.5 3L9 1.5"/>
+              <path d="M13.5 3L15 1.5"/>
+              <ellipse cx="12" cy="13" rx="5" ry="7"/>
+              <line x1="12" y1="7" x2="12" y2="20"/>
+              <path d="M4 9h3"/>
+              <path d="M4 13h3"/>
+              <path d="M4 17h3"/>
+              <path d="M17 9h3"/>
+              <path d="M17 13h3"/>
+              <path d="M17 17h3"/>
+             </svg>`
+    }
+  ];
+
+  // اضافه کردن آیتم‌ها به Dropdown
+  options.forEach(opt => {
+    const item = document.createElement("button");
+    if (opt.onClick) {
+      item.addEventListener("click", (e) => {
+        e.stopPropagation();
+        opt.onClick();
+        dropdownMenu.style.display = "none";
+      });
+    }
+    item.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${opt.icon}<span>${opt.text}</span></span>`;
+    item.style.display = "block";
+    item.style.width = "100%";
+    item.style.padding = "8px 16px";
+    item.style.border = "none";
+    item.style.background = "none";
+    item.style.textAlign = "left";
+    item.style.cursor = "pointer";
+    item.addEventListener("mouseenter", () => item.style.background = "#f0f0f0");
+    item.addEventListener("mouseleave", () => item.style.background = "none");
+    dropdownMenu.appendChild(item);
+  });
+
+  chatModalContent.appendChild(dropdownMenu);
+
+  chatOptionsBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const rect = chatOptionsBtn.getBoundingClientRect();
+    const modalRect = chatModalContent.getBoundingClientRect();
+    dropdownMenu.style.left = `${rect.left - modalRect.left}px`;
+    dropdownMenu.style.top = `${rect.bottom - modalRect.top + 4}px`;
+    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+  });
+
+  dropdownMenu.addEventListener("click", e => e.stopPropagation());
+  document.addEventListener("click", () => { dropdownMenu.style.display = "none"; });
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      document.cookie.split(';').forEach(cookie => {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + '=')) cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+      });
+    }
+    return cookieValue;
+  }
+
+function applyBlockUI() {
+  const chatForm = document.getElementById("chatForm");
+  const chatInput = document.getElementById("chatInput");
+  const sendBtn = chatForm.querySelector("button");
+  const unblockBtn = document.getElementById("unblockBtn");
+  const userId = window.currentChatUserId || localStorage.getItem("currentChatUserId");
+  const blocked = userId ? localStorage.getItem(`blocked_${userId}`) : null;
+
+  if (blocked) {
+    // بلاک: فرم از پایین خارج شود
+    if (chatForm) {
+      chatForm.classList.remove("animate-show");
+      chatForm.classList.add("animate-hide");
+      setTimeout(() => chatForm.style.display = "none", 300);
+    }
+    // دکمه آنبلاک را نمایش بده
+    if (unblockBtn) {
+      unblockBtn.style.display = "block";
+      unblockBtn.classList.remove("animate-hide");
+      unblockBtn.classList.add("animate-show");
+    }
+  } else {
+    // آنبلاک: فرم از پایین وارد شود
+    if (chatForm) {
+      chatForm.style.display = "flex";
+      chatForm.classList.remove("animate-hide");
+      chatForm.classList.add("animate-show");
+    }
+    // دکمه آنبلاک را مخفی کن
+    if (unblockBtn) {
+      unblockBtn.classList.remove("animate-show");
+      unblockBtn.classList.add("animate-hide");
+      setTimeout(() => unblockBtn.style.display = "none", 300);
+    }
+  }
+}
+
+
+  chatUserAvatar.addEventListener("click", () => {
+    const userId = chatUserAvatar.getAttribute("data-user-id");
+    if (!userId) return;
+    window.currentChatUserId = userId;
+    localStorage.setItem("currentChatUserId", userId);
+    fetch(`/user_profile_ajax/${userId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(res => res.text())
+      .then(html => {
+        contentContainer.innerHTML = html;
+        openUserProfileModal();
+        applyBlockUI();
+      });
+  });
+
+  function blockUser(userId) {
+    fetch(`/api/block-user/${userId}/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        localStorage.setItem(`blocked_${userId}`, '1');
+        closeUserProfileModal();
+        applyBlockUI();
+      }
+    });
+  }
+
+  unblockBtn.addEventListener("click", () => {
+    const userId = window.currentChatUserId;
+    if (!userId) return;
+
+    fetch(`/api/unblock-user/${userId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        localStorage.removeItem(`blocked_${userId}`);
+        applyBlockUI();
+      } else {
+        alert("Unblock failed!");
+      }
+    })
+    .catch(err => console.error("Error:", err));
+  });
+
+
+
+
+
+  applyBlockUI();
 
   function openUserProfileModal() {
     if (userProfileModal) {
@@ -2886,6 +3182,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatForm = document.getElementById("chatForm");
   const chatInput = document.getElementById("chatInput");
   const chatMessages = document.getElementById("chatMessages");
+  
 
   const chatUserAvatar = document.getElementById("chatUserAvatar");
   const chatUserNameAvatar = document.getElementById("chatUserNameAvatar");
@@ -2908,71 +3205,60 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ذخیره پیام‌ها در localStorage
-  function saveMessagesToLocalStorage(userId) {
-    if (!userId) return;
-    if (!chatMessages) return;
+async function sendMessage(event) {
+  event.preventDefault();
+  event.stopPropagation();
 
-    const messages = [];
-    chatMessages.querySelectorAll(".chat-message").forEach((msgElem) => {
-      const content = msgElem.querySelector(".message-text")?.textContent || "";
-      const timestamp = msgElem.querySelector(".message-time")?.textContent || "";
-      const isMe = msgElem.classList.contains("me");
-      const rawId = msgElem.dataset.id;
-      const id = rawId && !rawId.startsWith("local-") ? parseInt(rawId) : null;
-      messages.push({ id, content, timestamp, isMe });
-    });
+  const chatInput = document.getElementById("chatInput");
+  if (!chatInput) return;
 
-    localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
+  const message = chatInput.value.trim();
+  if (!message) return;
+
+  if (!window.currentUserId || !window.currentChatUserId) {
+    alert("یک کاربر برای چت انتخاب کنید.");
+    return;
   }
 
-  // ارسال پیام جدید
-  async function sendMessage(event) {
-    event.preventDefault();
+  console.log("Sending message:", { sender: window.currentUserId, receiver: window.currentChatUserId, message });
 
-    const message = chatInput.value.trim();
-    if (!message) return;
+  try {
+    const response = await fetch("/api/chat/messages/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        sender_id: window.currentUserId,
+        receiver_id: window.currentChatUserId,
+        message
+      })
+    });
 
-    if (!window.currentUserId || !window.currentChatUserId) {
-      alert("یک کاربر برای چت انتخاب کنید.");
+    const data = await response.json();
+    console.log("Server response:", data);
+
+    if (!response.ok) {
+      alert("خطا در ارسال پیام: " + (data.error || data.detail || JSON.stringify(data)));
       return;
     }
 
-    try {
-      const response = await fetch("/api/chat/messages/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCSRFToken(),
-          "X-Requested-With": "XMLHttpRequest"
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          sender_id: window.currentUserId,
-          receiver_id: window.currentChatUserId,
-          message
-        })
-      });
+    chatInput.value = "";
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert("خطا در ارسال پیام: " + (data.error || "خطای نامشخص"));
-        console.error("Server error:", data);
-        return;
-      }
-
-      chatInput.value = "";
-
-      if (typeof loadMessagesFromServer === "function") {
-        loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
-      }
-
-      scrollChatToBottom(); // 🔹 بعد از لود، ببر پایین
-    } catch (error) {
-      alert("خطا در ارسال پیام. لطفا دوباره تلاش کنید.");
-      console.error("Fetch error:", error);
+    if (typeof loadMessagesFromServer === "function") {
+      await loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
     }
+
+    scrollChatToBottom();
+
+  } catch (error) {
+    console.error("Fetch error:", error);
+    alert("خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.");
   }
+}
 
 
 
@@ -4553,9 +4839,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 });
-
-
-
 
 
 

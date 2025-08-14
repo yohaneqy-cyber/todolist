@@ -844,19 +844,19 @@ class ChatMessageApi(View):
 
         if not sender_id or not receiver_id:
             return JsonResponse({"error": "sender_id and receiver_id required"}, status=400)
-        
+
         try:
             sender = User.objects.get(id=sender_id)
             receiver = User.objects.get(id=receiver_id)
         except User.DoesNotExist:
             return JsonResponse({"error": "User not found"}, status=404)
-           
+
         messages = ChatMessage.objects.filter(
             Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)
-        ).order_by('-timestamp')
+        ).order_by('timestamp')
 
         data = []
-        for msg in reversed(messages):
+        for msg in messages:
             local_time = timezone.localtime(msg.timestamp) if msg.timestamp else None
             data.append({
                 'id': msg.id,
@@ -866,19 +866,17 @@ class ChatMessageApi(View):
                 'timestamp': local_time.strftime("%H:%M:%S") if local_time else '',
             })
         return JsonResponse({'messages': data}, safe=False)
-    
+
     def post(self, request):
         try:
-            print("RAW Body:", request.body)
             data = json.loads(request.body)
-            print("Parsed Data:", data)
             sender_id = data.get('sender_id')
             receiver_id = data.get('receiver_id')
             content = data.get('message', '').strip()
 
             if not sender_id or not receiver_id:
                 return JsonResponse({"error": "sender_id and receiver_id required"}, status=400)
-            
+
             if not content:
                 return JsonResponse({"error": "Empty message"}, status=400)
 
@@ -887,6 +885,10 @@ class ChatMessageApi(View):
                 receiver = User.objects.get(id=receiver_id)
             except User.DoesNotExist:
                 return JsonResponse({"error": "User not found"}, status=404)
+
+            # 🔹 Check if sender is blocked by receiver
+            if ChatMessage.objects.filter(blocker=receiver, blocked=sender, message="").exists():
+                return JsonResponse({"error": "You are blocked by this user"}, status=403)
 
             msg = ChatMessage.objects.create(sender=sender, receiver=receiver, message=content)
 
@@ -902,6 +904,48 @@ class ChatMessageApi(View):
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+@csrf_exempt
+def block_user(request, user_id):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        blocked_user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
+
+    # اگر قبلاً بلاک شده بود، پیام بده
+    if ChatMessage.objects.filter(blocker=request.user, blocked=blocked_user).exists():
+        return JsonResponse({"success": False, "message": "User already blocked"})
+
+    # ایجاد بلاک بدون پیام واقعی
+    ChatMessage.objects.create(
+        sender=request.user,
+        receiver=blocked_user,
+        message="",  # فقط خالی بذار
+        blocker=request.user,
+        blocked=blocked_user
+    )
+
+    return JsonResponse({"success": True})
+
+
+
+@csrf_exempt
+def unblock_user(request, user_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    try:
+        blocked_user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+    # حذف رکورد بلاک
+    ChatMessage.objects.filter(blocker=request.user, blocked=blocked_user).delete()
+
+    return JsonResponse({'success': True})
 
 
 class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
