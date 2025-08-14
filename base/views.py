@@ -886,10 +886,11 @@ class ChatMessageApi(View):
             except User.DoesNotExist:
                 return JsonResponse({"error": "User not found"}, status=404)
 
-            # 🔹 Check if sender is blocked by receiver
-            if ChatMessage.objects.filter(blocker=receiver, blocked=sender, message="").exists():
+            # 🔹 Check if sender is blocked by receiver using Block model
+            if Block.objects.filter(blocker=receiver, blocked=sender).exists():
                 return JsonResponse({"error": "You are blocked by this user"}, status=403)
 
+            # Create message
             msg = ChatMessage.objects.create(sender=sender, receiver=receiver, message=content)
 
             local_time = timezone.localtime(msg.timestamp) if msg.timestamp else None
@@ -904,46 +905,53 @@ class ChatMessageApi(View):
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
+        
+# views.py
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Block, User
+
 
 @csrf_exempt
 def block_user(request, user_id):
     if request.method != "POST":
         return JsonResponse({"error": "POST required"}, status=405)
 
+    # بررسی لاگین بودن کاربر
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Login required"}, status=403)
+
     try:
         blocked_user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return JsonResponse({"error": "User not found"}, status=404)
 
-    # اگر قبلاً بلاک شده بود، پیام بده
-    if ChatMessage.objects.filter(blocker=request.user, blocked=blocked_user).exists():
-        return JsonResponse({"success": False, "message": "User already blocked"})
-
-    # ایجاد بلاک بدون پیام واقعی
-    ChatMessage.objects.create(
-        sender=request.user,
-        receiver=blocked_user,
-        message="",  # فقط خالی بذار
+    # بلاک کردن کاربر با استفاده از مدل Block
+    block, created = Block.objects.get_or_create(
         blocker=request.user,
         blocked=blocked_user
     )
 
-    return JsonResponse({"success": True})
+    if not created:
+        return JsonResponse({"success": False, "message": "User already blocked"})
 
+    return JsonResponse({"success": True})
 
 
 @csrf_exempt
 def unblock_user(request, user_id):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST required'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Login required"}, status=403)
 
     try:
         blocked_user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
 
-    # حذف رکورد بلاک
-    ChatMessage.objects.filter(blocker=request.user, blocked=blocked_user).delete()
+    Block.objects.filter(blocker=request.user, blocked=blocked_user).delete()
 
     return JsonResponse({'success': True})
 

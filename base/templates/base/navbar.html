@@ -6,6 +6,78 @@
   <title>MySite</title>
   {% load static %}
   <style>
+/* Dropdown پایه */
+.chat-dropdown-menu {
+  position: absolute;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  padding: 4px 0;
+  min-width: 180px;
+  display: none;
+  z-index: 1001;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  transition: background 0.3s, color 0.3s;
+  overflow: hidden;
+}
+
+/* آیتم‌های Dropdown */
+.chat-dropdown-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  color: #333;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* هاور و انتخاب - بنفش کم‌رنگ */
+.chat-dropdown-menu button:hover {
+  background-color: rgba(0, 0, 0, 1) !important; /* بنفش خیلی کم‌رنگ */
+  color: #000;
+}
+
+/* آیکون‌ها */
+.chat-dropdown-menu button svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+
+/* Dark Mode */
+body.dark-mode .chat-dropdown-menu {
+  background-color: #1e1e2f;
+  color: #eee;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .chat-dropdown-menu button {
+  color: #eee;
+}
+
+body.dark-mode .chat-dropdown-menu button:hover {
+  background-color: rgba(128, 0, 128, 0.15); /* بنفش کم‌رنگ‌تر برای dark */
+  color: #fff;
+}
+
+/* انیمیشن باز شدن */
+.chat-dropdown-menu.show {
+  display: block;
+  animation: dropdownFadeIn 0.2s ease-out forwards;
+}
+
+@keyframes dropdownFadeIn {
+  0% { opacity: 0; transform: translateY(-6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+
 
   @keyframes slideDownHide {
   0% { transform: translateY(0); opacity: 1; }
@@ -2935,14 +3007,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const dropdownMenu = document.createElement("div");
   dropdownMenu.id = "chatDropdownMenu";
   dropdownMenu.style.position = "absolute";
-  dropdownMenu.style.background = "#fff";
-  dropdownMenu.style.border = "1px solid #ccc";
   dropdownMenu.style.borderRadius = "8px";
   dropdownMenu.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
   dropdownMenu.style.padding = "4px 0";
   dropdownMenu.style.display = "none";
   dropdownMenu.style.minWidth = "160px";
   dropdownMenu.style.zIndex = "1001";
+
+  dropdownMenu.classList.add("chat-dropdown-menu");
 
   // آیتم‌ها
   const options = [

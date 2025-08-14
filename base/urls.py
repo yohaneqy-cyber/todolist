@@ -46,5 +46,5 @@ urlpatterns = [
     path('api/chat/messages/<int:pk>/', views.MessageUpdateDeleteView.as_view(), name='chat-message-edit-delete'),
     path('api/user/profile/<int:user_id>/', views.get_user_profile, name='get_user_profile'),
     path('api/block-user/<int:user_id>/', views.block_user, name='block_user'),
-    path('api/unblock-user/<int:user_id>/', views.unblock_user, name='unblock-user')
+    path('api/unblock-user/<int:user_id>/', views.unblock_user, name='unblock_user'),
 ]
