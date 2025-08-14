@@ -56,11 +56,18 @@ class RecurringTaskForm(forms.ModelForm):
         self.fields['start_date'].required = True
 
 # فرم تغییر پروفایل
+from django import forms
+from django.forms.widgets import ClearableFileInput
+
+class NoLinkFileInput(ClearableFileInput):
+    template_name = "widgets/no_link_file_input.html"  # قالب سفارشی بدون لینک
+
 class ChengeForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('avatar', 'name', 'email', 'bio')
         widgets = {
+            'avatar': NoLinkFileInput(),
             'bio': forms.Textarea(attrs={
                 'class': 'auth-input bio-field',
                 'rows': 2,
@@ -74,16 +81,14 @@ class ChengeForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-
         inactive_users = User.objects.filter(email=email, is_active=False)
         if inactive_users.exists():
             inactive_users.delete()
-
         user_with_email = User.objects.filter(email=email, is_active=True).first()
         if user_with_email and user_with_email.pk != self.instance.pk:
             raise forms.ValidationError('This email is already in use.')
-
         return email
+
 
 # فرم یادآور
 class ReminderForm(forms.Form):

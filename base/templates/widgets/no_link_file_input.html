@@ -1,5 +1,10 @@
-{% if widget.value %}
-    <p style="margin-top:4px; font-size:0.9em;">
-          Currently: {{ widget.value }}
-    </p>
+<input type="{{ widget.type }}" name="{{ widget.name }}"
+    {% for name, value in widget.attrs.items %}
+        {% if value %}
+            {{ name }}="{{ value }}"
+        {% endif %}
+    {% endfor %}
+>
+{% if widget.errors %}
+  <div class="error">{{ widget.errors }}</div>
 {% endif %}
