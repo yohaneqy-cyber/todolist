@@ -1,3 +1,35 @@
+/* استایل پایه */
+.file-input-wrapper input[type="file"] {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    background-color: #f8f8f8;
+    font-size: 14px;
+}
+
+/* ریسپانسیو برای موبایل */
+@media (max-width: 480px) {
+    .file-input-wrapper input[type="file"] {
+        padding: 3px 6px;   /* کمتر کردن padding */
+        font-size: 8px !important;    /* فونت کوچیک‌تر */
+        border-radius: 4px; /* شعاع گرد کوچک‌تر */
+    }
+}
+
+
+.add-buttons-container .add-btn {
+  text-decoration: none !important;
+  padding: 8px 16px !important;
+  background-color: #007bff !important;
+  color: white !important;
+  border-radius: 6px !important;
+  display: inline-block !important;
+  white-space: nowrap !important; /* جلوگیری از شکست متن داخل دکمه */
+}
+
+
 .add-buttons-container {
   display: flex;           /* نمایش افقی */
   justify-content: center; /* وسط‌چین کردن افقی */
@@ -1848,7 +1880,7 @@ html.dark-mode, body.dark-mode select:-webkit-autofill {
 }
 
 .profile-container {
-  max-width: 480px !important;
+  max-width: 580px !important;
   margin: 50px auto;
   padding: 35px 40px;
   background: #f0f4ff; /* روشن ولی نزدیک رنگ قبلی */
@@ -1892,12 +1924,13 @@ html.dark-mode, body.dark-mode select:-webkit-autofill {
 
 .profile-form {
   background: white;
-  padding: 28px 32px;
+  padding: 10px 10px;
   border-radius: 16px;
   border: 2px solid #888888;
   box-shadow: 0 5px 18px rgba(0, 0, 0, 0.07);
   transition: box-shadow 0.3s ease;
 }
+
 
 .profile-form:hover {
   box-shadow: 0 7px 28px rgba(0, 0, 0, 0.12);
