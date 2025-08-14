@@ -2558,16 +2558,56 @@ body.logout-modal-open {
 
 
 <style>
+#unblockBtn {
+    display: none;
+    position: absolute;
+    top: 14px;
+    left: 60px;
+    padding: 8px 14px;
+    background: #1E90FF;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgba(30,144,255,0.4);
+    transition: all 0.2s ease-in-out;
+}
+
 #unblockBtn:hover {
-    background: #1C86EE; /* Slightly darker blue on hover */
+    background: #1C86EE;
     transform: translateY(-2px);
     box-shadow: 0 6px 10px rgba(30,144,255,0.5);
 }
+
 #unblockBtn:active {
     transform: translateY(0);
     box-shadow: 0 3px 5px rgba(30,144,255,0.3);
 }
+
+/* ریسپانسیو موبایل */
+@media (max-width: 480px) {
+    #unblockBtn {
+        top: 10px;
+        left: 12px;
+        padding: 6px 10px;
+        font-size: 14px;
+        border-radius: 6px;
+        box-shadow: 0 3px 5px rgba(30,144,255,0.3);
+    }
+
+    #unblockBtn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(30,144,255,0.4);
+    }
+
+    #unblockBtn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(30,144,255,0.2);
+    }
+}
 </style>
+
 
 
 
