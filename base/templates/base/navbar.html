@@ -6,6 +6,20 @@
   <title>MySite</title>
   {% load static %}
   <style>
+
+.message.my-message, 
+.message.my-message * {
+  user-select: none !important;           /* جلوگیری از انتخاب متن */
+  -webkit-user-select: none !important;   /* Chrome, Safari */
+  -moz-user-select: none !important;      /* Firefox */
+  -ms-user-select: none !important;       /* IE/Edge */
+  -webkit-touch-callout: none !important; /* جلوگیری از منوی long press روی iOS */
+  -webkit-tap-highlight-color: transparent !important; /* جلوگیری از هایلایت لمس موبایل */
+  pointer-events: auto; /* اجازه تعامل با دکمه‌ها و لینک‌ها */
+}
+
+
+
 /* Dropdown پایه */
 .chat-dropdown-menu {
   position: absolute;
@@ -310,6 +324,11 @@ body.dark-mode .chat-dropdown-menu button:hover {
   width: 100%;
   max-width: 2000px;
   margin: 0 auto;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  -webkit-touch-callout: none !important;
 }
 
 /* ریسپانسیو برای موبایل */
@@ -883,6 +902,7 @@ body.dark-mode #chatModalTitle {
   box-sizing: border-box;
   user-select: text;
   position: relative;
+  user-select: none; 
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   align-items: flex-start; /* Keep time a bit lower */
   gap: 8px;
@@ -2856,7 +2876,7 @@ function loadMessagesFromLocalStorage(userId, receiverName) {
     msgElem.dataset.index = index;
     msgElem.dataset.id = msg.id ?? `local-${index}`;
 
-    // ✨ اضافه کردن data-receiver-name برای منوی راست‌کلیک
+    // اضافه کردن data-receiver-name برای منوی راست‌کلیک
     msgElem.dataset.receiverName = receiverName;
 
     const textP = document.createElement("p");
@@ -2869,6 +2889,18 @@ function loadMessagesFromLocalStorage(userId, receiverName) {
 
     msgElem.appendChild(textP);
     msgElem.appendChild(timeSpan);
+
+    // 🔹 جلوگیری از انتخاب متن و راست کلیک / long press
+    msgElem.addEventListener('contextmenu', e => e.preventDefault());
+    msgElem.addEventListener('mousedown', e => e.preventDefault());
+    msgElem.addEventListener('touchstart', e => e.preventDefault());
+
+    // CSS inline برای اطمینان بیشتر
+    msgElem.style.userSelect = 'none';
+    msgElem.style.webkitUserSelect = 'none';
+    msgElem.style.mozUserSelect = 'none';
+    msgElem.style.msUserSelect = 'none';
+    msgElem.style.webkitTouchCallout = 'none';
 
     chatMessages.appendChild(msgElem);
   });
@@ -2888,6 +2920,19 @@ function saveMessagesToLocalStorage(userId) {
   chatMessages.querySelectorAll(".message.my-message").forEach(msgElem => {
     const content = msgElem.querySelector(".message-text")?.textContent || "";
     const timestamp = msgElem.querySelector(".message-time")?.textContent || "";
+
+    // جلوگیری از منوی راست کلیک و انتخاب متن
+    msgElem.addEventListener('contextmenu', e => e.preventDefault());
+    msgElem.addEventListener('mousedown', e => e.preventDefault());   // جلوگیری از کشیدن موس
+    msgElem.addEventListener('touchstart', e => e.preventDefault()); // جلوگیری از long press موبایل
+
+    // همچنین CSS برای مطمئن شدن غیرقابل انتخاب بودن
+    msgElem.style.userSelect = 'none';
+    msgElem.style.webkitUserSelect = 'none';
+    msgElem.style.mozUserSelect = 'none';
+    msgElem.style.msUserSelect = 'none';
+    msgElem.style.webkitTouchCallout = 'none';
+
     const isMe = msgElem.classList.contains("me");
     const id = msgElem.dataset.id?.startsWith("local-") ? null : parseInt(msgElem.dataset.id);
 
@@ -2896,6 +2941,8 @@ function saveMessagesToLocalStorage(userId) {
 
   localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
 }
+
+
 
 // ✅ بارگذاری پیام‌ها از localStorage با id و index
 let selectedMessage = null;
@@ -4350,18 +4397,37 @@ document.addEventListener("DOMContentLoaded", () => {document.addEventListener("
   const chatInput = document.getElementById("chatInput");
   const chatMessages = document.getElementById("chatMessages");
 
-  function saveMessagesToLocalStorage(userId) {
-    if (!userId) return; // اگه کاربر انتخاب نشده، ذخیره نکن
-    const messages = [];
-    chatMessages.querySelectorAll(".message.my-message").forEach(msgElem => {
-      messages.push({
-        content: msgElem.querySelector(".message-text").textContent,
-        timestamp: msgElem.querySelector(".message-time").textContent,
-        isMe: msgElem.classList.contains("me")
-      });
-    });
-    localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
-  }
+function saveMessagesToLocalStorage(userId) {
+  if (!userId) return;
+
+  const chatMessages = document.getElementById("chatMessages");
+  if (!chatMessages) return;
+
+  const messages = [];
+  chatMessages.querySelectorAll(".message.my-message").forEach(msgElem => {
+    const content = msgElem.querySelector(".message-text")?.textContent || "";
+    const timestamp = msgElem.querySelector(".message-time")?.textContent || "";
+
+    // جلوگیری از منوی راست کلیک و انتخاب متن
+    msgElem.addEventListener('contextmenu', e => e.preventDefault());
+    msgElem.addEventListener('mousedown', e => e.preventDefault());   // جلوگیری از کشیدن موس
+    msgElem.addEventListener('touchstart', e => e.preventDefault()); // جلوگیری از long press موبایل
+
+    // همچنین CSS برای مطمئن شدن غیرقابل انتخاب بودن
+    msgElem.style.userSelect = 'none';
+    msgElem.style.webkitUserSelect = 'none';
+    msgElem.style.mozUserSelect = 'none';
+    msgElem.style.msUserSelect = 'none';
+    msgElem.style.webkitTouchCallout = 'none';
+
+    const isMe = msgElem.classList.contains("me");
+    const id = msgElem.dataset.id?.startsWith("local-") ? null : parseInt(msgElem.dataset.id);
+
+    messages.push({ id, content, timestamp, isMe });
+  });
+
+  localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
+}
 
   // نمونه استفاده:
   // saveMessagesToLocalStorage('123');
