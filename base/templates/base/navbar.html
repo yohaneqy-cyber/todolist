@@ -3850,36 +3850,45 @@ async function sendMessage(event) {
   let currentMessageIdToDelete = null;
 
   // راست‌کلیک روی پیام‌ها
-  chatMessages.addEventListener("contextmenu", function (e) {
+chatMessages.addEventListener("contextmenu", function (e) {
     const messageEl = e.target.closest(".chat-message");
     if (!messageEl) return;
 
     e.preventDefault();
 
     selectedMessageElement = messageEl;
-
-    // ذخیره آیدی پیام برای حذف
     currentMessageIdToDelete = messageEl.dataset.id;
 
-    // دریافت نام طرف مقابل از data attribute
     const receiverName = messageEl.dataset.receiverName || "this user";
-
-    // جایگزین کردن نام طرف مقابل در span مودال
     const kekewithSpan = document.getElementById("kekewith");
     if (kekewithSpan) {
-      kekewithSpan.textContent = receiverName;
+        kekewithSpan.textContent = receiverName;
     }
 
-    // انتخاب پیام (هایلایت کردن)
-    document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+    // حذف هایلایت قبلی و انتخاب پیام فعلی
+    document.querySelectorAll(".chat-message.selected")
+        .forEach(el => el.classList.remove("selected"));
     messageEl.classList.add("selected");
 
-    // نمایش منوی راست‌کلیک کنار موس
-    messageMenu.style.left = `${e.clientX}px`;
-    messageMenu.style.top = `${e.clientY}px`;
-    messageMenu.style.position = "fixed";
+    // گرفتن موقعیت پیام
+    const rect = messageEl.getBoundingClientRect();
+    let top = rect.top + window.scrollY;
+    let left;
+
+    if (messageEl.classList.contains("me")) {
+        // پیام سمت راست → منو کمی به چپ
+        left = rect.left + window.scrollX - messageMenu.offsetWidth - 10;
+    } else {
+        // پیام سمت چپ → منو کمی به راست
+        left = rect.right + window.scrollX + 10;
+    }
+
+    messageMenu.style.top = `${top}px`;
+    messageMenu.style.left = `${left}px`;
+    messageMenu.style.position = "absolute";
     messageMenu.classList.remove("hidden");
-  });
+});
+
 
   // کلیک بیرون منوی راست‌کلیک باعث بسته شدن منو و لغو انتخاب پیام می‌شود
   document.addEventListener("click", (e) => {
@@ -3909,7 +3918,7 @@ document.getElementById("copyMessage").addEventListener("click", (e) => {
   e.stopPropagation();
   if (!selectedMessageElement) return;
 
-  const text = selectedMessageElement.textContent.trim();
+  const text = selectedMessageElement.querySelector(".message-text")?.textContent.trim() || "";
   if (!text) return;
 
   navigator.clipboard.writeText(text)
@@ -3937,13 +3946,11 @@ document.getElementById("copyMessage").addEventListener("click", (e) => {
       notif.style.top = `${rect.top + rect.height / 2 - notif.offsetHeight / 2 + window.scrollY}px`;
       notif.style.left = `${rect.left - notif.offsetWidth - 8 + window.scrollX}px`;
 
-      // اجازه بده DOM رندر بشه، بعد انیمیشن ورود
       setTimeout(() => {
         notif.style.opacity = 1;
         notif.style.transform = 'translateY(0)';
       }, 10);
 
-      // بعد 2 ثانیه انیمیشن خروج
       setTimeout(() => {
         notif.style.opacity = 0;
         notif.style.transform = 'translateY(20px)';
@@ -3954,6 +3961,7 @@ document.getElementById("copyMessage").addEventListener("click", (e) => {
 
   document.getElementById("messageMenu").style.display = "none";
 });
+
 
 
     // جستجوی کاربران با تایمر (debounce)
@@ -4559,43 +4567,101 @@ function closeModal(modal) {
   document.body.classList.remove("modal-open");
 }
 
-document.addEventListener("DOMContentLoaded", () => {document.addEventListener("DOMContentLoaded", () => {
-  const chatModal = document.getElementById("chatModal");
-  const closeChatModalBtn = document.getElementById("closeChatModal");
-  const chatInput = document.getElementById("chatInput");
-  const chatMessages = document.getElementById("chatMessages");
+document.addEventListener("DOMContentLoaded", () => {
+    const chatModal = document.getElementById("chatModal");
+    const closeChatModalBtn = document.getElementById("closeChatModal");
+    const chatInput = document.getElementById("chatInput");
+    const chatMessages = document.getElementById("chatMessages");
+    const messageMenu = document.getElementById("messageMenu");
 
-function saveMessagesToLocalStorage(userId) {
-  if (!userId) return;
+    let selectedMessageElement = null;
+    let selectedMessageId = null;
 
-  const chatMessages = document.getElementById("chatMessages");
-  if (!chatMessages) return;
+    function saveMessagesToLocalStorage(userId) {
+        if (!userId) return;
+        if (!chatMessages) return;
 
-  const messages = [];
-  chatMessages.querySelectorAll(".message.my-message").forEach(msgElem => {
-    const content = msgElem.querySelector(".message-text")?.textContent || "";
-    const timestamp = msgElem.querySelector(".message-time")?.textContent || "";
+        const messages = [];
+        chatMessages.querySelectorAll(".message.my-message").forEach(msgElem => {
+            const content = msgElem.querySelector(".message-text")?.textContent || "";
+            const timestamp = msgElem.querySelector(".message-time")?.textContent || "";
 
-    // جلوگیری از منوی راست کلیک و انتخاب متن
-    msgElem.addEventListener('contextmenu', e => e.preventDefault());
-    msgElem.addEventListener('mousedown', e => e.preventDefault());   // جلوگیری از کشیدن موس
-    msgElem.addEventListener('touchstart', e => e.preventDefault()); // جلوگیری از long press موبایل
+            // جلوگیری از منوی پیشفرض و انتخاب متن
+            msgElem.addEventListener('contextmenu', e => e.preventDefault());
+            msgElem.addEventListener('mousedown', e => e.preventDefault());
+            msgElem.addEventListener('touchstart', e => e.preventDefault());
 
-    // همچنین CSS برای مطمئن شدن غیرقابل انتخاب بودن
-    msgElem.style.userSelect = 'none';
-    msgElem.style.webkitUserSelect = 'none';
-    msgElem.style.mozUserSelect = 'none';
-    msgElem.style.msUserSelect = 'none';
-    msgElem.style.webkitTouchCallout = 'none';
+            msgElem.style.userSelect = 'none';
+            msgElem.style.webkitUserSelect = 'none';
+            msgElem.style.mozUserSelect = 'none';
+            msgElem.style.msUserSelect = 'none';
+            msgElem.style.webkitTouchCallout = 'none';
 
-    const isMe = msgElem.classList.contains("me");
-    const id = msgElem.dataset.id?.startsWith("local-") ? null : parseInt(msgElem.dataset.id);
+            const isMe = msgElem.classList.contains("me");
+            const id = msgElem.dataset.id?.startsWith("local-") ? null : parseInt(msgElem.dataset.id);
 
-    messages.push({ id, content, timestamp, isMe });
-  });
+            messages.push({ id, content, timestamp, isMe });
+        });
 
-  localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
-}
+        localStorage.setItem(`chatMessages_${userId}`, JSON.stringify(messages));
+    }
+
+    function openMessageMenuFor(messageEl) {
+        selectedMessageElement = messageEl;
+        selectedMessageId = messageEl.dataset.id;
+
+        // حذف انتخاب قبلی
+        document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+        messageEl.classList.add("selected");
+
+        // گرفتن موقعیت پیام
+        const rect = messageEl.getBoundingClientRect();
+        let top = rect.top + window.scrollY;
+        let left;
+
+        if (messageEl.classList.contains("me")) {
+            // پیام سمت راست → منو سمت چپ
+            left = rect.left + window.scrollX - messageMenu.offsetWidth - 10;
+        } else {
+            // پیام سمت چپ → منو سمت راست
+            left = rect.right + window.scrollX + 10;
+        }
+
+        messageMenu.style.top = `${top}px`;
+        messageMenu.style.left = `${left}px`;
+        messageMenu.style.position = "absolute";
+        messageMenu.classList.remove("hidden");
+    }
+
+    // کلیک راست روی پیام‌ها
+    document.addEventListener("contextmenu", (e) => {
+        const messageEl = e.target.closest(".chat-message");
+        if (!messageEl) {
+            messageMenu.classList.add("hidden");
+            document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+            selectedMessageId = null;
+            selectedMessageElement = null;
+            return;
+        }
+
+        e.preventDefault();
+        openMessageMenuFor(messageEl);
+    });
+
+    // بستن منو وقتی بیرون کلیک می‌کنیم
+    document.addEventListener("click", (e) => {
+        if (!messageMenu.contains(e.target)) {
+            messageMenu.classList.add("hidden");
+        }
+    });
+
+    // ذخیره پیام‌ها هنگام بستن چت
+    closeChatModalBtn?.addEventListener("click", () => {
+        saveMessagesToLocalStorage(currentChatUserId);
+        chatModal.style.display = "none";
+    });
+
+
 
   // نمونه استفاده:
   // saveMessagesToLocalStorage('123');
@@ -4831,19 +4897,53 @@ let editingMessageId = null;
 let isEditing = false;
 
 
-document.addEventListener("contextmenu", (e) => {
-  const messageEl = e.target.closest(".chat-message");
-  if (!messageEl) {
-    messageMenu.classList.add("hidden");
-    document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
-    selectedMessageId = null;
-    selectedMessageElement = null;
-    return;
-  }
+function openMessageMenuFor(messageEl) {
+    // ذخیره برای عملیات بعدی
+    selectedMessageElement = messageEl;
+    selectedMessageId = messageEl.dataset.id;
 
-  e.preventDefault();
-  openMessageMenuFor(messageEl);
+    // هایلایت پیام انتخاب‌شده
+    document.querySelectorAll(".chat-message.selected")
+        .forEach(el => el.classList.remove("selected"));
+    messageEl.classList.add("selected");
+
+    // محاسبه موقعیت پیام
+    const rect = messageEl.getBoundingClientRect();
+    let top = rect.top + window.scrollY;
+    let left;
+
+    if (messageEl.classList.contains("me")) {
+        // پیام سمت راست → منو کمی به چپ
+        left = rect.left + window.scrollX - messageMenu.offsetWidth - 10;
+    } else {
+        // پیام سمت چپ → منو کمی به راست
+        left = rect.right + window.scrollX + 10;
+    }
+
+    // نمایش منو
+    messageMenu.style.top = `${top}px`;
+    messageMenu.style.left = `${left}px`;
+    messageMenu.style.position = "absolute";
+    messageMenu.classList.remove("hidden");
+}
+
+// رویداد کلیک راست کلی عمومی
+document.addEventListener("contextmenu", (e) => {
+    const messageEl = e.target.closest(".chat-message");
+    if (!messageEl) {
+        // بستن منو
+        messageMenu.classList.add("hidden");
+        document.querySelectorAll(".chat-message.selected")
+            .forEach(el => el.classList.remove("selected"));
+        selectedMessageId = null;
+        selectedMessageElement = null;
+        return;
+    }
+
+    e.preventDefault();
+    openMessageMenuFor(messageEl);
 });
+
 
 function openMessageMenuFor(messageEl) {
   selectedMessageId = messageEl.dataset.id ?? null;
@@ -5056,7 +5156,6 @@ editBtn.addEventListener("touchstart", onEditMessageClick);
 
 
 // فرض می‌گیریم این متغیر سراسری در بالا تعریف شده:
-const cancelDeleteBtn  = document.getElementById("cancelDeleteMessageBtn");
 const confirmDeleteBtn = document.getElementById("confirmDeleteMessageBtn");
 
 let currentMessageIdToDelete = null;
@@ -5104,7 +5203,6 @@ if (confirmDeleteBtn) {
   confirmDeleteBtn.addEventListener("click", onConfirmDelete);
 }
 
-});
 
 
 
