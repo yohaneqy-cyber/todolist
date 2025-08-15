@@ -3062,7 +3062,7 @@ document.addEventListener("DOMContentLoaded", () => {
   dropdownMenu.style.zIndex = "1001";
 
   dropdownMenu.classList.add("chat-dropdown-menu");
-
+  
   // آیتم‌ها
   const options = [
     { 
@@ -3168,6 +3168,49 @@ function getCookie(name) {
   return cookieValue;
 }
 
+function updateBlockMenuText(isBlocked) {
+  const dropdownMenu = document.getElementById("chatDropdownMenu");
+  if (!dropdownMenu) return;
+
+  const buttons = Array.from(dropdownMenu.querySelectorAll("button"));
+  buttons.forEach(btn => {
+    const spanText = btn.querySelector("span:last-child");
+    if (!spanText) return;
+
+    if (spanText.textContent.includes("Block") || spanText.textContent.includes("Unblock")) {
+      // Set new text
+      const newText = isBlocked ? "Unblock This User" : "Block This User";
+
+      // SVG for each state
+      const iconSVG = isBlocked
+        ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <path d="M4 12l6 6 10-10"/> <!-- simplified handshake -->
+           </svg>`
+        : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <circle cx="12" cy="12" r="10"/>
+             <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
+           </svg>`;
+
+      // Remove old click listeners by cloning
+      const newBtn = btn.cloneNode(true);
+      newBtn.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${iconSVG}<span>${newText}</span></span>`;
+
+      newBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (isBlocked) {
+          unblockUser(window.currentChatUserId);
+        } else {
+          blockUser(window.currentChatUserId);
+        }
+        dropdownMenu.style.display = "none";
+      });
+
+      btn.replaceWith(newBtn);
+    }
+  });
+}
+
+
 function applyBlockUI(isBlockedFromServer = null) {
   const chatForm = document.getElementById("chatForm");
   const unblockBtn = document.getElementById("unblockBtn");
@@ -3180,7 +3223,6 @@ function applyBlockUI(isBlockedFromServer = null) {
   if (!chatForm || !unblockBtn) return;
 
   if (blocked) {
-    // بلاک: فرم از پایین خارج شود
     chatForm.classList.remove("animate-show");
     chatForm.classList.add("animate-hide");
     setTimeout(() => chatForm.style.display = "none", 300);
@@ -3188,8 +3230,9 @@ function applyBlockUI(isBlockedFromServer = null) {
     unblockBtn.style.display = "block";
     unblockBtn.classList.remove("animate-hide");
     unblockBtn.classList.add("animate-show");
+
+    updateBlockMenuText(true);
   } else {
-    // آنبلاک: فرم از پایین وارد شود
     chatForm.style.display = "flex";
     chatForm.classList.remove("animate-hide");
     chatForm.classList.add("animate-show");
@@ -3197,10 +3240,11 @@ function applyBlockUI(isBlockedFromServer = null) {
     unblockBtn.classList.remove("animate-show");
     unblockBtn.classList.add("animate-hide");
     setTimeout(() => unblockBtn.style.display = "none", 300);
+
+    updateBlockMenuText(false);
   }
 }
 
-// ✅ New: Check block status from server
 function checkBlockStatus(userId) {
   fetch(`/api/check-block-status/${userId}/`, {
     headers: { 'X-Requested-With': 'XMLHttpRequest' },
@@ -3230,7 +3274,7 @@ chatUserAvatar.addEventListener("click", () => {
     .then(html => {
       contentContainer.innerHTML = html;
       openUserProfileModal();
-      checkBlockStatus(userId); // ✅ Always check server when opening profile
+      checkBlockStatus(userId);
     });
 });
 
@@ -3250,10 +3294,7 @@ function blockUser(userId) {
     });
 }
 
-unblockBtn.addEventListener("click", () => {
-  const userId = window.currentChatUserId;
-  if (!userId) return;
-
+function unblockUser(userId) {
   fetch(`/api/unblock-user/${userId}/`, {
     method: 'POST',
     headers: {
@@ -3272,12 +3313,20 @@ unblockBtn.addEventListener("click", () => {
       }
     })
     .catch(err => console.error("Error:", err));
+}
+
+unblockBtn.addEventListener("click", () => {
+  const userId = window.currentChatUserId;
+  if (!userId) return;
+  unblockUser(userId);
 });
 
-// ✅ On first load, check if a user is selected
+// بارگذاری اولیه وضعیت بلاک
 if (window.currentChatUserId || localStorage.getItem("currentChatUserId")) {
   checkBlockStatus(window.currentChatUserId || localStorage.getItem("currentChatUserId"));
 }
+
+
 
   function openUserProfileModal() {
     if (userProfileModal) {
