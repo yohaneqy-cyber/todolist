@@ -19,6 +19,26 @@
 }
 
 
+.toast-message {
+  position: fixed;
+  bottom: 37px; /* start closer to the bottom */
+  left: 50%;
+  transform: translateX(-50%) translateY(30px); /* hidden lower */
+  background: #e53935;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  z-index: 20000000000;
+  text-align: center;
+}
+.toast-message.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0); /* slide up a bit */
+}
+
 
 /* Dropdown پایه */
 body.dark-mode .chat-dropdown-menu {
@@ -2659,6 +2679,7 @@ body.dark-mode #chatDropdownMenu button span:last-child {
         <circle cx="12" cy="19" r="2"/>
       </svg>
     </button>
+    <div id="blockedToast" class="toast-message">You are blocked by this user</div>
 
 <button id="unblockBtn" style="
     display: none;
@@ -3097,8 +3118,6 @@ async function loadMessagesFromServer(senderId = null, receiverId = null) {
 
 
 
-
-
 document.addEventListener("DOMContentLoaded", () => {
   const chatUserAvatar = document.getElementById("chatUserAvatar");
   const userProfileModal = document.getElementById('userProfileModal');
@@ -3122,95 +3141,95 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // آیتم‌ها
   const options = [
-    { 
-      text: "Block This User",
-      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
-             </svg>`,
-      onClick: () => {
-        if(window.currentChatUserId){
-          blockUser(window.currentChatUserId);
-        } else {
-          alert("No user selected to block.");
-        }
+  { 
+    text: "Block This User",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
+           </svg>`,
+    onClick: () => {
+      if(window.currentChatUserId){
+        blockUser(window.currentChatUserId);
+      } else {
+        alert("No user selected to block.");
       }
-    },
-    { 
-      text: "Mute Chat",   
-      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-              <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"></line>
-             </svg>`
-    },
-    { 
-      text: "Delete Chat",
-      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M3 6h18"/>
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-              <path d="M10 11v6"/>
-              <path d="M14 11v6"/>
-              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-             </svg>`
-    },
-    { 
-      text: "Report User",
-      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="5" r="2"/>
-              <path d="M10.5 3L9 1.5"/>
-              <path d="M13.5 3L15 1.5"/>
-              <ellipse cx="12" cy="13" rx="5" ry="7"/>
-              <line x1="12" y1="7" x2="12" y2="20"/>
-              <path d="M4 9h3"/>
-              <path d="M4 13h3"/>
-              <path d="M4 17h3"/>
-              <path d="M17 9h3"/>
-              <path d="M17 13h3"/>
-              <path d="M17 17h3"/>
-             </svg>`
     }
-  ];
+  },
+  { 
+    text: "Mute Chat",   
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"></line>
+           </svg>`
+  },
+  { 
+    text: "Delete Chat",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 6h18"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6"/>
+            <path d="M14 11v6"/>
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+           </svg>`
+  },
+  { 
+    text: "Report User",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="5" r="2"/>
+            <path d="M10.5 3L9 1.5"/>
+            <path d="M13.5 3L15 1.5"/>
+            <ellipse cx="12" cy="13" rx="5" ry="7"/>
+            <line x1="12" y1="7" x2="12" y2="20"/>
+            <path d="M4 9h3"/>
+            <path d="M4 13h3"/>
+            <path d="M4 17h3"/>
+            <path d="M17 9h3"/>
+            <path d="M17 13h3"/>
+            <path d="M17 17h3"/>
+           </svg>`
+  }
+];
 
-  // اضافه کردن آیتم‌ها به Dropdown
-  options.forEach(opt => {
-    const item = document.createElement("button");
-    if (opt.onClick) {
-      item.addEventListener("click", (e) => {
-        e.stopPropagation();
-        opt.onClick();
-        dropdownMenu.style.display = "none";
-      });
-    }
-    item.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${opt.icon}<span>${opt.text}</span></span>`;
-    item.style.display = "block";
-    item.style.width = "100%";
-    item.style.padding = "8px 16px";
-    item.style.border = "none";
-    item.style.background = "none";
-    item.style.textAlign = "left";
-    item.style.cursor = "pointer";
-    item.addEventListener("mouseenter", () => item.style.background = "#f0f0f0");
-    item.addEventListener("mouseleave", () => item.style.background = "none");
-    dropdownMenu.appendChild(item);
-  });
+// اضافه کردن آیتم‌ها به Dropdown
+options.forEach(opt => {
+  const item = document.createElement("button");
+  if (opt.onClick) {
+    item.addEventListener("click", (e) => {
+      e.stopPropagation();
+      opt.onClick();
+      dropdownMenu.style.display = "none";
+    });
+  }
+  item.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${opt.icon}<span>${opt.text}</span></span>`;
+  item.style.display = "block";
+  item.style.width = "100%";
+  item.style.padding = "8px 16px";
+  item.style.border = "none";
+  item.style.background = "none";
+  item.style.textAlign = "left";
+  item.style.cursor = "pointer";
+  item.addEventListener("mouseenter", () => item.style.background = "#f0f0f0");
+  item.addEventListener("mouseleave", () => item.style.background = "none");
+  dropdownMenu.appendChild(item);
+});
 
-  chatModalContent.appendChild(dropdownMenu);
+chatModalContent.appendChild(dropdownMenu);
 
-  chatOptionsBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const rect = chatOptionsBtn.getBoundingClientRect();
-    const modalRect = chatModalContent.getBoundingClientRect();
-    dropdownMenu.style.left = `${rect.left - modalRect.left}px`;
-    dropdownMenu.style.top = `${rect.bottom - modalRect.top + 4}px`;
-    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
-  });
+chatOptionsBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  const rect = chatOptionsBtn.getBoundingClientRect();
+  const modalRect = chatModalContent.getBoundingClientRect();
+  dropdownMenu.style.left = `${rect.left - modalRect.left}px`;
+  dropdownMenu.style.top = `${rect.bottom - modalRect.top + 4}px`;
+  dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+});
 
-  dropdownMenu.addEventListener("click", e => e.stopPropagation());
-  document.addEventListener("click", () => { dropdownMenu.style.display = "none"; });
+dropdownMenu.addEventListener("click", e => e.stopPropagation());
+document.addEventListener("click", () => { dropdownMenu.style.display = "none"; });
 
 function getCookie(name) {
   let cookieValue = null;
@@ -3235,23 +3254,18 @@ function updateBlockMenuText(isBlocked) {
     if (!spanText) return;
 
     if (spanText.textContent.includes("Block") || spanText.textContent.includes("Unblock")) {
-      // Set new text
       const newText = isBlocked ? "Unblock This User" : "Block This User";
-
-      // SVG for each state
       const iconSVG = isBlocked
         ? `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-             <path d="M4 12l6 6 10-10"/> <!-- simplified handshake -->
+             <path d="M4 12l6 6 10-10"/>
            </svg>`
         : `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
              <circle cx="12" cy="12" r="10"/>
              <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
            </svg>`;
 
-      // Remove old click listeners by cloning
       const newBtn = btn.cloneNode(true);
       newBtn.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${iconSVG}<span>${newText}</span></span>`;
-
       newBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         if (isBlocked) {
@@ -3261,12 +3275,10 @@ function updateBlockMenuText(isBlocked) {
         }
         dropdownMenu.style.display = "none";
       });
-
       btn.replaceWith(newBtn);
     }
   });
 }
-
 
 function applyBlockUI(isBlockedFromServer = null) {
   const chatForm = document.getElementById("chatForm");
@@ -3378,11 +3390,36 @@ unblockBtn.addEventListener("click", () => {
   unblockUser(userId);
 });
 
+// --- Toast function ---
+function showBlockedToast() {
+  const toast = document.getElementById("blockedToast");
+  if (!toast) return;
+
+  toast.classList.add("show");
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 10000);
+}
+
+// --- Block sending if blocked ---
+const chatForm = document.getElementById("chatForm");
+if (chatForm) {
+  chatForm.addEventListener("submit", (e) => {
+    const userId = window.currentChatUserId || localStorage.getItem("currentChatUserId");
+    const blocked = localStorage.getItem(`blocked_${userId}`);
+
+    if (blocked) {
+      e.preventDefault();
+      showBlockedToast();
+      return;
+    }
+  });
+}
+
 // بارگذاری اولیه وضعیت بلاک
 if (window.currentChatUserId || localStorage.getItem("currentChatUserId")) {
   checkBlockStatus(window.currentChatUserId || localStorage.getItem("currentChatUserId"));
 }
-
 
 
   function openUserProfileModal() {
@@ -5112,7 +5149,6 @@ document.getElementById("chatForm").addEventListener("submit", async (e) => {
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
-      alert("خطا در ارسال پیام جدید: " + (data.error || data.detail || "خطای نامشخص"));
       return;
     }
 
