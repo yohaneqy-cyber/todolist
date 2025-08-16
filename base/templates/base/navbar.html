@@ -21,23 +21,38 @@
 
 .toast-message {
   position: fixed;
-  bottom: 37px; /* start closer to the bottom */
+  bottom: 30px;
   left: 50%;
-  transform: translateX(-50%) translateY(30px); /* hidden lower */
+  transform: translateX(-50%) translateY(20px);
   background: #e53935;
   color: #fff;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 6px 10px;          /* smaller padding */
+  border-radius: 4px;         /* smaller corners */
+  font-size: 12px;            /* smaller text */
   opacity: 0;
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
   z-index: 20000000000;
   text-align: center;
+  white-space: nowrap;        /* force one line */
+  overflow: hidden;
+  text-overflow: ellipsis;    /* show ... if too long */
+  max-width: 80vw;            /* even smaller max width */
 }
+
 .toast-message.show {
   opacity: 1;
-  transform: translateX(-50%) translateY(0); /* slide up a bit */
+  transform: translateX(-50%) translateY(0);
 }
+
+/* Even smaller on very small phones */
+@media (max-width: 480px) {
+  .toast-message {
+    font-size: 11px;
+    padding: 5px 8px;
+    border-radius: 3px;
+  }
+}
+
 
 
 /* Dropdown پایه */
