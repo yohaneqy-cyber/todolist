@@ -30,7 +30,16 @@
   padding: 0;
 }
 
+@media (max-width: 480px) {
+  #chatsSection {
+    border-bottom: 1px solid #ddd; /* خط جداکننده شبیه hr */
+  }
 
+  /* خط آخر نیاد */
+  #chatsSection:last-child {
+    border-bottom: none;
+  }
+}
 
 
 
@@ -4804,12 +4813,12 @@ function loadMessages(senderId, receiverId) {
       });
 
     } else {
-      chatMessages.innerHTML = "<p>هیچ پیامی موجود نیست.</p>";
+      chatMessages.innerHTML = "<p></p>";
     }
   })
   .catch(err => {
     console.error("خطا در واکشی پیام‌ها:", err);
-    chatMessages.innerHTML = "<p>خطا در بارگذاری پیام‌ها.</p>";
+    chatMessages.innerHTML = "<p></p>";
   });
 }
 
