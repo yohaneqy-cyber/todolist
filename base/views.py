@@ -1025,6 +1025,10 @@ def save_resized_avatars(image_path, user_id):
     return base_name
 
 
+from django.db.models import Q
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+
 @login_required
 def chats_list(request):
     user = request.user
@@ -1039,15 +1043,27 @@ def chats_list(request):
     for uid in chat_user_ids:
         try:
             other = User.objects.get(id=uid)
+            
+            # مسیر آواتار
             avatar_url = other.avatar.url if other.avatar else None
             if avatar_url:
-                avatar_url = request.build_absolute_uri(avatar_url)  # مسیر کامل برای فرانت‌اند
+                avatar_url = request.build_absolute_uri(avatar_url)
+            
+            # آخرین پیام بین دو کاربر
+            last_msg_obj = ChatMessage.objects.filter(
+                Q(sender=user, receiver=other) | Q(sender=other, receiver=user)
+            ).order_by("-timestamp").first()
+
+            last_message = last_msg_obj.message if last_msg_obj else "پیامی وجود ندارد"
+
             chats.append({
                 "id": other.id,
                 "name": other.name,
-                "avatar": avatar_url
+                "avatar": avatar_url,
+                "last_message": last_message
             })
         except User.DoesNotExist:
             continue
 
     return JsonResponse({"chats": chats})
+
