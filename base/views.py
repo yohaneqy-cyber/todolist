@@ -38,6 +38,9 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship, ChatMessage
 from .serializers import TaskSerializer, ChatMessageSerializers, UserSerializer
 from .forms import CustomUserCreationForm, ReminderForm, ChengeForm, RecurringTaskForm, TaskForm, LoginForm, MySetPasswordForm
+from PIL import Image
+from pathlib import Path
+import os
 
 User = get_user_model()
 
@@ -994,9 +997,7 @@ def get_user_profile(request, user_id):
     serializer = UserSerializer(user, context={'request': request})
     return Response(serializer.data)
 
-from PIL import Image
-from pathlib import Path
-import os
+
 
 def save_resized_avatars(image_path, user_id):
     sizes = [56, 112]
@@ -1024,3 +1025,29 @@ def save_resized_avatars(image_path, user_id):
     return base_name
 
 
+@login_required
+def chats_list(request):
+    user = request.user
+
+    # همه کاربرانی که با این کاربر چت کردند
+    sent_to = ChatMessage.objects.filter(sender=user).values_list("receiver", flat=True)
+    received_from = ChatMessage.objects.filter(receiver=user).values_list("sender", flat=True)
+
+    chat_user_ids = set(list(sent_to) + list(received_from))
+
+    chats = []
+    for uid in chat_user_ids:
+        try:
+            other = User.objects.get(id=uid)
+            avatar_url = other.avatar.url if other.avatar else None
+            if avatar_url:
+                avatar_url = request.build_absolute_uri(avatar_url)  # مسیر کامل برای فرانت‌اند
+            chats.append({
+                "id": other.id,
+                "name": other.name,
+                "avatar": avatar_url
+            })
+        except User.DoesNotExist:
+            continue
+
+    return JsonResponse({"chats": chats})

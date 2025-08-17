@@ -18,6 +18,21 @@
   pointer-events: auto; /* اجازه تعامل با دکمه‌ها و لینک‌ها */
 }
 
+#chatsList {
+  background-color: transparent; /* حذف پس‌زمینه والد */
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+#chatsSection {
+  background-color: transparent; /* حذف پس‌زمینه کلی */
+  padding: 0;
+}
+
+
+
+
 
 .toast-message {
   position: fixed;
@@ -1639,7 +1654,7 @@ body.dark-mode .cancel-btn:active {
 
 
 /* استایل پایه تب‌ها */
-#searchTabBtn, #requestsTabBtn, #friendsTabBtn {
+#searchTabBtn, #requestsTabBtn, #friendsTabBtn, #chatsBtn {
   background-color: transparent;
   border: none;
   padding: 8px 14px;
@@ -1659,8 +1674,8 @@ body.dark-mode .cancel-btn:active {
 }
 
 /* هاور و فوکوس */
-#searchTabBtn:hover, #requestsTabBtn:hover, #friendsTabBtn:hover,
-#searchTabBtn:focus, #requestsTabBtn:focus, #friendsTabBtn:focus,
+#searchTabBtn:hover, #requestsTabBtn:hover, #friendsTabBtn:hover, #chatsBtn:hover,
+#searchTabBtn:focus, #requestsTabBtn:focus, #friendsTabBtn:focus, #chatsBtn.focus,
 .tab-hover-effect {
   color: #fff;
   background: linear-gradient(45deg, #4dabf5 0%, #64b5f6 100%);
@@ -1674,8 +1689,8 @@ body.dark-mode .cancel-btn:active {
 }
 
 /* کلیک و فوکوس دیده‌شده */
-#searchTabBtn:active, #requestsTabBtn:active, #friendsTabBtn:active,
-#searchTabBtn:focus-visible, #requestsTabBtn:focus-visible, #friendsTabBtn:focus-visible {
+#searchTabBtn:active, #requestsTabBtn:active, #friendsTabBtn:active, #chatsBtn:active,
+#searchTabBtn:focus-visible, #requestsTabBtn:focus-visible, #friendsTabBtn:focus-visible, #chatsBtn:focus-visible {
   background: linear-gradient(45deg, #1e88e5 0%, #1976d2 100%);
   color: #fff !important;
   box-shadow: 0 4px 8px rgba(25, 118, 210, 0.8);
@@ -2048,7 +2063,7 @@ body.logout-modal-open {
     }
 
     /* Tabs Buttons */
-    #searchTabBtn, #requestsTabBtn, #friendsTabBtn {
+    #searchTabBtn, #requestsTabBtn, #friendsTabBtn, #chatsBtn {
       background-color: #f0f0f0;
       border: 1px solid #ddd;
       border-radius: 6px;
@@ -2061,7 +2076,8 @@ body.logout-modal-open {
 
     #searchTabBtn:disabled,
     #requestsTabBtn:disabled,
-    #friendsTabBtn:disabled {
+    #friendsTabBtn:disabled,
+    #chatsBtn:disabled {
       background-color: #2196f3;
       color: white;
       cursor: default;
@@ -2069,7 +2085,8 @@ body.logout-modal-open {
 
     #searchTabBtn:hover:not(:disabled),
     #requestsTabBtn:hover:not(:disabled),
-    #friendsTabBtn:hover:not(:disabled) {
+    #friendsTabBtn:hover:not(:disabled),
+    #chatsBtn:hover:not(:disabled) {
       background-color: #dbefff;
     }
 
@@ -2625,6 +2642,7 @@ body.dark-mode #chatDropdownMenu button span:last-child {
         <button id="searchTabBtn">Search</button>
         <button id="requestsTabBtn">Requests</button>
         <button id="friendsTabBtn">Friends</button>
+        <button id="chatsBtn">Chats</button>
       </div>
 
       <div id="searchSection">
@@ -2634,7 +2652,7 @@ body.dark-mode #chatDropdownMenu button span:last-child {
 
       <div id="requestsSection" style="display:none;">
         <ul id="friendRequestsList"></ul>
-        <p id="noRequestsMsg" style="display:none;">No Requests</p>
+        <p id="noRequestsMsg" style="display:none;">No Requests Yet</p>
         <p id="errorLoadingRequests" style="display:none; color: red; font-weight: bold;">Error to load requests.</p>
       </div>
 
@@ -2642,8 +2660,14 @@ body.dark-mode #chatDropdownMenu button span:last-child {
         <ul id="friendsList"></ul>
         <p id="noFriendsMsg" style="display:none;">No Friends Yet</p>
       </div>
+      
+      <div id="chatsSection" style="display:none;">
+        <ul id="chatsList"></ul>
+        <p id="noChatsMsg" style="display:none;">No Chat Yet</p>
+      </div>
     </div>
   </div>
+  
 
   <div id="confirmUnfriendModal" class="modal unfriend-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="confirmUnfriendTitle" style="display:none;">
     <div class="modal-content">
@@ -3844,52 +3868,134 @@ async function sendMessage(event) {
   });
 
   // --- تب‌ها ---
-  const searchTabBtn = document.getElementById("searchTabBtn");
-  const requestsTabBtn = document.getElementById("requestsTabBtn");
-  const friendsTabBtn = document.getElementById("friendsTabBtn");
+const searchTabBtn = document.getElementById("searchTabBtn");
+const requestsTabBtn = document.getElementById("requestsTabBtn");
+const friendsTabBtn = document.getElementById("friendsTabBtn");
+const chatsBtn = document.getElementById("chatsBtn");
 
-  const searchSection = document.getElementById("searchSection");
-  const requestsSection = document.getElementById("requestsSection");
-  const friendsSection = document.getElementById("friendsSection");
+const searchSection = document.getElementById("searchSection");
+const requestsSection = document.getElementById("requestsSection");
+const friendsSection = document.getElementById("friendsSection");
+const chatsSection = document.getElementById("chatsSection");
 
-  const searchInput = document.getElementById("userSearchInput");
-  const userList = document.getElementById("userList");
+const searchInput = document.getElementById("userSearchInput");
+const userList = document.getElementById("userList");
 
-  function showSearchTab() {
-    searchSection.style.display = "block";
-    requestsSection.style.display = "none";
-    friendsSection.style.display = "none";
-    searchTabBtn.disabled = true;
-    requestsTabBtn.disabled = false;
-    friendsTabBtn.disabled = false;
-    hideErrorMessage();
+// ------------------------------
+// توابع مدیریت تب‌ها
+// ------------------------------
+function showSearchTab() {
+  searchSection.style.display = "block";
+  requestsSection.style.display = "none";
+  friendsSection.style.display = "none";
+  chatsSection.style.display = "none";
+
+  searchTabBtn.disabled = true;
+  requestsTabBtn.disabled = false;
+  friendsTabBtn.disabled = false;
+  chatsBtn.disabled = false;
+
+  hideErrorMessage();
+}
+
+function showRequestsTab() {
+  searchSection.style.display = "none";
+  requestsSection.style.display = "block";
+  friendsSection.style.display = "none";
+  chatsSection.style.display = "none";
+
+  searchTabBtn.disabled = false;
+  requestsTabBtn.disabled = true;
+  friendsTabBtn.disabled = false;
+  chatsBtn.disabled = false;
+
+  loadFriendRequests();
+  hideErrorMessage();
+}
+
+function showFriendsTab() {
+  searchSection.style.display = "none";
+  requestsSection.style.display = "none";
+  friendsSection.style.display = "block";
+  chatsSection.style.display = "none";
+
+  searchTabBtn.disabled = false;
+  requestsTabBtn.disabled = false;
+  friendsTabBtn.disabled = true;
+  chatsBtn.disabled = false;
+
+  loadFriendsList();
+  hideErrorMessage();
+}
+
+function showChatsTab() {
+  searchSection.style.display = "none";
+  requestsSection.style.display = "none";
+  friendsSection.style.display = "none";
+  chatsSection.style.display = "block";
+
+  searchTabBtn.disabled = false;
+  requestsTabBtn.disabled = false;
+  friendsTabBtn.disabled = false;
+  chatsBtn.disabled = true;
+
+  loadChatsList();
+  hideErrorMessage();
+}
+
+// ------------------------------
+// اتصال دکمه‌ها به توابع
+// ------------------------------
+searchTabBtn.addEventListener("click", showSearchTab);
+requestsTabBtn.addEventListener("click", showRequestsTab);
+friendsTabBtn.addEventListener("click", showFriendsTab);
+chatsBtn.addEventListener("click", showChatsTab);
+
+// ------------------------------
+// توابع نمونه برای لود دیتا
+// ------------------------------
+function loadFriendRequests() {
+  const list = document.getElementById("friendRequestsList");
+  const noMsg = document.getElementById("noRequestsMsg");
+  list.innerHTML = ""; // پاک کردن لیست
+  // فرضی: اینجا باید درخواست‌ها رو از سرور بگیری
+  const requests = []; // هیچ درخواستی نیست
+  if (requests.length === 0) {
+    noMsg.style.display = "block";
+  } else {
+    noMsg.style.display = "none";
+    // اینجا li اضافه کن
   }
+}
 
-  function showRequestsTab() {
-    searchSection.style.display = "none";
-    requestsSection.style.display = "block";
-    friendsSection.style.display = "none";
-    searchTabBtn.disabled = false;
-    requestsTabBtn.disabled = true;
-    friendsTabBtn.disabled = false;
-    loadFriendRequests();
-    hideErrorMessage();
+function loadFriendsList() {
+  const list = document.getElementById("friendsList");
+  const noMsg = document.getElementById("noFriendsMsg");
+  list.innerHTML = "";
+  const friends = []; // هیچ دوستی نیست
+  if (friends.length === 0) {
+    noMsg.style.display = "block";
+  } else {
+    noMsg.style.display = "none";
   }
+}
 
-  function showFriendsTab() {
-    searchSection.style.display = "none";
-    requestsSection.style.display = "none";
-    friendsSection.style.display = "block";
-    searchTabBtn.disabled = false;
-    requestsTabBtn.disabled = false;
-    friendsTabBtn.disabled = true;
-    loadFriendsList();
-    hideErrorMessage();
+function loadChatsList() {
+  const list = document.getElementById("chatsList");
+  const noMsg = document.getElementById("noChatsMsg");
+  list.innerHTML = "";
+  const chats = []; // هیچ چتی نیست
+  if (chats.length === 0) {
+    noMsg.style.display = "block";
+  } else {
+    noMsg.style.display = "none";
   }
+}
 
-  searchTabBtn.addEventListener("click", showSearchTab);
-  requestsTabBtn.addEventListener("click", showRequestsTab);
-  friendsTabBtn.addEventListener("click", showFriendsTab);
+function hideErrorMessage() {
+  const errorMsg = document.getElementById("errorLoadingRequests");
+  if (errorMsg) errorMsg.style.display = "none";
+}
 
   // --- کلیک راست روی پیام چت ---
   const chatMessages = document.getElementById("chatMessages");
@@ -4076,6 +4182,173 @@ function getCSRFToken() {
   }
   return '';
 }
+
+function loadChatsList() {
+  const list = document.getElementById("chatsList");
+  const noMsg = document.getElementById("noChatsMsg");
+  list.innerHTML = "";
+
+  fetch("/api/chats-list/")
+    .then(res => res.json())
+    .then(data => {
+      const chats = data.chats;
+
+      if (chats.length === 0) {
+        noMsg.style.display = "block";
+      } else {
+        noMsg.style.display = "none";
+
+        chats.forEach(chat => {
+          const li = document.createElement("li");
+
+          // Flex row with LTR direction to prevent RTL reversal
+          li.style.cursor = "pointer";
+          li.style.display = "flex";
+          li.style.flexDirection = "row";
+          li.style.alignItems = "center";
+          li.style.gap = "8px";
+          li.style.padding = "6px 10px";
+          li.style.borderRadius = "12px";
+          li.style.transition = "background-color 0.2s ease, color 0.2s ease";
+          li.style.backgroundColor = "transparent";
+          li.style.direction = "ltr"; // force correct avatar-name order
+
+          // avatar
+          if (chat.avatar) {
+            const img = document.createElement("img");
+            img.src = chat.avatar;
+            img.style.width = "55px";
+            img.style.height = "55px";
+            img.style.borderRadius = "50%";
+            img.style.objectFit = "cover";
+            li.appendChild(img);
+          }
+
+          // wrapper for name
+          const nameWrapper = document.createElement("div");
+          nameWrapper.style.display = "flex";
+          nameWrapper.style.alignItems = "center";
+          nameWrapper.style.flex = "1"; // take remaining space
+          nameWrapper.style.justifyContent = "flex-start";
+
+          const span = document.createElement("span");
+          span.textContent = chat.name;
+          nameWrapper.appendChild(span);
+
+          li.appendChild(nameWrapper);
+
+          // click to open chat
+          li.addEventListener("click", () => {
+            Array.from(list.children).forEach(c => c.classList.remove("active"));
+            li.classList.add("active");
+            openChatWindow(chat.id, chat.name);
+          });
+
+          // hover effect
+          li.addEventListener("mouseover", () => {
+            li.style.backgroundColor = "rgba(0,0,0,0.05)";
+          });
+          li.addEventListener("mouseout", () => {
+            if (!li.classList.contains("active")) {
+              li.style.backgroundColor = "transparent";
+            }
+          });
+
+          list.appendChild(li);
+        });
+      }
+    })
+    .catch(err => {
+      console.error("Error loading chats:", err);
+      noMsg.style.display = "block";
+      noMsg.textContent = "Error loading chats.";
+    });
+}
+function loadChatsList() {
+  const list = document.getElementById("chatsList");
+  const noMsg = document.getElementById("noChatsMsg");
+  list.innerHTML = "";
+
+  fetch("/api/chats-list/")
+    .then(res => res.json())
+    .then(data => {
+      const chats = data.chats;
+
+      if (chats.length === 0) {
+        noMsg.style.display = "block";
+      } else {
+        noMsg.style.display = "none";
+
+        chats.forEach(chat => {
+          const li = document.createElement("li");
+
+          // Flex row with LTR direction to prevent RTL reversal
+          li.style.cursor = "pointer";
+          li.style.display = "flex";
+          li.style.flexDirection = "row";
+          li.style.alignItems = "center";
+          li.style.gap = "8px";
+          li.style.padding = "6px 10px";
+          li.style.borderRadius = "12px";
+          li.style.transition = "background-color 0.2s ease, color 0.2s ease";
+          li.style.backgroundColor = "transparent";
+          li.style.direction = "ltr"; // force correct avatar-name order
+
+          // avatar
+          if (chat.avatar) {
+            const img = document.createElement("img");
+            img.src = chat.avatar;
+            img.style.width = "55px";
+            img.style.height = "55px";
+            img.style.borderRadius = "50%";
+            img.style.objectFit = "cover";
+            li.appendChild(img);
+          }
+
+          // wrapper for name
+          const nameWrapper = document.createElement("div");
+          nameWrapper.style.display = "flex";
+          nameWrapper.style.alignItems = "center";
+          nameWrapper.style.flex = "1"; // take remaining space
+          nameWrapper.style.justifyContent = "flex-start";
+
+          const span = document.createElement("span");
+          span.textContent = chat.name;
+          nameWrapper.appendChild(span);
+
+          li.appendChild(nameWrapper);
+
+          // click to open chat
+          li.addEventListener("click", () => {
+            Array.from(list.children).forEach(c => c.classList.remove("active"));
+            li.classList.add("active");
+            openChatWindow(chat.id, chat.name);
+          });
+
+          // hover effect
+          li.addEventListener("mouseover", () => {
+            li.style.backgroundColor = "rgba(0,0,0,0.05)";
+          });
+          li.addEventListener("mouseout", () => {
+            if (!li.classList.contains("active")) {
+              li.style.backgroundColor = "transparent";
+            }
+          });
+
+          list.appendChild(li);
+        });
+      }
+    })
+    .catch(err => {
+      console.error("Error loading chats:", err);
+      noMsg.style.display = "block";
+      noMsg.textContent = "Error loading chats.";
+    });
+}
+
+
+
+
 
 
 searchInput.addEventListener("input", function() {
