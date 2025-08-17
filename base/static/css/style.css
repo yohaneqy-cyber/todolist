@@ -526,7 +526,8 @@ html.dark-mode, body.dark-mode #userSearchInput {
 /* Tab buttons in dark mode */
 html.dark-mode, body.dark-mode #searchTabBtn,
 html.dark-mode, body.dark-mode #requestsTabBtn,
-html.dark-mode, body.dark-mode #friendBtn {
+html.dark-mode, body.dark-mode #friendsTabBtn,
+html.dark-mode, body.dark-mode #chatsBtn {
   background-color: #333;
   color: #eee;
   border: 1px solid #555;
@@ -538,8 +539,9 @@ html.dark-mode, body.dark-mode #friendBtn {
 
 html.dark-mode, body.dark-mode #searchTabBtn:hover,
 html.dark-mode, body.dark-mode #requestsTabBtn:hover,
-html.dark-mode, body.dark-mode #friendBtn:hover, 
-html.dark-mode, body.dark-mode #chats:hover {
+html.dark-mode, body.dark-mode #friendsTabBtn:hover, 
+html.dark-mode, body.dark-mode #chats:hover,
+html.dark-mode, body.dark-mode #chatsBtn:hover {
   background-color: #555;
   color: #fff;
 }
@@ -2529,8 +2531,8 @@ button.btn-primary:hover {
 
 @media (max-width: 600px) {
   .modal-content {
-    width: 95%;
-    padding: 15px;
+    width: 97%;
+    padding: 13px;
     font-size: 14px;
   }
 }

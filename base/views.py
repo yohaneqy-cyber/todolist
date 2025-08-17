@@ -1054,16 +1054,30 @@ def chats_list(request):
                 Q(sender=user, receiver=other) | Q(sender=other, receiver=user)
             ).order_by("-timestamp").first()
 
-            last_message = last_msg_obj.message if last_msg_obj else "پیامی وجود ندارد"
+            if last_msg_obj:
+                last_message = last_msg_obj.message
+                timestamp = timezone.localtime(last_msg_obj.timestamp)
+                now = timezone.localtime(timezone.now())
+
+                # اگر پیام امروز باشد فقط ساعت:دقیقه
+                if timestamp.date() == now.date():
+                    last_message_time = timestamp.strftime("%H:%M")
+                else:
+                    last_message_time = timestamp.strftime("%d/%m")
+            else:
+                last_message = "پیامی وجود ندارد"
+                last_message_time = ""
 
             chats.append({
                 "id": other.id,
                 "name": other.name,
                 "avatar": avatar_url,
-                "last_message": last_message
+                "last_message": last_message,
+                "last_message_time": last_message_time
             })
         except User.DoesNotExist:
             continue
 
     return JsonResponse({"chats": chats})
+
 

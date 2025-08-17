@@ -4081,6 +4081,25 @@ function loadFriendsList() {
   }
 }
 
+function formatChatTime(timestamp) {
+  if (!timestamp) return "";
+  const msgDate = new Date(timestamp);
+  const now = new Date();
+
+  const isToday =
+    msgDate.getFullYear() === now.getFullYear() &&
+    msgDate.getMonth() === now.getMonth() &&
+    msgDate.getDate() === now.getDate();
+
+  if (isToday) {
+    // فقط ساعت و دقیقه
+    return msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } else {
+    // فقط روز و ماه
+    return msgDate.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+  }
+}
+
 function loadChatsList() {
   const list = document.getElementById("chatsList");
   const noMsg = document.getElementById("noChatsMsg");
@@ -4091,104 +4110,118 @@ function loadChatsList() {
     .then(data => {
       const chats = data.chats;
 
-      if (chats.length === 0) {
+      if (!chats || chats.length === 0) {
         noMsg.style.display = "block";
-      } else {
-        noMsg.style.display = "none";
-
-        chats.forEach(chat => {
-          const li = document.createElement("li");
-
-          // Flex row: avatar left, text block right
-          li.style.cursor = "pointer";
-          li.style.display = "flex";
-          li.style.flexDirection = "row";
-          li.style.alignItems = "center";
-          li.style.gap = "10px";
-          li.style.padding = "8px 12px";
-          li.style.borderRadius = "12px";
-          li.style.transition = "background-color 0.2s ease, color 0.2s ease";
-          li.style.backgroundColor = "transparent";
-          li.style.direction = "ltr";
-
-          // avatar
-          if (chat.avatar) {
-            const img = document.createElement("img");
-            img.src = chat.avatar;
-            img.style.width = "50px";
-            img.style.height = "50px";
-            img.style.borderRadius = "50%";
-            img.style.objectFit = "cover";
-            li.appendChild(img);
-          }
-
-          // text block (name + last message)
-          const textBlock = document.createElement("div");
-          textBlock.style.display = "flex";
-          textBlock.style.flexDirection = "column";
-          textBlock.style.justifyContent = "center";
-          textBlock.style.overflow = "hidden";
-          textBlock.style.flex = "1";
-
-          const nameSpan = document.createElement("span");
-          nameSpan.textContent = chat.name;
-          nameSpan.style.fontWeight = "600";
-          nameSpan.style.fontSize = "15px";
-          nameSpan.style.color = "#222";
-
-          const msgSpan = document.createElement("span");
-          msgSpan.textContent = chat.last_message || "No messages yet";
-          msgSpan.style.fontSize = "13px";
-          msgSpan.style.color = "#666";
-          msgSpan.style.whiteSpace = "nowrap";
-          msgSpan.style.overflow = "hidden";
-          msgSpan.style.textOverflow = "ellipsis";
-
-          textBlock.appendChild(nameSpan);
-          textBlock.appendChild(msgSpan);
-          li.appendChild(textBlock);
-
-          // کلیک روی کاربر → باز شدن مودال و بارگذاری پیام‌ها
-          li.addEventListener("click", () => {
-            // مودال چت باز شود
-            const chatModal = document.getElementById("chatModal");
-            chatModal.style.display = "flex";
-
-            // ست کردن اطلاعات کاربر فعلی
-            window.currentChatUserId = chat.id;
-            window.currentChatUserName = chat.name;
-            window.currentUserId = parseInt(document.body.dataset.userId); // فرض می‌کنیم user_id در body ذخیره شده
-            window.currentUserEmail = document.body.dataset.userEmail;
-
-            // ست کردن نام و آواتار در مودال
-            const chatUserNameAvatar = document.getElementById("chatUserNameAvatar");
-            chatUserNameAvatar.textContent = chat.name;
-
-            const chatUserAvatar = document.getElementById("chatUserAvatar");
-            if (chat.avatar) chatUserAvatar.src = chat.avatar;
-
-            // بارگذاری پیام‌ها از سرور
-            loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
-          });
-
-          // hover effect
-          li.addEventListener("mouseover", () => {
-            li.style.backgroundColor = "rgba(0,0,0,0.05)";
-          });
-          li.addEventListener("mouseout", () => {
-            li.style.backgroundColor = "transparent";
-          });
-
-          list.appendChild(li);
-        });
+        noMsg.textContent = "هیچ چتی وجود ندارد";
+        return;
       }
+
+      noMsg.style.display = "none";
+
+      chats.forEach(chat => {
+        const li = document.createElement("li");
+
+        li.style.cursor = "pointer";
+        li.style.display = "flex";
+        li.style.flexDirection = "row";
+        li.style.alignItems = "center";
+        li.style.gap = "10px";
+        li.style.padding = "8px 12px";
+        li.style.borderRadius = "12px";
+        li.style.transition = "background-color 0.2s ease, color 0.2s ease";
+        li.style.backgroundColor = "transparent";
+        li.style.direction = "ltr";
+        li.style.position = "relative"; // برای قرار دادن زمان
+
+        // avatar
+        if (chat.avatar) {
+          const img = document.createElement("img");
+          img.src = chat.avatar;
+          img.style.width = "50px";
+          img.style.height = "50px";
+          img.style.borderRadius = "50%";
+          img.style.objectFit = "cover";
+          li.appendChild(img);
+        }
+
+        // text block (name + last message)
+        const textBlock = document.createElement("div");
+        textBlock.style.display = "flex";
+        textBlock.style.flexDirection = "column";
+        textBlock.style.justifyContent = "center";
+        textBlock.style.overflow = "hidden";
+        textBlock.style.flex = "1";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = chat.name;
+        nameSpan.style.fontWeight = "600";
+        nameSpan.style.fontSize = "15px";
+        nameSpan.style.color = "#222";
+
+        const msgSpan = document.createElement("span");
+        msgSpan.textContent = chat.last_message || "پیامی وجود ندارد";
+        msgSpan.style.fontSize = "13px";
+        msgSpan.style.color = "#666";
+        msgSpan.style.whiteSpace = "nowrap";
+        msgSpan.style.overflow = "hidden";
+        msgSpan.style.textOverflow = "ellipsis";
+
+        textBlock.appendChild(nameSpan);
+        textBlock.appendChild(msgSpan);
+        li.appendChild(textBlock);
+
+        // time span بالا سمت راست
+        if (chat.last_message_time) {
+          const timeSpan = document.createElement("span");
+          timeSpan.textContent = chat.last_message_time;
+          timeSpan.style.position = "absolute";
+          timeSpan.style.top = "8px";
+          timeSpan.style.right = "12px";
+          timeSpan.style.fontSize = "11px";
+          timeSpan.style.padding = "2px 6px";
+          timeSpan.style.backgroundColor = "rgba(0,0,0,0.05)";
+          timeSpan.style.borderRadius = "8px";
+          timeSpan.style.color = "#555";
+          li.appendChild(timeSpan);
+        }
+
+        // کلیک روی کاربر → باز شدن مودال و بارگذاری پیام‌ها
+        li.addEventListener("click", () => {
+          const chatModal = document.getElementById("chatModal");
+          chatModal.style.display = "flex";
+
+          window.currentChatUserId = chat.id;
+          window.currentChatUserName = chat.name;
+          window.currentUserId = parseInt(document.body.dataset.userId);
+          window.currentUserEmail = document.body.dataset.userEmail;
+
+          const chatUserNameAvatar = document.getElementById("chatUserNameAvatar");
+          chatUserNameAvatar.textContent = chat.name;
+
+          const chatUserAvatar = document.getElementById("chatUserAvatar");
+          if (chat.avatar) chatUserAvatar.src = chat.avatar;
+
+          loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
+        });
+
+        li.addEventListener("mouseover", () => {
+          li.style.backgroundColor = "rgba(0,0,0,0.05)";
+        });
+        li.addEventListener("mouseout", () => {
+          li.style.backgroundColor = "transparent";
+        });
+
+        list.appendChild(li);
+      });
     })
     .catch(err => {
       console.error("Error loading chats:", err);
       noMsg.style.display = "block";
-      noMsg.textContent = "Error loading chats.";
+      noMsg.textContent = "خطا در بارگذاری چت‌ها";
     });
 }
+
+
 
 // --- Close chat modal ---
 document.getElementById("closeChatModal").addEventListener("click", () => {
