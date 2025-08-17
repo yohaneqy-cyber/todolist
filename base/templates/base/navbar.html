@@ -32,15 +32,16 @@
 
 @media (max-width: 480px) {
   #chatsSection {
-    border-bottom: 1px solid #ddd; /* خط جداکننده شبیه hr */
-  }
-
-  /* خط آخر نیاد */
-  #chatsSection:last-child {
-    border-bottom: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none; /* جلوگیری از انتخاب متن هنگام لمس */
+    outline: none;
   }
 }
 
+#chatsSection,
+#chatsSection * {
+  -webkit-tap-highlight-color: transparent; /* غیرفعال کردن رنگ آبی لمس */
+}
 
 
 .toast-message {
