@@ -1,3 +1,45 @@
+/* غیرفعال کردن افکت‌ها و hover روی موبایل */
+@media (max-width: 768px) {
+  /* دکمه‌ها و لینک‌ها */
+  button, a, .navbar-link, #searchTabBtn, #requestsTabBtn, #friendsTabBtn {
+    pointer-events: auto; /* فعال ولی بدون افکت */
+    background: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+    animation: none !important;
+    color: inherit !important;
+  }
+
+  /* حذف تمام هاورها */
+  button:hover,
+  button:focus,
+  a:hover,
+  a:focus,
+  .navbar-link:hover,
+  .navbar-link:focus,
+  #searchTabBtn:hover,
+  #requestsTabBtn:hover,
+  #friendsTabBtn:hover {
+    background: none !important;
+    color: inherit !important;
+    box-shadow: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+
+  /* حذف outline روی موبایل */
+  button:focus,
+  a:focus {
+    outline: none !important;
+  }
+
+  /* مودال و دکمه‌ها */
+  .modal-content, .modal-content1, .confirm-btn, .cancel-btn, .modal-cancel-btn, .modal-confirm-btn {
+    transition: none !important;
+  }
+}
+
+
 .file-input-wrapper input[type="file"] {
     display: inline-block;
     padding: 4px 6px;
@@ -524,7 +566,7 @@ html.dark-mode, body.dark-mode #userSearchInput {
 /* Tab buttons in dark mode */
 html.dark-mode, body.dark-mode #searchTabBtn,
 html.dark-mode, body.dark-mode #requestsTabBtn,
-html.dark-mode, body.dark-mode #friendsTabBtn {
+html.dark-mode, body.dark-mode #friendBtn {
   background-color: #333;
   color: #eee;
   border: 1px solid #555;
@@ -536,7 +578,8 @@ html.dark-mode, body.dark-mode #friendsTabBtn {
 
 html.dark-mode, body.dark-mode #searchTabBtn:hover,
 html.dark-mode, body.dark-mode #requestsTabBtn:hover,
-html.dark-mode, body.dark-mode #friendsTabBtn:hover {
+html.dark-mode, body.dark-mode #friendBtn:hover, 
+html.dark-mode, body.dark-mode #chats:hover {
   background-color: #555;
   color: #fff;
 }
@@ -2519,7 +2562,7 @@ button.btn-primary:hover {
   background: white;
   border-radius: 10px;
   padding: 20px;
-  max-width: 400px;
+  max-width: 430px;
   width: 90%;
   box-sizing: border-box;
 }
