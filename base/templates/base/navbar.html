@@ -2701,6 +2701,7 @@ body.dark-mode #chatDropdownMenu button span:last-child {
   </div>
 
 
+
   <!-- User profile modal -->
 <div id="userProfileModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="userProfileTitle" style="display:none;">
   <div class="modal-content">
@@ -2982,6 +2983,35 @@ function getCookie(name) {
   return cookieValue;
 }
 
+let errorTimeout = null;
+
+function showErrorMessage(message) {
+  const errorDiv = document.getElementById("errorMessage");
+  const errorText = document.getElementById("errorText");
+
+  errorText.textContent = message;
+  errorDiv.style.display = "block";
+  errorDiv.style.opacity = 1;
+
+  clearTimeout(errorTimeout); // حالا مشکلی ندارد
+
+  errorTimeout = setTimeout(() => {
+    errorDiv.style.opacity = 0;
+    setTimeout(() => {
+      errorDiv.style.display = "none";
+      errorText.textContent = "";
+    }, 300);
+  }, 3000);
+}
+
+function hideErrorMessage() {
+  const errorDiv = document.getElementById("errorMessage");
+  const errorText = document.getElementById("errorText");
+
+  clearTimeout(errorTimeout); // حالا مشکلی ندارد
+  errorDiv.style.display = "none";
+  errorText.textContent = "";
+}
 
 
   // ذخیره پیام‌ها در localStorage
@@ -3389,258 +3419,80 @@ function checkBlockStatus(userId) {
     .catch(err => console.error("Error checking block status:", err));
 }
 
-chatUserAvatar.addEventListener("click", () => {
-  const userId = chatUserAvatar.getAttribute("data-user-id");
-  if (!userId) return;
+document.addEventListener("DOMContentLoaded", () => {
+  const userProfileModal = document.getElementById("userProfileModal");
+  const contentContainer = document.getElementById("userProfileContent");
+  const closeUserProfileModalBtn = document.getElementById("closeUserProfileModal");
+  const chatUserAvatar = document.getElementById("chatUserAvatar");
+  const chatUserName = document.getElementById("chatUserNameAvatar");
 
-  window.currentChatUserId = userId;
-  localStorage.setItem("currentChatUserId", userId);
-
-  fetch(`/user_profile_ajax/${userId}/`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-    .then(res => res.text())
-    .then(html => {
-      contentContainer.innerHTML = html;
-      openUserProfileModal();
-      checkBlockStatus(userId);
-    });
-});
-
-function blockUser(userId) {
-  if (!userId) return;
-
-  fetch(`/api/block-user/${userId}/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCookie('csrftoken')
-    },
-    credentials: 'include'
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      // مقدار بلاک به صورت "true" ذخیره شود
-      localStorage.setItem(`blocked_${userId}`, 'true');
-
-      // بسته شدن مودال پروفایل کاربر
-      if (typeof closeUserProfileModal === 'function') closeUserProfileModal();
-
-      // اعمال وضعیت بلاک روی فرم چت
-      applyBlockUI(true);
-    } else {
-      alert("Block failed!");
-    }
-  })
-  .catch(err => console.error("Error blocking user:", err));
-}
-
-function unblockUser(userId) {
-  if (!userId) return;
-
-  fetch(`/api/unblock-user/${userId}/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCookie('csrftoken')
-    },
-    credentials: 'include'
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      // پاک کردن کلید بلاک یا مقدار "false"
-      localStorage.removeItem(`blocked_${userId}`);
-      applyBlockUI(false);
-    } else {
-      alert("Unblock failed!");
-    }
-  })
-  .catch(err => console.error("Error unblocking user:", err));
-}
-
-
-unblockBtn.addEventListener("click", () => {
-  const userId = window.currentChatUserId;
-  if (!userId) return;
-  unblockUser(userId);
-});
-
-// --- Toast function ---
-// --- Toast ---
-function showBlockedToast() {
-  const toast = document.getElementById("blockedToast");
-  if (!toast) return;
-
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 10000);
-}
-
-// --- ارسال پیام با بررسی بلاک ---
-if (chatForm) {
-  chatForm.addEventListener("submit", (e) => {
-    const userId = window.currentChatUserId;
-    if (!userId) return;
-
-    const blocked = localStorage.getItem(`blocked_${userId}`) === "true"; // تبدیل به boolean
-    if (blocked) {
-      e.preventDefault();
-      showBlockedToast();
-      return;
-    }
-  });
-}
-
-// --- بررسی اولیه بلاک ---
-function loadInitialBlockStatus() {
-  const userId = window.currentChatUserId;
-  if (!userId) return;
-
-  checkBlockStatus(userId);
-}
-loadInitialBlockStatus();
-
-// --- مودال پروفایل ---
-function openUserProfileModal() {
-  if (userProfileModal) {
+  function openUserProfileModal() {
+    if (!userProfileModal) return;
     userProfileModal.style.display = "flex";
     userProfileModal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
   }
-}
 
-function closeUserProfileModal() {
-  if (userProfileModal) {
+  function closeUserProfileModal() {
+    if (!userProfileModal) return;
     userProfileModal.style.display = "none";
     userProfileModal.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
     if (contentContainer) contentContainer.innerHTML = "";
   }
-}
 
-if (closeUserProfileModalBtn) {
-  closeUserProfileModalBtn.addEventListener("click", closeUserProfileModal);
-}
-
-if (chatUserAvatar) {
-  chatUserAvatar.style.cursor = "pointer";
-  chatUserAvatar.addEventListener("click", () => {
-    const userId = chatUserAvatar.getAttribute("data-user-id");
-    if (!userId) {
-      console.error("User ID not found!");
-      return;
-    }
-
-    fetch(`/user_profile_ajax/${userId}/`, {
-      method: 'GET',
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(response => {
-      if (!response.ok) throw new Error("Network response was not ok");
-      return response.text();
-    })
-    .then(html => {
-      if (contentContainer) {
-        contentContainer.innerHTML = html;
-        openUserProfileModal();
-      } else {
-        console.error('Element with id "userProfileContent" not found.');
-      }
-    })
-    .catch(err => console.error("Fetch error:", err));
-  });
-}
-
-// --- Block sending if blocked ---
-const chatForm = document.getElementById("chatForm");
-if (chatForm) {
-  chatForm.addEventListener("submit", (e) => {
-    const userId = window.currentChatUserId || localStorage.getItem("currentChatUserId");
-    const blocked = localStorage.getItem(`blocked_${userId}`);
-
-    if (blocked) {
-      e.preventDefault();
-      showBlockedToast();
-      return;
-    }
-  });
-}
-
-// بارگذاری اولیه وضعیت بلاک
-if (window.currentChatUserId || localStorage.getItem("currentChatUserId")) {
-  checkBlockStatus(window.currentChatUserId || localStorage.getItem("currentChatUserId"));
-}
-
-
-  function openUserProfileModal() {
-    if (userProfileModal) {
-      userProfileModal.style.display = "flex";  // flex برای وسط چین
-      userProfileModal.setAttribute("aria-hidden", "false");
-      document.body.classList.add("modal-open");
-    }
-  }
-
-  function closeUserProfileModal() {
-    if (userProfileModal) {
-      userProfileModal.style.display = "none";
-      userProfileModal.setAttribute("aria-hidden", "true");
-      document.body.classList.remove("modal-open");
-      if(contentContainer) contentContainer.innerHTML = ""; // خالی کردن محتوا
-    }
-  }
-
+  // بستن مودال با دکمه
   if (closeUserProfileModalBtn) {
     closeUserProfileModalBtn.addEventListener("click", closeUserProfileModal);
   }
 
-  if (chatUserAvatar) {
-    chatUserAvatar.style.cursor = "pointer";
-    chatUserAvatar.addEventListener("click", () => {
-      const userId = chatUserAvatar.getAttribute("data-user-id");
-      if (!userId) {
-        console.error("User ID not found!");
-        return;
-      }
+  // بستن با کلیک روی پس‌زمینه
+  if (userProfileModal) {
+    userProfileModal.addEventListener("click", (e) => {
+      if (e.target === userProfileModal) closeUserProfileModal();
+    });
+  }
 
-      fetch(`/user_profile_ajax/${userId}/`, {
-        method: 'GET',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-      .then(response => {
-        if (!response.ok) throw new Error("Network response was not ok");
-        return response.text();
-      })
+  // بستن با Esc
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && userProfileModal.style.display === "flex") {
+      closeUserProfileModal();
+    }
+  });
+
+  // تابع باز کردن پروفایل کاربر
+  function openUserProfile(userId) {
+    if (!userId) return;
+    fetch(`/user_profile_ajax/${userId}/`, {
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+      .then(res => res.text())
       .then(html => {
         if (contentContainer) {
           contentContainer.innerHTML = html;
           openUserProfileModal();
-        } else {
-          console.error('Element with id "userProfileContent" not found.');
         }
       })
-      .catch(err => {
-        console.error("Fetch error:", err);
+      .catch(err => console.error("خطا در بارگذاری پروفایل:", err));
+  }
+
+  // کلیک روی آواتار یا نام در chat modal
+  function attachChatProfileClick() {
+    if (!chatUserAvatar || !chatUserName) return;
+
+    [chatUserAvatar, chatUserName].forEach(el => {
+      el.style.cursor = "pointer";
+      el.addEventListener("click", () => {
+        const userId = chatUserAvatar.dataset.userId;
+        openUserProfile(userId);
       });
     });
   }
 
-  // بستن مودال با کلیک روی پس‌زمینه
-  if(userProfileModal) {
-    userProfileModal.addEventListener("click", (e) => {
-      if(e.target === userProfileModal) {
-        closeUserProfileModal();
-      }
-    });
-  }
-
-  // بستن مودال با کلید Esc
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape' && userProfileModal.style.display === 'flex') {
-      closeUserProfileModal();
-    }
-  });
+  attachChatProfileClick();
 });
+});
+
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -3900,41 +3752,101 @@ async function sendMessage(event) {
   }
 
   // مودال تایید Unfriend
-  let friendToRemoveId = null;
-  if (modals.confirmUnfriend.modal) {
-    modals.confirmUnfriend.closeBtn.addEventListener('click', () => closeModal(modals.confirmUnfriend.modal));
-    modals.confirmUnfriend.cancelBtn.addEventListener('click', () => {
+let friendToRemoveId = null;
+
+// Event delegation برای دکمه‌های Unfriend
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('unfriendBtn')) {
+    friendToRemoveId = e.target.dataset.userid; // ذخیره ID برای مودال
+    openModal(modals.confirmUnfriend.modal);    // باز کردن مودال
+  }
+});
+
+if (modals.confirmUnfriend.modal) {
+  modals.confirmUnfriend.closeBtn.addEventListener('click', () => closeModal(modals.confirmUnfriend.modal));
+  modals.confirmUnfriend.cancelBtn.addEventListener('click', () => {
+    friendToRemoveId = null;
+    closeModal(modals.confirmUnfriend.modal);
+  });
+  modals.confirmUnfriend.modal.addEventListener('click', e => {
+    if (e.target === modals.confirmUnfriend.modal) {
       friendToRemoveId = null;
       closeModal(modals.confirmUnfriend.modal);
-    });
-    modals.confirmUnfriend.modal.addEventListener('click', e => {
-      if (e.target === modals.confirmUnfriend.modal) {
-        friendToRemoveId = null;
+    }
+  });
+  modals.confirmUnfriend.confirmBtn.addEventListener('click', () => {
+    if (!friendToRemoveId) return;
+    fetch(`/unfriend/${friendToRemoveId}/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
         closeModal(modals.confirmUnfriend.modal);
+        friendToRemoveId = null;
+        loadFriendsList();
+      } else {
+        alert(data.error || "Failed to unfriend.");
+      }
+    })
+    .catch(() => alert("Network error, please try again."));
+  });
+}
+
+// مودال پروفایل
+if (modals.userProfile.modal && modals.userProfile.closeBtn) {
+  modals.userProfile.closeBtn.addEventListener('click', () => closeModal(modals.userProfile.modal));
+  modals.userProfile.modal.addEventListener('click', e => {
+    if (e.target === modals.userProfile.modal) closeModal(modals.userProfile.modal);
+  });
+}
+
+// مودال خروج
+if (modals.logout.openBtn && modals.logout.modal) {
+  modals.logout.openBtn.addEventListener('click', e => {
+    e.preventDefault();
+    openModal(modals.logout.modal);
+  });
+}
+if (modals.logout.closeBtn) {
+  modals.logout.closeBtn.addEventListener('click', () => closeModal(modals.logout.modal));
+}
+if (modals.logout.cancelBtn) {
+  modals.logout.cancelBtn.addEventListener('click', () => closeModal(modals.logout.modal));
+}
+if (modals.logout.modal) {
+  modals.logout.modal.addEventListener('click', e => {
+    if (e.target === modals.logout.modal) closeModal(modals.logout.modal);
+  });
+}
+
+// بستن مودال با Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    Object.values(modals).forEach(({ modal }) => {
+      if (modal && modal.style.display === 'flex') {
+        closeModal(modal);
       }
     });
-    modals.confirmUnfriend.confirmBtn.addEventListener('click', () => {
-      if (!friendToRemoveId) return;
-      fetch(`/unfriend/${friendToRemoveId}/`, {
-        method: "POST",
-        headers: {
-          "X-CSRFToken": getCSRFToken(),
-          "X-Requested-With": "XMLHttpRequest"
-        }
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          closeModal(modals.confirmUnfriend.modal);
-          friendToRemoveId = null;
-          loadFriendsList();
-        } else {
-          alert(data.error || "Failed to unfriend.");
-        }
-      })
-      .catch(() => alert("Network error, please try again."));
-    });
   }
+});
+
+// تابع باز کردن مودال
+function openModal(modal) {
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+// تابع بستن مودال
+function closeModal(modal) {
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
+}
+
 
   // مودال پروفایل
   if (modals.userProfile.modal && modals.userProfile.closeBtn) {
@@ -4053,41 +3965,414 @@ function showChatsTab() {
   hideErrorMessage();
 }
 
-// ------------------------------
-// اتصال دکمه‌ها به توابع
-// ------------------------------
+
 searchTabBtn.addEventListener("click", showSearchTab);
 requestsTabBtn.addEventListener("click", showRequestsTab);
 friendsTabBtn.addEventListener("click", showFriendsTab);
 chatsBtn.addEventListener("click", showChatsTab);
 
-// ------------------------------
-// توابع نمونه برای لود دیتا
-// ------------------------------
+
 function loadFriendRequests() {
-  const list = document.getElementById("friendRequestsList");
-  const noMsg = document.getElementById("noRequestsMsg");
-  list.innerHTML = ""; // پاک کردن لیست
-  // فرضی: اینجا باید درخواست‌ها رو از سرور بگیری
-  const requests = []; // هیچ درخواستی نیست
-  if (requests.length === 0) {
-    noMsg.style.display = "block";
-  } else {
-    noMsg.style.display = "none";
-    // اینجا li اضافه کن
-  }
+  const friendRequestsList = document.getElementById("friendRequestsList");
+  const noRequestsMsg = document.getElementById("noRequestsMsg");
+  const errorLoadingRequests = document.getElementById("errorLoadingRequests");
+
+  friendRequestsList.innerHTML = "Loading...";
+  noRequestsMsg.style.display = "none";
+  errorLoadingRequests.style.display = "none";
+
+  const FRIEND_REQUESTS_URL = "{% url 'friend_requests_api' %}";
+
+  fetch(FRIEND_REQUESTS_URL, {
+    headers: { "X-Requested-With": "XMLHttpRequest" }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  })
+  .then(payload => {
+    const requests = payload.requests || [];
+    friendRequestsList.innerHTML = "";
+
+    if (!requests.length) {
+      noRequestsMsg.style.display = "block";
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+
+    requests.forEach(req => {
+      const id = req.from_user_id;
+      const name = req.from_user_name || "Unknown";
+      const email = req.from_user_email || "";
+      const avatarSrc = req.from_user_avatar || "/static/default-avatar.png";
+
+      const li = document.createElement("li");
+      li.style.padding = "8px 0";
+      li.style.display = "flex";
+      li.style.alignItems = "center";
+      li.style.justifyContent = "space-between";
+      li.style.gap = "10px";
+
+      // info button wrapper
+      const infoBtn = document.createElement("div");
+      infoBtn.style.display = "flex";
+      infoBtn.style.alignItems = "center";
+      infoBtn.style.gap = "10px";
+      infoBtn.style.cursor = "pointer";
+
+      const avatar = document.createElement("img");
+      avatar.src = avatarSrc;
+      avatar.alt = `${name} avatar`;
+      avatar.style.width = "46px";
+      avatar.style.height = "46px";
+      avatar.style.borderRadius = "50%";
+      avatar.style.objectFit = "cover";
+      avatar.referrerPolicy = "no-referrer";
+
+      const textWrap = document.createElement("span");
+      textWrap.style.display = "flex";
+      textWrap.style.flexDirection = "column";
+      textWrap.style.alignItems = "flex-start";
+      textWrap.style.lineHeight = "1.2";
+
+      const nameEl = document.createElement("span");
+      nameEl.textContent = name;
+      nameEl.style.fontWeight = "600";
+      nameEl.style.cursor = "pointer";
+
+      const emailEl = document.createElement("span");
+      emailEl.textContent = email;
+      emailEl.style.fontSize = "12px";
+      emailEl.style.opacity = "0.8";
+      emailEl.style.cursor = "pointer";
+
+      textWrap.appendChild(nameEl);
+      textWrap.appendChild(emailEl);
+      infoBtn.appendChild(avatar);
+      infoBtn.appendChild(textWrap);
+
+      // تابع باز کردن پروفایل
+      const openUserProfile = () => {
+        fetch(`/user_profile_ajax/${id}/`, {
+          headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById("userProfileContent").innerHTML = html;
+          openModal(modals.userProfile.modal);
+        })
+        .catch(() => alert("خطا در بارگذاری پروفایل"));
+      };
+
+      // اضافه کردن event به تمام عناصر قابل کلیک
+      avatar.addEventListener("click", openUserProfile);
+      nameEl.addEventListener("click", openUserProfile);
+      emailEl.addEventListener("click", openUserProfile);
+
+      // accept / decline buttons
+      const buttonsDiv = document.createElement("div");
+      buttonsDiv.style.display = "flex";
+      buttonsDiv.style.gap = "8px";
+
+      const acceptBtn = document.createElement("button");
+      acceptBtn.textContent = "Accept";
+      acceptBtn.classList.add("friend-request-btn", "accept");
+      acceptBtn.onclick = () => {
+        fetch(`/friends/accept/${req.id}/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCSRFToken(),
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        })
+        .then(res => res.json())
+        .then(resData => {
+          if(resData.success){
+            li.remove();
+            if(friendRequestsList.children.length === 0) noRequestsMsg.style.display = "block";
+            hideErrorMessage();
+            loadFriendsList();
+          } else showErrorMessage(resData.error || "Failed to accept request");
+        })
+        .catch(() => showErrorMessage("Network error, please try again."));
+      };
+
+      const declineBtn = document.createElement("button");
+      declineBtn.textContent = "Decline";
+      declineBtn.classList.add("friend-request-btn", "decline");
+      declineBtn.onclick = () => {
+        fetch(`/friends/decline/${req.id}/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCSRFToken(),
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        })
+        .then(res => res.json())
+        .then(resData => {
+          if(resData.success){
+            li.remove();
+            if(friendRequestsList.children.length === 0) noRequestsMsg.style.display = "block";
+            hideErrorMessage();
+          } else showErrorMessage(resData.error || "Failed to decline request");
+        })
+        .catch(() => showErrorMessage("Network error, please try again."));
+      };
+
+      buttonsDiv.appendChild(acceptBtn);
+      buttonsDiv.appendChild(declineBtn);
+
+      li.appendChild(infoBtn);
+      li.appendChild(buttonsDiv);
+      frag.appendChild(li);
+    });
+
+    friendRequestsList.appendChild(frag);
+  })
+  .catch(err => {
+    console.error("Friend requests error:", err);
+    friendRequestsList.innerHTML = "";
+    noRequestsMsg.style.display = "none";
+    errorLoadingRequests.style.display = "block";
+  });
 }
+
 
 function loadFriendsList() {
   const list = document.getElementById("friendsList");
   const noMsg = document.getElementById("noFriendsMsg");
   list.innerHTML = "";
-  const friends = []; // هیچ دوستی نیست
-  if (friends.length === 0) {
+  noMsg.style.display = "none";
+
+  fetch("{% url 'friends_list_api' %}", {
+    headers: { "X-Requested-With": "XMLHttpRequest" }
+  })
+  .then(res => res.json())
+  .then(payload => {
+    const friends = payload.friends || [];
+    if (!friends.length) {
+      noMsg.style.display = "block";
+      return;
+    }
+
+    const frag = document.createDocumentFragment();
+
+    friends.forEach(f => {
+      const li = document.createElement("li");
+      li.style.display = "flex";
+      li.style.alignItems = "center";
+      li.style.justifyContent = "space-between";
+      li.style.gap = "10px";
+      li.style.padding = "8px 0";
+
+      // Profile info button
+      const infoBtn = document.createElement("button");
+      infoBtn.type = "button";
+      infoBtn.style.display = "flex";
+      infoBtn.style.alignItems = "center";
+      infoBtn.style.gap = "10px";
+      infoBtn.style.background = "transparent";
+      infoBtn.style.border = "none";
+      infoBtn.style.padding = "0";
+      infoBtn.style.cursor = "pointer";
+
+      const avatar = document.createElement("img");
+      avatar.src = f.avatar;
+      avatar.alt = f.name + " avatar";
+      avatar.style.width = "50px";
+      avatar.style.height = "50px";
+      avatar.style.borderRadius = "50%";
+      avatar.style.objectFit = "cover";
+
+      const textWrap = document.createElement("span");
+      textWrap.style.display = "flex";
+      textWrap.style.flexDirection = "column";
+      textWrap.style.alignItems = "flex-start";
+
+      const nameEl = document.createElement("span");
+      nameEl.textContent = f.name;
+      nameEl.style.fontWeight = "600";
+
+      const emailEl = document.createElement("span");
+      emailEl.textContent = f.email;
+      emailEl.style.fontSize = "12px";
+      emailEl.style.opacity = "0.8";
+
+      textWrap.appendChild(nameEl);
+      textWrap.appendChild(emailEl);
+      infoBtn.appendChild(avatar);
+      infoBtn.appendChild(textWrap);
+
+      // **Open user profile modal on click**
+      infoBtn.addEventListener("click", () => {
+        const modal = document.getElementById("userProfileModal");
+        const content = document.getElementById("userProfileContent");
+        modal.style.display = "flex";
+        modal.dataset.userid = f.id;
+
+        // Load user info via AJAX
+        fetch(`/user_profile_ajax/${f.id}/`, {
+          headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(res => res.text())
+        .then(html => {
+          content.innerHTML = html;
+        })
+        .catch(err => {
+          content.innerHTML = "خطا در بارگذاری اطلاعات کاربر.";
+          console.error("User profile load error:", err);
+        });
+      });
+
+      // Unfriend button
+      const unfriendBtn = document.createElement("button");
+      unfriendBtn.textContent = "Unfriend";
+      unfriendBtn.classList.add("unfriendBtn");
+      unfriendBtn.dataset.userid = f.id;
+      unfriendBtn.style.padding = "6px 12px";
+      unfriendBtn.style.background = "#f44336";
+      unfriendBtn.style.color = "#fff";
+      unfriendBtn.style.border = "none";
+      unfriendBtn.style.borderRadius = "6px";
+      unfriendBtn.style.cursor = "pointer";
+
+      const btnWrap = document.createElement("div");
+      btnWrap.style.display = "flex";
+      btnWrap.style.gap = "8px";
+      btnWrap.appendChild(unfriendBtn);
+
+      li.appendChild(infoBtn);
+      li.appendChild(btnWrap);
+      frag.appendChild(li);
+
+      // Unfriend click
+      unfriendBtn.addEventListener("click", () => {
+        console.log("Clicked unfriendBtn for user:", f.id);
+        const modal = document.getElementById("confirmUnfriendModal");
+        modal.style.display = "flex";
+        modal.dataset.userid = f.id;
+      });
+    });
+
+    list.appendChild(frag);
+  })
+  .catch(err => {
+    console.error("Friends list error:", err);
     noMsg.style.display = "block";
-  } else {
-    noMsg.style.display = "none";
-  }
+    noMsg.textContent = "خطا در بارگذاری لیست دوستان.";
+  });
+}
+
+
+// Modal buttons
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById("confirmUnfriendModal");
+  const closeBtn = document.getElementById("closeConfirmUnfriendModal");
+  const cancelBtn = document.getElementById("cancelUnfriendBtn");
+
+  const closeModal = () => {
+    modal.style.display = "none";
+    delete modal.dataset.userid;
+  };
+
+  closeBtn.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", closeModal);
+
+  // ✅ Event delegation روی خود modal برای دکمه Yes
+  modal.addEventListener("click", (e) => {
+    if (e.target.id === "confirmUnfriendBtn") {
+      e.stopPropagation();
+      const friendId = modal.dataset.userid;
+      console.log("Yes clicked! Friend ID:", friendId);
+
+      if (!friendId) return;
+
+      fetch(`/unfriend/${friendId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCSRFToken(),
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("Server response:", data);
+        if (data.success) {
+          closeModal();
+          const btn = document.querySelector(`.unfriendBtn[data-userid="${friendId}"]`);
+          if (btn) btn.closest("li").remove();
+        } else {
+          alert(data.error || "خطا در حذف دوست.");
+        }
+      })
+      .catch(err => console.error("Network error:", err));
+    }
+  });
+
+  // ✅ Attach روی دکمه‌های unfriend بعد از ساخت آنها
+  const attachUnfriendButtons = () => {
+    document.querySelectorAll(".unfriendBtn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const userId = e.currentTarget.dataset.userid;
+        console.log("Clicked unfriendBtn for user:", userId);
+        modal.style.display = "flex";
+        modal.dataset.userid = userId;
+      });
+    });
+  };
+
+  // بعد از بارگذاری friends list فراخوانی شود
+  attachUnfriendButtons();
+});
+
+// Helper برای CSRF
+function getCSRFToken() {
+  let cookieValue = null;
+  document.cookie.split(";").forEach(cookie => {
+    cookie = cookie.trim();
+    if (cookie.startsWith("csrftoken=")) {
+      cookieValue = decodeURIComponent(cookie.substring("csrftoken=".length));
+    }
+  });
+  return cookieValue;
+}
+
+
+function getCSRFToken() {
+  let cookieValue = null;
+  document.cookie.split(";").forEach(cookie => {
+    cookie = cookie.trim();
+    if (cookie.startsWith("csrftoken=")) {
+      cookieValue = decodeURIComponent(cookie.substring("csrftoken=".length));
+    }
+  });
+  return cookieValue;
+}
+
+// هنگام کلیک روی unfriendBtn
+function attachUnfriendButtons() {
+  document.querySelectorAll(".unfriendBtn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const modal = document.getElementById("confirmUnfriendModal");
+      const userId = e.currentTarget.dataset.userid;
+      console.log("Clicked unfriendBtn for user:", userId);
+      modal.style.display = "flex";
+      modal.dataset.userid = userId;
+    });
+  });
+}
+
+function getCSRFToken() {
+  let cookieValue = null;
+  document.cookie.split(";").forEach(cookie => {
+    cookie = cookie.trim();
+    if (cookie.startsWith("csrftoken=")) {
+      cookieValue = decodeURIComponent(cookie.substring("csrftoken=".length));
+    }
+  });
+  console.log("CSRF token:", cookieValue);
+  return cookieValue;
 }
 
 function formatChatTime(timestamp) {
@@ -4435,11 +4720,17 @@ function getCSRFToken() {
 }
 
 
+// Global variable for current chat user
+let currentChatUserId = null;
+
+// --- Search Input Handler ---
+let searchTimeout = null;
+
 searchInput.addEventListener("input", function() {
-  clearTimeout(timeout);
+  clearTimeout(searchTimeout);
   const query = this.value.trim();
 
-  timeout = setTimeout(() => {
+  searchTimeout = setTimeout(() => {
     if (query.length === 0) {
       userList.innerHTML = "";
       return;
@@ -4456,29 +4747,68 @@ searchInput.addEventListener("input", function() {
         return;
       }
 
+      const frag = document.createDocumentFragment();
+
       data.users.forEach(user => {
         const li = document.createElement("li");
-        li.style.padding = "6px 0";
         li.style.display = "flex";
         li.style.alignItems = "center";
-        li.style.justifyContent = "flex-start";
-        li.style.gap = "6px";
+        li.style.justifyContent = "space-between";
+        li.style.padding = "8px 0";
+        li.style.gap = "10px";
 
-        // User info clickable text
-        const userText = document.createElement("span");
-        userText.textContent = `${user.name} - ${user.email}`;
-        userText.style.cursor = "pointer";
-        userText.onclick = () => {
+        // Avatar + Name + Email
+        const infoBtn = document.createElement("button");
+        infoBtn.type = "button";
+        infoBtn.style.display = "flex";
+        infoBtn.style.alignItems = "center";
+        infoBtn.style.gap = "10px";
+        infoBtn.style.background = "transparent";
+        infoBtn.style.border = "none";
+        infoBtn.style.padding = "0";
+        infoBtn.style.cursor = "pointer";
+
+        const avatar = document.createElement("img");
+        avatar.src = user.avatar || "/static/default-avatar.png";
+        avatar.style.width = "46px";
+        avatar.style.height = "46px";
+        avatar.style.borderRadius = "50%";
+        avatar.style.objectFit = "cover";
+
+        const textWrap = document.createElement("span");
+        textWrap.style.display = "flex";
+        textWrap.style.flexDirection = "column";
+        textWrap.style.alignItems = "flex-start";
+        textWrap.style.lineHeight = "1.2";
+
+        const nameEl = document.createElement("span");
+        nameEl.textContent = user.name;
+        nameEl.style.fontWeight = "600";
+        nameEl.style.cursor = "pointer";
+
+        const emailEl = document.createElement("span");
+        emailEl.textContent = user.email;
+        emailEl.style.fontSize = "12px";
+        emailEl.style.opacity = "0.8";
+        emailEl.style.cursor = "pointer";
+
+        textWrap.appendChild(nameEl);
+        textWrap.appendChild(emailEl);
+        infoBtn.appendChild(avatar);
+        infoBtn.appendChild(textWrap);
+
+        // Click to open user profile
+        infoBtn.addEventListener("click", () => {
           fetch(`/user_profile_ajax/${user.id}/`, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
           })
           .then(res => res.text())
           .then(html => {
             document.getElementById("userProfileContent").innerHTML = html;
-            openModal(modals.userProfile.modal);
+            openModal(document.getElementById("userProfileModal"));
           })
           .catch(() => alert("خطا در بارگذاری پروفایل"));
-        };
+        });
 
         // Add Friend button
         const addBtn = document.createElement("button");
@@ -4494,20 +4824,15 @@ searchInput.addEventListener("input", function() {
           })
           .then(res => res.json())
           .then(data => {
-            if(data.success){
+            if (data.success) {
               addBtn.textContent = "Requested";
               addBtn.disabled = true;
-              hideErrorMessage();
-            }
-            else if (data.code === "already_friends") {
-              showErrorMessage("Already Friend");
+            } else if (data.code === "already_friends") {
               addBtn.textContent = "Already Friends";
               addBtn.disabled = true;
               addBtn.style.backgroundColor = "#ccc";
               addBtn.style.cursor = "default";
-            }
-            else if (data.code === "already_requested") {
-              showErrorMessage("Request sent before");
+            } else if (data.code === "already_requested") {
               addBtn.textContent = "Already Requested";
               addBtn.disabled = true;
               addBtn.style.backgroundColor = "#ccc";
@@ -4518,273 +4843,87 @@ searchInput.addEventListener("input", function() {
           })
           .catch(() => showErrorMessage("Network error, please try again."));
         };
-const chatBtn = document.createElement("button");
-chatBtn.classList.add("chat-btn");
-chatBtn.title = `${user.name}`;
-chatBtn.setAttribute("data-user-id", user.id);
-chatBtn.setAttribute("data-user-name", user.name);
 
-chatBtn.style.position = "relative";
-chatBtn.style.padding = "4px";
-chatBtn.style.width = "28px";
-chatBtn.style.height = "28px";
-chatBtn.style.border = "none";
-chatBtn.style.borderRadius = "50%";
-chatBtn.style.cursor = "pointer";
-chatBtn.style.background = "transparent";
-chatBtn.style.boxShadow = "none";
-chatBtn.style.transition = "color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease";
-chatBtn.style.display = "flex";
-chatBtn.style.alignItems = "center";
-chatBtn.style.justifyContent = "center";
-chatBtn.style.outline = "none";
-chatBtn.style.color = "#4dabf5";
-chatBtn.style.marginRight = "6px";
-chatBtn.style.marginLeft = "2px";
+        // Chat button
+        const chatBtn = document.createElement("button");
+        chatBtn.classList.add("chat-btn");
+        chatBtn.title = `${user.name}`;
+        chatBtn.setAttribute("data-user-id", user.id);
+        chatBtn.setAttribute("data-user-name", user.name);
+        chatBtn.setAttribute("data-user-avatar", user.avatar || "/static/default-avatar.png"); // ✅ مهم
 
-chatBtn.innerHTML = `
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-`;
+        chatBtn.style.position = "relative";
+        chatBtn.style.padding = "4px";
+        chatBtn.style.width = "28px";
+        chatBtn.style.height = "28px";
+        chatBtn.style.border = "none";
+        chatBtn.style.borderRadius = "50%";
+        chatBtn.style.cursor = "pointer";
+        chatBtn.style.background = "transparent";
+        chatBtn.style.display = "flex";
+        chatBtn.style.alignItems = "center";
+        chatBtn.style.justifyContent = "center";
+        chatBtn.style.color = "#4dabf5";
+        chatBtn.style.marginRight = "6px";
+        chatBtn.style.marginLeft = "2px";
 
-chatBtn.addEventListener("click", () => {
-  currentChatUserId = user.id;
-  fetchMessages(window.currentUserId, currentChatUserId);
-  openModal(document.getElementById('chatModal'));
-});
+        chatBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        `;
 
-chatBtn.addEventListener("mouseenter", () => {
-  chatBtn.style.color = "#1976d2";
-  chatBtn.style.transform = "scale(1.1)";
-  chatBtn.style.boxShadowa = "0 4px 12px rgba(25, 118, 210, 0.6)";
-});
+        chatBtn.addEventListener("click", () => {
+          // Set current chat user
+          currentChatUserId = user.id;
 
-chatBtn.addEventListener("mouseleave", () => {
-  chatBtn.style.color = "#4dabf5";
-  chatBtn.style.transform = "scale(1)";
-  chatBtn.style.boxShadow = "none";
-});
+          // Update chat modal with dynamic info
+          const chatModal = document.getElementById("chatModal");
+          const chatUserAvatar = chatModal.querySelector("#chatUserAvatar");
+          const chatUserNameAvatar = chatModal.querySelector("#chatUserNameAvatar");
+          chatUserAvatar.src = user.avatar || "/static/default-avatar.png";
+          chatUserNameAvatar.textContent = user.name || "کاربر ناشناس";
 
-chatBtn.addEventListener("mousedown", (e) => {
-  e.preventDefault();
-});
+          // Clear previous messages and input
+          const chatMessages = chatModal.querySelector(".chat-messages");
+          const chatInput = chatModal.querySelector("#chatInput");
+          if (chatMessages) chatMessages.innerHTML = "";
+          if (chatInput) chatInput.value = "";
 
-chatBtn.addEventListener("focus", () => {
-  chatBtn.style.outline = "2px solid #1976d2";
-  chatBtn.style.outlineOffset = "2px";
-});
+          // Open modal
+          openModal(chatModal);
 
-chatBtn.addEventListener("blur", () => {
-  chatBtn.style.outline = "none";
-});
+          // Load messages
+          if (typeof fetchMessages === "function") {
+            fetchMessages(window.currentUserId, currentChatUserId);
+          }
+        });
 
-
-
-
-        chatBtn.onclick = () => {
-          openChatModal(user.id, user.name);
-        };
-
-        // Append all elements to li in order
-        // گروه دکمه‌ها
+        // Group buttons
         const btnGroup = document.createElement("div");
         btnGroup.classList.add("btn-group");
+        btnGroup.style.display = "flex";
+        btnGroup.style.gap = "6px";
+
         btnGroup.appendChild(addBtn);
         btnGroup.appendChild(chatBtn);
 
-        // اضافه کردن به li
-        li.appendChild(userText);
+        // Assemble li
+        li.appendChild(infoBtn);
         li.appendChild(btnGroup);
-
-        userList.appendChild(li);
+        frag.appendChild(li);
       });
-    })
-    .catch(() => {
-      userList.innerHTML = "<li>Error loading users.</li>";
+
+      userList.appendChild(frag);
     });
   }, 300);
 });
 
-    // بارگذاری درخواست‌های دوستی
-    function loadFriendRequests() {
-      friendRequestsList.innerHTML = "Loading...";
-      noRequestsMsg.style.display = "none";
-      errorLoadingRequests.style.display = "none";
-
-      fetch("{% url 'friend_requests_api' %}", {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-      .then(res => res.json())
-      .then(data => {
-        friendRequestsList.innerHTML = "";
-        if (data.requests && data.requests.length > 0) {
-          noRequestsMsg.style.display = "none";
-          errorLoadingRequests.style.display = "none";
-
-          data.requests.forEach(req => {
-            const li = document.createElement("li");
-            li.textContent = req.from_user_name;
-
-            const buttonsDiv = document.createElement("div");
-            buttonsDiv.style.marginTop = '5px';
-            buttonsDiv.style.display = 'flex';
-            buttonsDiv.style.gap = '8px';
-
-            const acceptBtn = document.createElement("button");
-            acceptBtn.textContent = "Accept";
-            acceptBtn.classList.add("friend-request-btn", "accept");
-            acceptBtn.onclick = () => {
-              fetch(`/friends/accept/${req.id}/`, {
-                method: "POST",
-                headers: {
-                  "X-CSRFToken": getCSRFToken(),
-                  "X-Requested-With": "XMLHttpRequest"
-                }
-              })
-              .then(res => res.json())
-              .then(resData => {
-                if(resData.success){
-                  li.remove();
-                  if(friendRequestsList.children.length === 0) {
-                    noRequestsMsg.style.display = "block";
-                  }
-                  hideErrorMessage();
-                  loadFriendsList();
-                } else {
-                  showErrorMessage(resData.error || "Failed to accept request");
-                }
-              })
-              .catch(() => showErrorMessage("Network error, please try again."));
-            };
-
-            const declineBtn = document.createElement("button");
-            declineBtn.textContent = "Decline";
-            declineBtn.classList.add("friend-request-btn", "decline");
-            declineBtn.onclick = () => {
-              fetch(`/friends/decline/${req.id}/`, {
-                method: "POST",
-                headers: {
-                  "X-CSRFToken": getCSRFToken(),
-                  "X-Requested-With": "XMLHttpRequest"
-                }
-              })
-              .then(res => res.json())
-              .then(resData => {
-                if(resData.success){
-                  li.remove();
-                  if(friendRequestsList.children.length === 0) {
-                    noRequestsMsg.style.display = "block";
-                  }
-                  hideErrorMessage();
-                } else {
-                  showErrorMessage(resData.error || "Failed to decline request");
-                }
-              })
-              .catch(() => showErrorMessage("Network error, please try again."));
-            };
-
-            buttonsDiv.appendChild(acceptBtn);
-            buttonsDiv.appendChild(declineBtn);
-
-            li.appendChild(buttonsDiv);
-            friendRequestsList.appendChild(li);
-          });
-        } else {
-          noRequestsMsg.style.display = "block";
-          errorLoadingRequests.style.display = "none";
-        }
-      })
-      .catch(() => {
-        friendRequestsList.innerHTML = "";
-        noRequestsMsg.style.display = "none";
-        errorLoadingRequests.style.display = "block";
-      });
-    }
-
-    // بارگذاری لیست دوستان
-    function loadFriendsList() {
-      friendsList.innerHTML = "Loading...";
-      noFriendsMsg.style.display = "none";
-
-      fetch("{% url 'friends_list_api' %}", {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-      .then(res => res.json())
-      .then(data => {
-        friendsList.innerHTML = "";
-        if (data.friends && data.friends.length > 0) {
-          noFriendsMsg.style.display = "none";
-
-          data.friends.forEach(friend => {
-            const li = document.createElement("li");
-            li.style.display = "flex";
-            li.style.justifyContent = "space-between";
-            li.style.alignItems = "center";
-            li.style.padding = "6px 0";
-
-            const friendName = document.createElement("span");
-            friendName.textContent = friend.name;
-
-            const unfriendBtn = document.createElement("button");
-            unfriendBtn.textContent = "Unfriend";
-            unfriendBtn.classList.add("friend-request-btn", "decline");
-            unfriendBtn.style.cursor = "pointer";
-            unfriendBtn.onclick = () => {
-              friendToRemoveId = friend.id;
-              openModal(modals.confirmUnfriend.modal);
-            };
-
-            li.appendChild(friendName);
-            li.appendChild(unfriendBtn);
-
-            friendsList.appendChild(li);
-          });
-        } else {
-          noFriendsMsg.style.display = "block";
-          noFriendsMsg.textContent = "No Friends Yet";
-        }
-      })
-      .catch(() => {
-        friendsList.innerHTML = "";
-        noFriendsMsg.style.display = "block";
-        noFriendsMsg.textContent = "Error loading friends.";
-      });
-    }
 
     // نمایش و مخفی کردن پیام خطا
-let errorTimeout;
-
-function showErrorMessage(message) {
-  const errorDiv = document.getElementById("errorMessage");
-  const errorText = document.getElementById("errorText");
-
-  errorText.textContent = message;
-  errorDiv.style.display = "block";
-  errorDiv.style.opacity = 1;
-
-  // اگر تایمر قبلاً فعال بوده، ریستش کن
-  clearTimeout(errorTimeout);
-
-  errorTimeout = setTimeout(() => {
-    errorDiv.style.opacity = 0;
-
-    setTimeout(() => {
-      errorDiv.style.display = "none";
-      errorText.textContent = "";
-    }, 300); 
-  }, 3000); 
-}
-
-function hideErrorMessage() {
-  const errorDiv = document.getElementById("errorMessage");
-  const errorText = document.getElementById("errorText");
-
-  clearTimeout(errorTimeout);
-  errorDiv.style.display = "none";
-  errorText.textContent = "";
-}
-
+// تعریف در بالای فایل یا قبل از استفاده
 
 
     showSearchTab();
@@ -4844,27 +4983,74 @@ function renderMessages(messages) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-
 let windowCurrentChatUserId = null;
 
-function openChatModal(userId, userName) {
-  windowCurrentChatUserId = parseInt(userId);
+function openChatModal(userId, userName, userAvatar) {
+  userId = parseInt(userId);
+  windowCurrentChatUserId = userId;
 
   if (!window.currentUserId || !windowCurrentChatUserId) {
     console.error("❌ شناسه کاربر یا مخاطب تعریف نشده است.");
     return;
   }
 
+  const chatModal = document.getElementById("chatModal");
+
+  // ریست کامل مودال
+  const messagesContainer = chatModal.querySelector(".chat-messages");
+  if (messagesContainer) messagesContainer.innerHTML = "";
+
+  const profileAvatar = chatModal.querySelector("#chatUserAvatar");
+  const profileName = chatModal.querySelector("#chatUserNameAvatar");
+
+  if (profileAvatar) profileAvatar.src = userAvatar || "/static/images/default-avatar.png";
+  if (profileName) profileName.textContent = userName || "کاربر ناشناس";
+
+  // **Make avatar and name clickable to open profile modal**
+  const userProfileModal = document.getElementById("userProfileModal");
+  const userProfileContent = document.getElementById("userProfileContent");
+
+  function openProfileModal() {
+    if (!userProfileModal || !userProfileContent) return;
+
+    userProfileModal.style.display = "flex";
+    userProfileModal.dataset.userid = windowCurrentChatUserId;
+
+    // Load profile content via AJAX
+    fetch(`/user_profile_ajax/${windowCurrentChatUserId}/`, {
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+    .then(res => res.text())
+    .then(html => {
+      userProfileContent.innerHTML = html;
+    })
+    .catch(err => {
+      userProfileContent.innerHTML = "خطا در بارگذاری اطلاعات کاربر.";
+      console.error("User profile load error:", err);
+    });
+  }
+
+  if (profileAvatar) {
+    profileAvatar.style.cursor = "pointer";
+    profileAvatar.onclick = openProfileModal;
+  }
+  if (profileName) {
+    profileName.style.cursor = "pointer";
+    profileName.onclick = openProfileModal;
+  }
+
   // نمایش مودال
-  document.getElementById("chatModal").style.display = "flex";
+  chatModal.style.display = "flex";
 
-  // بارگذاری پیام‌ها با fetch
-  loadMessages(window.currentUserId, windowCurrentChatUserId);
-
-  // بارگذاری پروفایل کاربر (مثلاً توی عکس و نام بالای مودال)
-  loadUserProfile(userId, userName);
+  // بارگذاری پیام‌ها **بعد از آپدیت state**
+  setTimeout(() => {
+    loadMessages(window.currentUserId, windowCurrentChatUserId);
+  }, 0);
 }
 
+
+
+// 📩 بارگذاری پیام‌ها بین دو نفر
 function loadMessages(senderId, receiverId) {
   const chatMessages = document.getElementById("chatMessages");
   chatMessages.innerHTML = "در حال بارگذاری پیام‌ها...";
@@ -4882,66 +5068,18 @@ function loadMessages(senderId, receiverId) {
     if (data.messages && data.messages.length) {
       renderMessages(data.messages);
 
-      // 🔹 Scroll to bottom after loading messages
+      // بعد از بارگذاری، اسکرول بره پایین
       requestAnimationFrame(() => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
       });
 
     } else {
-      chatMessages.innerHTML = "<p></p>";
+      chatMessages.innerHTML = "<p>پیامی وجود ندارد</p>";
     }
   })
   .catch(err => {
     console.error("خطا در واکشی پیام‌ها:", err);
-    chatMessages.innerHTML = "<p></p>";
-  });
-}
-
-function loadUserProfile(userId, fallbackName) {
-  const chatUserAvatar = document.getElementById("chatUserAvatar");
-  const chatUserNameAvatar = document.getElementById("chatUserNameAvatar");
-
-  if (!chatUserAvatar || !chatUserNameAvatar) {
-    console.error("❌ المان‌های آواتار یا نام پیدا نشدند!");
-    return;
-  }
-
-  const profileUrl = `/api/user/profile/${userId}/`;
-  console.log("📡 Fetching profile from:", profileUrl);
-
-  fetch(profileUrl, {
-    headers: { 
-      "X-Requested-With": "XMLHttpRequest",
-      "Accept": "application/json"
-    },
-    credentials: "include",
-  })
-  .then(res => {
-    if (!res.ok) throw new Error(`خطا در دریافت پروفایل: ${res.status} ${res.statusText}`);
-    return res.json();
-  })
-  .then(data => {
-    console.log("✅ پروفایل دریافت شد:", data);
-
-    if (!data) throw new Error("داده پروفایل خالی است!");
-
-    let avatarUrl = data.avatar_url || null;
-    if (avatarUrl && !/^https?:\/\//i.test(avatarUrl)) {
-      avatarUrl = window.location.origin + avatarUrl;
-    }
-    if (!avatarUrl || avatarUrl.trim() === "") {
-      avatarUrl = `${window.location.origin}/media/avatars/default-avatar.png`;
-    }
-
-    chatUserAvatar.src = avatarUrl;
-    chatUserNameAvatar.textContent = data.name || fallbackName || "کاربر";
-    chatUserAvatar.dataset.userId = userId; // 🔹 مهم برای باز شدن مودال
-  })
-  .catch(err => {
-    console.error("⚠ خطا در واکشی پروفایل:", err);
-    chatUserAvatar.src = `${window.location.origin}/media/avatars/default-avatar.png`;
-    chatUserNameAvatar.textContent = fallbackName || "کاربر";
-    chatUserAvatar.dataset.userId = userId; // حتی در حالت خطا هم ست بشه
+    chatMessages.innerHTML = "<p>مشکل در دریافت پیام‌ها</p>";
   });
 }
 
@@ -5172,18 +5310,61 @@ document.body.addEventListener("click", (e) => {
 
   const userId = btn.getAttribute("data-user-id");
   const userName = btn.getAttribute("data-user-name");
+  const userAvatar = btn.getAttribute("data-user-avatar"); // اضافه شد
   if (!userId) return alert("کاربر انتخاب نشده!");
 
-  window.currentChatUserId = userId;
+  window.currentChatUserId = parseInt(userId);
 
-  // تنظیم عنوان مودال و باز کردن آن
+  const chatModal = document.getElementById("chatModal");
+  const chatUserAvatar = chatModal.querySelector("#chatUserAvatar");
+  const chatUserNameAvatar = chatModal.querySelector("#chatUserNameAvatar");
+  const chatMessages = chatModal.querySelector(".chat-messages");
+  const chatInput = chatModal.querySelector("#chatInput");
+
+  // آپدیت نام و آواتار کاربر
+  if (chatUserAvatar) chatUserAvatar.src = userAvatar || "/static/images/default-avatar.png";
+  if (chatUserNameAvatar) chatUserNameAvatar.textContent = userName || "کاربر ناشناس";
+
+  // **Make avatar and name clickable to open profile modal**
+  const userProfileModal = document.getElementById("userProfileModal");
+  const userProfileContent = document.getElementById("userProfileContent");
+
+  function openProfileModal() {
+    if (!userProfileModal || !userProfileContent) return;
+
+    userProfileModal.style.display = "flex";
+    userProfileModal.dataset.userid = window.currentChatUserId;
+
+    fetch(`/user_profile_ajax/${window.currentChatUserId}/`, {
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+    .then(res => res.text())
+    .then(html => {
+      userProfileContent.innerHTML = html;
+    })
+    .catch(err => {
+      userProfileContent.innerHTML = "خطا در بارگذاری اطلاعات کاربر.";
+      console.error("User profile load error:", err);
+    });
+  }
+
+  if (chatUserAvatar) {
+    chatUserAvatar.style.cursor = "pointer";
+    chatUserAvatar.onclick = openProfileModal;
+  }
+  if (chatUserNameAvatar) {
+    chatUserNameAvatar.style.cursor = "pointer";
+    chatUserNameAvatar.onclick = openProfileModal;
+  }
+
+  // نمایش مودال
   chatModal.style.display = "flex";
   chatModal.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
 
   // پاک کردن محتوای قبلی
-  chatInput.value = "";
-  chatMessages.innerHTML = "";
+  if (chatInput) chatInput.value = "";
+  if (chatMessages) chatMessages.innerHTML = "";
 
   // بارگذاری پیام‌ها
   if (typeof loadMessagesFromServer === "function") {
@@ -5192,49 +5373,7 @@ document.body.addEventListener("click", (e) => {
 });
 
 
-  // فرضا اگر دکمه بازکردن چت داری
-document.body.addEventListener("click", (e) => {
-  const btn = e.target.closest(".chat-btn");
-  if (!btn) return;
 
-  // بستن کیبورد و مودال سرچ (اگر باز است)
-  const searchInput = document.getElementById("userSearchInput");
-  if (searchInput) searchInput.blur();
-
-  const friendsModal = document.getElementById("friendsModal");
-  if (friendsModal && friendsModal.style.display === "flex") {
-    friendsModal.style.display = "none";
-    document.body.classList.remove("modal-open");
-  }
-
-  const userId = btn.getAttribute("data-user-id");
-  const userName = btn.getAttribute("data-user-name");
-  if (!userId) return alert("کاربر انتخاب نشده!");
-
-  window.currentChatUserId = userId;
-
-  // تنظیم عنوان مودال و باز کردن آن
-
-
-  // پاک کردن محتوای قبلی
-  chatInput.value = "";
-  chatMessages.innerHTML = "";
-
-  // بارگذاری پیام‌ها
-  if (typeof loadMessagesFromServer === "function") {
-    loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
-  }
-
-  // فقط روی دسکتاپ فوکوس کن
-  if (window.innerWidth > 768) {
-    setTimeout(() => {
-      chatInput.focus();
-    }, 100);
-  }
-
-
-
-});
 
 
 
@@ -5694,7 +5833,33 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+document.addEventListener("DOMContentLoaded", () => {
+  const chatUserAvatar = document.getElementById("chatUserAvatar"); // the avatar in chat header
+  const userProfileModal = document.getElementById("userProfileModal");
+  const closeBtn = document.getElementById("closeUserProfileModal");
 
+  if (chatUserAvatar) {
+    chatUserAvatar.addEventListener("click", () => {
+      userProfileModal.classList.add("show");
+      document.body.classList.add("modal-open");
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      userProfileModal.classList.remove("show");
+      document.body.classList.remove("modal-open");
+    });
+  }
+
+  // close if clicked outside
+  userProfileModal.addEventListener("click", (e) => {
+    if (e.target === userProfileModal) {
+      userProfileModal.classList.remove("show");
+      document.body.classList.remove("modal-open");
+    }
+  });
+});
 </script>
 </body>
 </html>

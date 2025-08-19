@@ -675,17 +675,26 @@ def friend_requests(request):
     return render(request, 'base/friend_request_modal.html', {'recived_request':recived_request})
 
 @login_required
+@login_required
 def friend_requests_api(request):
-    requests = FriendRequest.objects.filter(to_user=request.user)
-    data = []
-    for req in requests:
-        data.append({
-            'id': req.id,
-            'from_user_name': req.from_user.name,
-            'accept_url': reverse('accept_friend_request', args=[req.id]),
-            'decline_url': reverse('decline_friend_request', args=[req.id]),
+    incoming_requests = FriendRequest.objects.filter(to_user=request.user, is_accepted=False)
+    requests_data = []
+
+    for fr in incoming_requests:
+        user = fr.from_user
+        requests_data.append({
+            "id": fr.id,
+            "from_user_id": user.id,
+            "from_user_name": getattr(user, "name", "Unknown"),
+            "from_user_email": getattr(user, "email", ""),
+            "from_user_avatar": request.build_absolute_uri(user.avatar.url) if user.avatar else "/static/default-avatar.png"
         })
-    return JsonResponse({'requests': data})
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"requests": requests_data})
+
+    return render(request, "base/friend_requests.html", {"requests": requests_data})
+
 
 @login_required
 def search_users(request):
@@ -697,10 +706,17 @@ def search_users(request):
         users = User.objects.exclude(id=request.user.id).filter(is_active=True)[:5]  
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        users_data = [
-            {'id': u.id, 'name': u.name, 'email': u.email}
-            for u in users
-        ]
+        users_data = []
+        for u in users:
+            avatar_url = u.avatar.url if u.avatar else None
+            if avatar_url:
+                avatar_url = request.build_absolute_uri(avatar_url)
+            users_data.append({
+                'id': u.id,
+                'name': u.name,
+                'email': u.email,
+                'avatar': avatar_url
+            })
         return JsonResponse({'users': users_data})
 
     context = {
@@ -708,7 +724,7 @@ def search_users(request):
         'query': query,
     }
     return render(request, 'base/search_users.html', context)
-    
+
 
 @login_required
 @require_POST
@@ -788,14 +804,27 @@ def decline_friend_request(request, request_id):
 def friends_list_api(request):
     friendships = Friendship.objects.filter(user1=request.user) | Friendship.objects.filter(user2=request.user)
     friends = []
-    for friendship in friendships:
-        if friendship.user1 == request.user:
-            friend = friendship.user2
-        else:
-            friend = friendship.user1
-        friends.append({'id': friend.id, 'name': friend.name})
 
-    return JsonResponse({'friends': friends})
+    for friendship in friendships:
+        friend = friendship.user2 if friendship.user1 == request.user else friendship.user1
+
+        name = getattr(friend, "name", "Unknown")
+        email = getattr(friend, "email", "")
+        avatar = "/static/default-avatar.png"
+        if hasattr(friend, "avatar") and friend.avatar:
+            avatar = request.build_absolute_uri(friend.avatar.url)
+        elif hasattr(friend, "profile") and getattr(friend.profile, "avatar", None):
+            avatar = request.build_absolute_uri(friend.profile.avatar.url)
+
+        friends.append({
+            "id": friend.id,
+            "name": name,
+            "email": email,
+            "avatar": avatar,
+        })
+
+    return JsonResponse({"friends": friends})
+
 
 
 from django.db import transaction
