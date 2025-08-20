@@ -6,6 +6,12 @@
   <title>MySite</title>
   {% load static %}
   <style>
+/* Disable hover styles on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  *:hover {
+    all: unset !important;
+  }
+}
 
 .message.my-message, 
 .message.my-message * {

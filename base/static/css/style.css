@@ -1,4 +1,9 @@
-
+/* Disable hover styles on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  *:hover {
+    all: unset !important;
+  }
+}
 
 .file-input-wrapper input[type="file"] {
     display: inline-block;
