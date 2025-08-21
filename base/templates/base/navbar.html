@@ -36,15 +36,6 @@
   -webkit-tap-highlight-color: transparent !important; /* جلوگیری از هایلایت لمس موبایل */
   pointer-events: auto; /* اجازه تعامل با دکمه‌ها و لینک‌ها */
 }
-/* حذف پس‌زمینه پیش‌فرض دکمه در موبایل */
-@media (hover: none) and (pointer: coarse) {
-  #chatDropdownMenu button {
-    background: none !important;
-    -webkit-tap-highlight-color: transparent; /* حذف هایلایت آبی در iOS/Android */
-    outline: none !important;
-    box-shadow: none !important;
-  }
-}
 
 #chatsSection {
   background-color: transparent; /* حذف پس‌زمینه والد */
@@ -2557,28 +2548,7 @@ body.logout-modal-open {
   align-items: center;
 }
 
-/* Hide on screens smaller than or equal to 768px */
-@media (max-width: 768px) {
-  .desktop-only {
-    display: none !important;
-  }
-}
 
-@media (hover: none), (pointer: coarse) {
-  a:hover, button:hover, .hover-effect:hover,
-  a:active, button:active, .hover-effect:active {
-    background: none !important;
-    color: inherit !important;
-    box-shadow: none !important;
-    transform: none !important;
-  }
-
-  button, a {
-    -webkit-tap-highlight-color: transparent;
-    outline: none;
-    touch-action: manipulation;
-  }
-}
 
 /* Dark mode wrapper — add .dark-mode to body */
 body.dark-mode #chatDropdownMenu {
