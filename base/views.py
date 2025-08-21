@@ -1110,3 +1110,26 @@ def chats_list(request):
     return JsonResponse({"chats": chats})
 
 
+@csrf_exempt
+def is_blocked_by_user(request, user_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Login required"}, status=403)
+
+    try:
+        other_user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
+
+    blocked = Block.objects.filter(blocker=request.user, blocked=other_user).exists()
+    return JsonResponse({"blockedByMe": blocked})
+
+
+@login_required
+def check_block_status(request, user_id):
+    other_user = get_object_or_404(User, id=user_id)
+    blocked_by_me = Block.objects.filter(blocker=request.user, blocked=other_user).exists()
+    blocked_me = Block.objects.filter(blocker=other_user, blocked=request.user).exists()
+    return JsonResponse({
+        "blockedByMe": blocked_by_me,
+        "blockedMe": blocked_me,
+    })

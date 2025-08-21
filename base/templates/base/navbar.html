@@ -6,11 +6,24 @@
   <title>MySite</title>
   {% load static %}
   <style>
-/* Disable hover styles on touch devices */
-@media (hover: none) and (pointer: coarse) {
-  *:hover {
-    all: unset !important;
-  }
+
+#chatForm.chatForm-hidden {
+  opacity: 0;
+  transform: translateY(100px); /* فرم به سمت پایین حرکت می‌کنه */
+  pointer-events: none; /* جلوگیری از کلیک روی فرم */
+}
+#chatForm.blocked::after {
+  content: "🚫 You blocked this user";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
 }
 
 .message.my-message, 
@@ -2340,7 +2353,7 @@ body.modal-open {
   #userProfileModal.show {
     display: flex;
   }
-s
+
 
   #userProfileModal > .modal-content {
     background-color: white;
@@ -2841,7 +2854,6 @@ body.dark-mode #chatDropdownMenu button span:last-child {
 
 
 <!-- منوی کلیک راست -->
-<!-- منوی کلیک راست -->
 <div id="messageMenu" class="context-menu hidden">
   <button id="editMessage" class="context-btn">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -3213,12 +3225,176 @@ async function loadMessagesFromServer(senderId = null, receiverId = null) {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+  // === Elements ===
   const chatUserAvatar = document.getElementById("chatUserAvatar");
   const userProfileModal = document.getElementById("userProfileModal");
   const contentContainer = document.getElementById("userProfileContent");
   const closeUserProfileModalBtn = document.getElementById("closeUserProfileModal");
+  const chatOptionsBtn = document.getElementById("chatOptionsBtn");
+  const chatModalContent = chatOptionsBtn.closest(".chat-modal-content");
 
-  // 🔹 Make avatar clickable
+  // === Create Dropdown Menu ===
+  const dropdownMenu = document.createElement("div");
+  dropdownMenu.id = "chatDropdownMenu";
+  dropdownMenu.style.position = "absolute";
+  dropdownMenu.style.borderRadius = "8px";
+  dropdownMenu.style.boxShadow = "0 4px 12px rgba(0,0,0,0.15)";
+  dropdownMenu.style.padding = "4px 0";
+  dropdownMenu.style.display = "none";
+  dropdownMenu.style.minWidth = "160px";
+  dropdownMenu.style.background = "#fff";
+  dropdownMenu.style.zIndex = "1001";
+  dropdownMenu.classList.add("chat-dropdown-menu");
+
+  // === Dropdown Items Config ===
+  const options = [
+    {
+      text: "Block User",
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
+            </svg>`,
+      onClick: () => {
+        if (!window.currentChatUserId) {
+          alert("No user selected to block.");
+          return;
+        }
+
+        // Block the user
+        blockUser(window.currentChatUserId);
+
+        // Immediately update dropdown to show "Unblock User" with check SVG
+        updateBlockMenuText(true);
+      }
+    },
+    {
+      text: "Mute Chat",
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+               <line x1="1" y1="1" x2="23" y2="23"></line>
+             </svg>`
+    },
+    {
+      text: "Delete Chat",
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M3 6h18"/>
+               <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+               <path d="M10 11v6"/>
+               <path d="M14 11v6"/>
+               <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+             </svg>`
+    },
+    {
+      text: "Report User",
+      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+               <circle cx="12" cy="5" r="2"/>
+               <ellipse cx="12" cy="13" rx="5" ry="7"/>
+               <line x1="12" y1="7" x2="12" y2="20"/>
+               <path d="M4 9h3M4 13h3M4 17h3"/>
+               <path d="M17 9h3M17 13h3M17 17h3"/>
+             </svg>`
+    }
+  ];
+
+function updateBlockMenuText(isBlocked) {
+  const dropdownMenu = document.getElementById("chatDropdownMenu");
+  if (!dropdownMenu) return;
+
+  const buttons = Array.from(dropdownMenu.querySelectorAll("button"));
+  buttons.forEach(btn => {
+    const spanText = btn.querySelector("span:last-child");
+    if (!spanText) return;
+
+    if (spanText.textContent.includes("Block") || spanText.textContent.includes("Unblock")) {
+      let newText, iconSVG;
+
+      if (isBlocked) {
+        newText = "Unblock This User";
+        iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                       viewBox="0 0 24 24" fill="none" stroke="green"
+                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M5 13l4 4L19 7"/>
+                   </svg>`;
+      } else {
+        newText = "Block This User";
+        iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     <circle cx="12" cy="12" r="10"/>
+                     <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
+                   </svg>`;
+      }
+
+      const newBtn = btn.cloneNode(true);
+      newBtn.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${iconSVG}<span>${newText}</span></span>`;
+      newBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (isBlocked) {
+          unblockUser(window.currentChatUserId);
+        } else {
+          blockUser(window.currentChatUserId);
+        }
+        dropdownMenu.style.display = "none";
+      });
+      btn.replaceWith(newBtn);
+    }
+  });
+}
+
+  // === Build Dropdown Items ===
+  options.forEach(opt => {
+    const item = document.createElement("button");
+    if (opt.onClick) {
+      item.addEventListener("click", (e) => {
+        e.stopPropagation();
+        opt.onClick();
+        dropdownMenu.style.display = "none";
+      });
+    }
+    item.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${opt.icon}<span>${opt.text}</span></span>`;
+    item.style.display = "block";
+    item.style.width = "100%";
+    item.style.padding = "8px 16px";
+    item.style.border = "none";
+    item.style.background = "none";
+    item.style.textAlign = "left";
+    item.style.cursor = "pointer";
+    item.addEventListener("mouseenter", () => item.style.background = "#f0f0f0");
+    item.addEventListener("mouseleave", () => item.style.background = "none");
+    dropdownMenu.appendChild(item);
+  });
+
+  // === Append Dropdown to Chat Modal ===
+  chatModalContent.appendChild(dropdownMenu);
+
+  // === Toggle Dropdown on Button Click ===
+  chatOptionsBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const rect = chatOptionsBtn.getBoundingClientRect();
+    const modalRect = chatModalContent.getBoundingClientRect();
+    dropdownMenu.style.left = `${rect.left - modalRect.left}px`;
+    dropdownMenu.style.top = `${rect.bottom - modalRect.top + 4}px`;
+    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+  });
+
+  // === Prevent Closing When Clicking Inside Menu ===
+  dropdownMenu.addEventListener("click", e => e.stopPropagation());
+
+  // === Close Dropdown When Clicking Outside ===
+  document.addEventListener("click", () => {
+    dropdownMenu.style.display = "none";
+  });
+
+  // === Avatar Profile Modal ===
   if (chatUserAvatar) {
     chatUserAvatar.style.cursor = "pointer";
     chatUserAvatar.addEventListener("click", () => {
@@ -3227,19 +3403,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Load user profile via AJAX
       fetch(`/user_profile_ajax/${window.currentChatUserId}/`, {
         headers: { "X-Requested-With": "XMLHttpRequest" }
       })
-
-        .then(res => {
-          if (!res.ok) throw new Error("Failed to load profile");
-          return res.text();
-        })
+        .then(res => res.ok ? res.text() : Promise.reject("Failed to load profile"))
         .then(html => {
           contentContainer.innerHTML = html;
-          userProfileModal.style.display = "flex"; // show modal (uses flex centering in your CSS)
-          document.body.classList.add("modal1-open"); // disable background scroll
+          userProfileModal.style.display = "flex";
+          document.body.classList.add("modal1-open");
         })
         .catch(err => {
           console.error(err);
@@ -3249,7 +3420,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🔹 Close modal on X click
+  // === Close Profile Modal ===
   if (closeUserProfileModalBtn) {
     closeUserProfileModalBtn.addEventListener("click", () => {
       userProfileModal.style.display = "none";
@@ -3257,7 +3428,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🔹 Close modal when clicking outside content
   if (userProfileModal) {
     userProfileModal.addEventListener("click", (e) => {
       if (e.target === userProfileModal) {
@@ -3267,56 +3437,145 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-function applyBlockUI(isBlockedFromServer = null) {
+  // === Apply Block UI ===
+function applyBlockUI(isBlocked = null) {
   const chatForm = document.getElementById("chatForm");
   const unblockBtn = document.getElementById("unblockBtn");
   const userId = window.currentChatUserId || localStorage.getItem("currentChatUserId");
 
-  let blocked = isBlockedFromServer !== null
-    ? isBlockedFromServer
-    : (userId ? localStorage.getItem(`blocked_${userId}`) : null);
-
   if (!chatForm || !unblockBtn) return;
 
+  let blocked = false;
+  if (isBlocked !== null) blocked = isBlocked;
+  else if (userId) blocked = localStorage.getItem(`blocked_${userId}`) === "1";
+
   if (blocked) {
-    chatForm.classList.remove("animate-show");
-    chatForm.classList.add("animate-hide");
-    setTimeout(() => chatForm.style.display = "none", 300);
-
+    chatForm.classList.add("chatForm-hidden"); // hide with animation
     unblockBtn.style.display = "block";
-    unblockBtn.classList.remove("animate-hide");
-    unblockBtn.classList.add("animate-show");
-
-    updateBlockMenuText(true);
   } else {
-    chatForm.style.display = "flex";
-    chatForm.classList.remove("animate-hide");
-    chatForm.classList.add("animate-show");
-
-    unblockBtn.classList.remove("animate-show");
-    unblockBtn.classList.add("animate-hide");
-    setTimeout(() => unblockBtn.style.display = "none", 300);
-
-    updateBlockMenuText(false);
+    chatForm.classList.remove("chatForm-hidden"); // show with animation
+    unblockBtn.style.display = "none";
   }
+
+  if (userId) checkIfBlockedByOtherUser(userId);
 }
 
-function checkBlockStatus(userId) {
-  fetch(`/api/check-block-status/${userId}/`, {
-    headers: { 'X-Requested-With': 'XMLHttpRequest' },
-    credentials: 'include'
+
+  // === Block / Unblock ===
+function blockUser(userId) {
+  fetch(`/api/block-user/${userId}/`, {
+    method: "POST",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRFToken": getCSRFToken(),
+    },
   })
+  .then(res => res.ok ? res.json() : Promise.reject("Failed to block"))
+  .then(() => {
+    localStorage.setItem(`blocked_${userId}`, "1");
+    applyBlockUI(true);
+    updateBlockMenuText(true);
+  })
+  .catch(err => console.error(err));
+}
+
+function unblockUser(userId) {
+  fetch(`/api/unblock-user/${userId}/`, {
+    method: "POST",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRFToken": getCSRFToken(),
+    },
+  })
+  .then(res => res.ok ? res.json() : Promise.reject("Failed to unblock"))
+  .then(() => {
+    localStorage.removeItem(`blocked_${userId}`);
+    applyBlockUI(false);
+    updateBlockMenuText(false);
+  })
+  .catch(err => console.error(err));
+}
+
+
+function unblockUser(userId) {
+  fetch(`/api/unblock-user/${userId}/`, {
+    method: "POST",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRFToken": getCSRFToken(),
+    },
+  })
+  .then(res => res.ok ? res.json() : Promise.reject("Failed to unblock"))
+  .then(() => {
+    localStorage.removeItem(`blocked_${userId}`);
+    applyBlockUI(false);
+    updateBlockMenuText(false);
+
+    // Show chat input again
+    const chatInput = document.getElementById("chatInput");
+    if (chatInput) chatInput.style.display = "block";
+  })
+  .catch(err => console.error(err));
+}
+
+  // === Check if blocked by other user ===
+  function checkIfBlockedByOtherUser(userId) {
+    fetch(`/api/is-blocked-by-user/${userId}/`, {
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
     .then(res => res.json())
     .then(data => {
+      const chatInput = document.getElementById("chatInput");
+      const chatForm = document.getElementById("chatForm");
+      if (!chatInput) return;
+
       if (data.blocked) {
-        localStorage.setItem(`blocked_${userId}`, '1');
+        chatInput.value = "You are blocked by this user";
+        chatInput.disabled = true;
+        if (chatForm) chatForm.classList.add("chatForm-disabled");
       } else {
-        localStorage.removeItem(`blocked_${userId}`);
+        chatInput.value = "";
+        chatInput.disabled = false;
+        if (chatForm) chatForm.classList.remove("chatForm-disabled");
       }
-      applyBlockUI(data.blocked);
     })
-    .catch(err => console.error("Error checking block status:", err));
-}
+    .catch(err => console.error(err));
+  }
+
+  // === Unblock Button Click ===
+  const unblockBtn = document.getElementById("unblockBtn");
+  if (unblockBtn) {
+    unblockBtn.addEventListener("click", () => {
+      if (window.currentChatUserId) unblockUser(window.currentChatUserId);
+    });
+  }
+
+  // === Check block status on page load from server ===
+  const userId = window.currentChatUserId || localStorage.getItem("currentChatUserId");
+  if (userId) {
+    console.log("DEBUG: Checking block status on page load for userId", userId);
+    fetch(`/api/check-block-status/${userId}/`, { // باید { blockedByMe: true/false } برگردونه
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log("DEBUG: Server block status:", data);
+      const blocked = !!data.blockedByMe;
+
+      if (blocked) localStorage.setItem(`blocked_${userId}`, "1");
+      else localStorage.removeItem(`blocked_${userId}`);
+
+      applyBlockUI(blocked);
+      updateBlockMenuText(blocked);
+    })
+    .catch(err => {
+      console.error("DEBUG: Failed to fetch block status", err);
+      applyBlockUI(); // fallback
+    });
+  }
+
+});
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const userProfileModal = document.getElementById("userProfileModal");
@@ -3389,7 +3648,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   attachChatProfileClick();
-});
 });
 
 
