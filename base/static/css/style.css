@@ -1,3 +1,32 @@
+/* ================== سراسری ================== */
+button, a {
+  transition: all 0.2s ease !important;
+  outline: none !important;
+}
+
+/* هاور دسکتاپ */
+@media (min-width: 481px) {
+  button:hover, a:hover {
+    filter: brightness(0.95);
+  }
+}
+
+/* موبایل: همه هاورها غیرفعال */
+@media (max-width: 480px) {
+  button:hover, a:hover {
+    background-color: transparent !important;
+    color: inherit !important;
+    filter: none !important;
+    box-shadow: none !important;
+  }
+
+  /* فوکوس و فعال */
+  button:focus, button:active, a:focus, a:active {
+    background-color: transparent !important;
+    color: inherit !important;
+    box-shadow: none !important;
+  }
+}
 
 .add-buttons-container {
   display: flex;           /* نمایش افقی */
