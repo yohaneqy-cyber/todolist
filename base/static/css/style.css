@@ -1,25 +1,12 @@
-/* ================== سراسری ================== */
-button, a {
-  transition: all 0.2s ease !important;
-  outline: none !important;
-  -webkit-tap-highlight-color: transparent; /* موبایل */
-}
-
-/* هاور دسکتاپ */
-@media (min-width: 481px) {
-  button:hover, a:hover {
-    filter: brightness(0.95);
-  }
-}
-
-/* موبایل: همه هاورها، فوکوس و فعال غیرفعال */
 @media (max-width: 480px) {
-  button:hover, button:focus, button:active,
-  a:hover, a:focus, a:active {
-    background-color: transparent !important;
-    color: inherit !important;
-    box-shadow: none !important;
-    filter: none !important;
+  .add-buttons-container {
+    display: flex !important;
+    flex-direction: row !important; /* دوتا کنار هم */
+    gap: 8px !important;
+  }
+
+  .add-buttons-container .add-btn {
+    flex: 1 !important; /* هر کدوم نصف عرض بگیره */
   }
 }
 
