@@ -2,6 +2,7 @@
 button, a {
   transition: all 0.2s ease !important;
   outline: none !important;
+  -webkit-tap-highlight-color: transparent; /* موبایل */
 }
 
 /* هاور دسکتاپ */
@@ -11,22 +12,17 @@ button, a {
   }
 }
 
-/* موبایل: همه هاورها غیرفعال */
+/* موبایل: همه هاورها، فوکوس و فعال غیرفعال */
 @media (max-width: 480px) {
-  button:hover, a:hover {
+  button:hover, button:focus, button:active,
+  a:hover, a:focus, a:active {
     background-color: transparent !important;
     color: inherit !important;
+    box-shadow: none !important;
     filter: none !important;
-    box-shadow: none !important;
-  }
-
-  /* فوکوس و فعال */
-  button:focus, button:active, a:focus, a:active {
-    background-color: transparent !important;
-    color: inherit !important;
-    box-shadow: none !important;
   }
 }
+
 
 .add-buttons-container {
   display: flex;           /* نمایش افقی */
