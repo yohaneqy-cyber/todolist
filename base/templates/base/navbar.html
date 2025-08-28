@@ -6,6 +6,51 @@
   <title>MySite</title>
   {% load static %}
   <style>
+#chatDropdownMenu, 
+#chatDropdownMenu * {
+  -webkit-tap-highlight-color: transparent !important;
+  box-sizing: border-box !important;
+}
+
+/* دکمه های منو */
+#chatDropdownMenu button {
+  background: transparent !important;
+  border: none !important;
+  width: 100% !important;
+  text-align: left !important;
+  padding: 8px 16px !important;
+  cursor: pointer !important;
+  border-radius: 6px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+/* محتوا داخل دکمه */
+#chatDropdownMenu button span {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: transparent !important; 
+}
+
+/* هاور */
+#chatDropdownMenu button:hover {
+  background-color: #f0f0f0 !important;
+}
+
+/* فوکوس و فعال */
+#chatDropdownMenu button:focus,
+#chatDropdownMenu button:active {
+  outline: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* کلاس های active و is-selected */
+#chatDropdownMenu .active,
+#chatDropdownMenu .is-selected {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
 
 #chatForm.chatForm-hidden {
   opacity: 0;
@@ -2553,13 +2598,13 @@ body.logout-modal-open {
 /* Dark mode wrapper — add .dark-mode to body */
 body.dark-mode #chatDropdownMenu {
   background-color: #2c2c2c; /* dark background */
-  color: #f1f1f1;
+  color: #000000ff;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
 }
 
 /* Dark mode dropdown buttons */
 body.dark-mode #chatDropdownMenu button {
-  color: #f1f1f1;
+  color: #000000ff;
   background: none;
   transition: background 0.2s, color 0.2s;
 }
@@ -3321,27 +3366,40 @@ function updateBlockMenuText(isBlocked) {
 }
 
   // === Build Dropdown Items ===
-  options.forEach(opt => {
-    const item = document.createElement("button");
-    if (opt.onClick) {
-      item.addEventListener("click", (e) => {
-        e.stopPropagation();
-        opt.onClick();
-        dropdownMenu.style.display = "none";
-      });
-    }
-    item.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${opt.icon}<span>${opt.text}</span></span>`;
-    item.style.display = "block";
-    item.style.width = "100%";
-    item.style.padding = "8px 16px";
-    item.style.border = "none";
-    item.style.background = "none";
-    item.style.textAlign = "left";
-    item.style.cursor = "pointer";
-    item.addEventListener("mouseenter", () => item.style.background = "#f0f0f0");
-    item.addEventListener("mouseleave", () => item.style.background = "none");
-    dropdownMenu.appendChild(item);
-  });
+// === Build Dropdown Items with hover ===
+options.forEach(opt => {
+  const item = document.createElement("button");
+
+  // Click event
+  if (opt.onClick) {
+    item.addEventListener("click", (e) => {
+      e.stopPropagation();
+      opt.onClick();
+      dropdownMenu.style.display = "none";
+    });
+  }
+
+  // Inner HTML with icon + text
+  item.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${opt.icon}<span>${opt.text}</span></span>`;
+
+  // Basic styles
+  item.style.display = "block";
+  item.style.width = "100%";
+  item.style.padding = "8px 16px";
+  item.style.border = "none";
+  item.style.background = "transparent"; // Important: allow hover
+  item.style.textAlign = "left";
+  item.style.cursor = "pointer";
+  item.style.borderRadius = "6px";
+  item.style.transition = "background-color 0.2s ease";
+
+  // Hover effect
+  item.addEventListener("mouseenter", () => item.style.backgroundColor = "#f0f0f0");
+  item.addEventListener("mouseleave", () => item.style.backgroundColor = "transparent");
+
+  dropdownMenu.appendChild(item);
+});
+
 
   // === Append Dropdown to Chat Modal ===
   chatModalContent.appendChild(dropdownMenu);
@@ -3407,28 +3465,41 @@ function updateBlockMenuText(isBlocked) {
     });
   }
 
-  // === Apply Block UI ===
-function applyBlockUI(isBlocked = null) {
+// === Apply Block UI ===
+function applyBlockUI(isBlocked = null, blockedByOther = false) {
   const chatForm = document.getElementById("chatForm");
   const unblockBtn = document.getElementById("unblockBtn");
+  const chatInput = document.getElementById("chatInput");
   const userId = window.currentChatUserId || localStorage.getItem("currentChatUserId");
 
-  if (!chatForm || !unblockBtn) return;
+  if (!chatForm || !unblockBtn || !chatInput) return;
 
-  let blocked = false;
-  if (isBlocked !== null) blocked = isBlocked;
-  else if (userId) blocked = localStorage.getItem(`blocked_${userId}`) === "1";
-
-  if (blocked) {
-    chatForm.classList.add("chatForm-hidden"); // hide with animation
+  // حالت وقتی خودت کسی رو بلاک کردی → هیچ تغییری نده
+  if (isBlocked) {
+    chatForm.classList.add("chatForm-hidden"); // همون حالت فعلی خودت
     unblockBtn.style.display = "block";
-  } else {
-    chatForm.classList.remove("chatForm-hidden"); // show with animation
-    unblockBtn.style.display = "none";
+    chatInput.disabled = false; // فعال باشه
+    chatInput.placeholder = "";
+    return; // مهم! برگرد تا بقیه کد اجرا نشه
   }
 
-  if (userId) checkIfBlockedByOtherUser(userId);
+  // وقتی طرف مقابل تو رو بلاک کرده
+  if (blockedByOther) {
+    chatForm.classList.remove("chatForm-hidden");
+    unblockBtn.style.display = "none"; // چون تو نمی‌تونی آنبلاک کنی
+    chatInput.disabled = true;
+    chatInput.value = "";
+    chatInput.placeholder = "❌ شما بلاک شدی";
+    return;
+  }
+
+  // حالت عادی
+  chatForm.classList.remove("chatForm-hidden");
+  unblockBtn.style.display = "none";
+  chatInput.disabled = false;
+  chatInput.placeholder = "";
 }
+
 
 
   // === Block / Unblock ===
@@ -3466,51 +3537,26 @@ function unblockUser(userId) {
   .catch(err => console.error(err));
 }
 
-
-function unblockUser(userId) {
-  fetch(`/api/unblock-user/${userId}/`, {
-    method: "POST",
-    headers: {
-      "X-Requested-With": "XMLHttpRequest",
-      "X-CSRFToken": getCSRFToken(),
-    },
+function checkIfBlockedByOtherUser(userId) {
+  fetch(`/api/is-blocked/${userId}/`, {
+    headers: { "X-Requested-With": "XMLHttpRequest" }
   })
-  .then(res => res.ok ? res.json() : Promise.reject("Failed to unblock"))
-  .then(() => {
-    localStorage.removeItem(`blocked_${userId}`);
-    applyBlockUI(false);
-    updateBlockMenuText(false);
-
-    // Show chat input again
-    const chatInput = document.getElementById("chatInput");
-    if (chatInput) chatInput.style.display = "block";
+  .then(res => res.json())
+  .then(data => {
+    // data.youBlocked => you blocked them (leave UI as-is)
+    // data.blockedByOther => they blocked you
+    applyBlockUI(data.youBlocked, data.blockedByOther);
   })
-  .catch(err => console.error(err));
+  .catch(err => console.error("Check block failed:", err));
 }
 
-  // === Check if blocked by other user ===
-  function checkIfBlockedByOtherUser(userId) {
-    fetch(`/api/is-blocked-by-user/${userId}/`, {
-      headers: { "X-Requested-With": "XMLHttpRequest" },
-    })
-    .then(res => res.json())
-    .then(data => {
-      const chatInput = document.getElementById("chatInput");
-      const chatForm = document.getElementById("chatForm");
-      if (!chatInput) return;
+// Call this on page load or when opening chat
+document.addEventListener("DOMContentLoaded", () => {
+  const userId = window.currentChatUserId || localStorage.getItem("currentChatUserId");
+  if (userId) checkIfBlockedByOtherUser(userId);
+});
 
-      if (data.blocked) {
-        chatInput.value = "You are blocked by this user";
-        chatInput.disabled = true;
-        if (chatForm) chatForm.classList.add("chatForm-disabled");
-      } else {
-        chatInput.value = "";
-        chatInput.disabled = false;
-        if (chatForm) chatForm.classList.remove("chatForm-disabled");
-      }
-    })
-    .catch(err => console.error(err));
-  }
+
 
   // === Unblock Button Click ===
   const unblockBtn = document.getElementById("unblockBtn");

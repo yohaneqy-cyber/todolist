@@ -48,6 +48,7 @@ urlpatterns = [
     path('api/block-user/<int:user_id>/', views.block_user, name='block_user'),
     path('api/unblock-user/<int:user_id>/', views.unblock_user, name='unblock_user'),
     path('api/chats-list/', views.chats_list, name='chats-list'),
-    path('api/is-blocked-by-user/<int:user_id>/', views.is_blocked_by_user, name='is_blocked_by_user'),
-    path('api/check-block-status/', views.check_block_status, name='check-block-status')
+    path('api/check-block-status/', views.check_block_status, name='check-block-status'),
+    path("api/is-blocked/<int:user_id>/", views.is_blocked, name="is_blocked"),
+
 ]
