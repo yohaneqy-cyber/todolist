@@ -3,6 +3,7 @@ from PIL import Image
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
+from django.db.models import Count
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -35,7 +36,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship, ChatMessage
+from .models import Task, User, Category, RecurringTask, TaskHistory, FriendRequest, Friendship, ChatMessage, Block
 from .serializers import TaskSerializer, ChatMessageSerializers, UserSerializer
 from .forms import CustomUserCreationForm, ReminderForm, ChengeForm, RecurringTaskForm, TaskForm, LoginForm, MySetPasswordForm
 from PIL import Image
@@ -866,7 +867,6 @@ def user_profile_ajax(request, user_id):
     return render(request, 'base/user_profile.html', {'user': user})    
 
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class ChatMessageApi(View):
 
@@ -884,7 +884,8 @@ class ChatMessageApi(View):
             return JsonResponse({"error": "User not found"}, status=404)
 
         messages = ChatMessage.objects.filter(
-            Q(sender=sender, receiver=receiver) | Q(sender=receiver, receiver=sender)
+            Q(sender=sender, receiver=receiver, hidden_for_sender=False) |
+            Q(sender=receiver, receiver=sender, hidden_for_receiver=False)
         ).order_by('timestamp')
 
         data = []
@@ -896,8 +897,13 @@ class ChatMessageApi(View):
                 'receiver': msg.receiver.email,
                 'message': msg.message,
                 'timestamp': local_time.strftime("%H:%M:%S") if local_time else '',
+                'is_read': msg.is_read,
             })
-        return JsonResponse({'messages': data}, safe=False)
+
+        # ✅ تعداد پیام‌های خوانده نشده فقط برای گیرنده
+        unread_count = messages.filter(receiver=receiver, is_read=False).count()
+
+        return JsonResponse({'messages': data, 'unread_count': unread_count}, safe=False)
 
     def post(self, request):
         try:
@@ -908,7 +914,6 @@ class ChatMessageApi(View):
 
             if not sender_id or not receiver_id:
                 return JsonResponse({"error": "sender_id and receiver_id required"}, status=400)
-
             if not content:
                 return JsonResponse({"error": "Empty message"}, status=400)
 
@@ -918,12 +923,12 @@ class ChatMessageApi(View):
             except User.DoesNotExist:
                 return JsonResponse({"error": "User not found"}, status=404)
 
-            # 🔹 Check if sender is blocked by receiver using Block model
             if Block.objects.filter(blocker=receiver, blocked=sender).exists():
                 return JsonResponse({"error": "You are blocked by this user"}, status=403)
 
-            # Create message
-            msg = ChatMessage.objects.create(sender=sender, receiver=receiver, message=content)
+            msg = ChatMessage.objects.create(
+                sender=sender, receiver=receiver, message=content, is_read=False
+            )
 
             local_time = timezone.localtime(msg.timestamp) if msg.timestamp else None
 
@@ -933,16 +938,12 @@ class ChatMessageApi(View):
                 'receiver': msg.receiver.email,
                 'message': msg.message,
                 'timestamp': local_time.strftime("%H:%M:%S") if local_time else '',
+                'is_read': msg.is_read,
             }, status=201)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         
-# views.py
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import Block, User
-
 
 @csrf_exempt
 def block_user(request, user_id):
@@ -987,21 +988,24 @@ def unblock_user(request, user_id):
 
     return JsonResponse({'success': True})
 
+from django.db.models import Q
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    
     queryset = ChatMessage.objects.all()
     serializer_class = ChatMessageSerializers
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # فقط پیام‌هایی که خود کاربر فرستاده
-        return ChatMessage.objects.filter(sender=self.request.user)
+        # فقط پیام‌هایی که کاربر فرستاده یا دریافت کرده
+        return ChatMessage.objects.filter(
+            Q(sender=self.request.user) | Q(receiver=self.request.user)
+        )
 
     def update(self, request, *args, **kwargs):
-        print("User editing:", request.user)
         instance = self.get_object()
-        print("Editing message id:", instance.id, "sender:", instance.sender)
         message_text = request.data.get('message', '').strip()
 
         if not message_text:
@@ -1012,11 +1016,28 @@ class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         instance.save()
         return Response(self.get_serializer(instance).data)
 
-
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        delete_for_all = request.query_params.get('delete_for_all', 'false').lower() == 'true'
+
+        if delete_for_all:
+            # Delete message completely for everyone
+            instance.delete()
+            return Response({'success': True, 'message': 'پیام برای همه حذف شد'}, status=status.HTTP_204_NO_CONTENT)
+        
+        # Delete only for the current user
+        if instance.sender == request.user:
+            # Sender deletes for self only: mark hidden_for_sender
+            instance.hidden_for_sender = True  # Make sure this field exists in model
+            instance.save()
+            return Response({'success': True, 'message': 'پیام فقط برای شما حذف شد'})
+        elif instance.receiver == request.user:
+            # Receiver deletes for self only: mark hidden_for_receiver
+            instance.hidden_for_receiver = True  # Make sure this field exists in model
+            instance.save()
+            return Response({'success': True, 'message': 'پیام فقط برای شما حذف شد'})
+        else:
+            return Response({'error': 'شما اجازه حذف این پیام را ندارید'}, status=403)
 
 
 @api_view(['GET'])
@@ -1131,3 +1152,51 @@ def check_block_status(request, user_id):
         "blockedByMe": blocked_by_me,
         "blockedMe": blocked_me,
     })
+
+
+@csrf_exempt
+@login_required
+def unread_message_count(request):
+    count = ChatMessage.objects.filter(
+        receiver=request.user, is_read=False
+    ).count()
+    return JsonResponse({'unread_count': count})
+
+
+
+@login_required
+def unread_message_count_each(request):
+    counts = ChatMessage.objects.filter(
+        receiver=request.user, is_read=False
+    ).values('sender').annotate(unread_count=Count('id'))
+
+    # ساخت دیکشنری با کلید sender_id و مقدار تعداد پیام‌های خوانده نشده
+    result = {str(item['sender']): item['unread_count'] for item in counts}
+
+    return JsonResponse(result)
+
+import json
+
+@login_required
+def mark_messages_read(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            sender_id = data.get('sender_id')
+        except:
+            sender_id = None
+
+        receiver = request.user
+
+        if not sender_id:
+            return JsonResponse({'error':'sender id required'}, status=400)
+        
+        try:
+            sender = User.objects.get(id=sender_id)
+        except User.DoesNotExist:
+            return JsonResponse({'error':'user not found'}, status=404)
+
+        ChatMessage.objects.filter(sender=sender, receiver=receiver, is_read=False).update(is_read=True)
+        return JsonResponse({"success": True})
+    
+    return JsonResponse({"error": "POST required"}, status=405)

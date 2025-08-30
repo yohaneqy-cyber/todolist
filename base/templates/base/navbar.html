@@ -6,21 +6,96 @@
   <title>MySite</title>
   {% load static %}
   <style>
-  
-  /* ================== سراسری ================== */
+
+#openFriendsModal {
+  position: relative;
+  display: inline-block;
+}
+
+#newMessagesBadge {
+  position: absolute;
+  left: -1px;   /* جای دایره کنار متن */
+  top: 0px;    /* بالاتر از متن لینک */
+
+  width: 12px;
+  height: 12px;
+  background-color: rgba(115, 81, 196, 1);
+  border-radius: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+
+  line-height: 12px; /* حتماً برابر با ارتفاع دایره */
+  padding: 0;
+  text-align: center;
+}
+
+#chatsBtn {
+  position: relative; /* برای موقعیت‌دهی badge */
+  display: inline-block;
+}
+
+#chatMessagesBadge {
+  position: absolute;
+  left: 1px;          /* دایره سر جای خودش */
+  top: 2px;        /* بالاتر از متن دکمه */
+
+  width: 12px;
+  height: 12px;
+  background-color: rgba(115, 81, 196, 1);
+  border-radius: 50%; /* کامل دایره */
+
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+
+  display: flex;
+  justify-content: center; 
+  align-items: center;     
+}
+
+body.dark-mode #chatsList li,
+body.dark-mode #chatsList li * {
+  color: #ffffffff !important;
+}
+
+body.dark-mode #chatsSection li:hover {
+  background-color: rgba(82, 79, 79, 1) !important;
+}
+
+
+.new-message-badge {
+  position: absolute;
+  top: 30px;
+  right: 12px; /* کنار avatar یا متن */
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: rgba(115, 81, 196, 1);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 button, a {
   transition: all 0.2s ease !important;
   outline: none !important;
 }
 
-/* هاور دسکتاپ */
 @media (min-width: 481px) {
   button:hover, a:hover {
     filter: brightness(0.95);
   }
 }
 
-/* موبایل: همه هاورها غیرفعال */
 @media (max-width: 480px) {
   button:hover, a:hover {
     background-color: transparent !important;
@@ -2700,7 +2775,6 @@ body.dark-mode #chatDropdownMenu button span:last-child {
 
 
     <!-- Logout Confirmation Modal -->
-<!-- Logout Confirmation Modal -->
     <div id="logoutModal" class="logout-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="logoutTitle" style="display: none;">
       <div class="logout-modal-content">
         <button id="closeLogoutModal" class="logout-close" aria-label="Close">&times;</button>
@@ -2719,7 +2793,10 @@ body.dark-mode #chatDropdownMenu button span:last-child {
 
 
       {% if user.is_authenticated %}
-        <a href="#" id="openFriendsModal" class="navbar-link">Friends</a>
+        <a href="#" id="openFriendsModal" class="navbar-link">
+          Friends
+          <span id="newMessagesBadge" class="badge">0</span>
+        </a>
         <a href="{% url 'dashbord' %}" class="navbar-link">Dashboard</a>
         
         <a href="#" id="openLogoutModal" class="navbar-link">Logout</a>
@@ -2753,7 +2830,10 @@ body.dark-mode #chatDropdownMenu button span:last-child {
         <button id="searchTabBtn">Search</button>
         <button id="requestsTabBtn">Requests</button>
         <button id="friendsTabBtn">Friends</button>
-        <button id="chatsBtn">Chats</button>
+        <button id="chatsBtn">
+          Chats
+          <span id="chatMessagesBadge" class="badge">0</span>
+        </button>
       </div>
 
       <div id="searchSection">
@@ -2799,7 +2879,6 @@ body.dark-mode #chatDropdownMenu button span:last-child {
   <div class="modal-content">
     <span id="closeUserProfileModal" class="close" role="button" aria-label="Close">&times;</span>
     <div id="userProfileContent">
-      <!-- اطلاعات پروفایل کاربر اینجا بارگذاری می‌شود -->
     </div>
   </div>
 </div>
@@ -2814,6 +2893,7 @@ body.dark-mode #chatDropdownMenu button span:last-child {
         data-user-id=""
         style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 0 12px rgba(255,255,255,0.8), 0 0 8px rgba(74,144,226,0.6); cursor: pointer;" 
       />
+      
       <div>
         <span id="chatUserNameAvatar" style="font-weight: 600;">کاربر</span>
       </div>
@@ -3009,10 +3089,9 @@ body.dark-mode #chatDropdownMenu button span:last-child {
     <p>Are You Sure To Delete?</p>
 
     <label style="display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 14px; cursor: pointer;">
-      <input type="checkbox" id="deleteForAllCheckbox" />
-      Delete for <span id="kekewith">this user</span>
+      <input type="checkbox" id="deleteForAllCheckbox" checked />
+      Delete for this user
     </label>
-
 
     <div class="buttons-container">
       <button class="cancel-btn" id="cancelDeleteMessageBtn" type="button">Cancel</button>
@@ -3029,6 +3108,8 @@ body.dark-mode #chatDropdownMenu button span:last-child {
   window.currentUserEmail = {% if request.user.is_authenticated %}"{{ request.user.email|escapejs }}"{% else %}null{% endif %};
   window.currentChatUserId = {{ chat_user.id|default:"null" }};
   window.currentUserEmail = "{{ request.user.email|escapejs }}";
+  window.currentChatUserId = user.id; // کاربر مقابل
+
 </script>
 
 
@@ -3232,38 +3313,42 @@ function deleteSelectedMessage(userId) {
 
 let isRefreshingMessages = false;
 
+// ======== Load chat messages from server ========
 async function loadMessagesFromServer(senderId = null, receiverId = null) {
   if (isRefreshingMessages) return;
   isRefreshingMessages = true;
 
   try {
-    senderId = senderId ?? window.currentUserId;
-    receiverId = receiverId ?? window.currentChatUserId;
+    senderId = senderId ?? window.currentUserId;         // Your user ID
+    receiverId = receiverId ?? window.currentChatUserId; // Chat partner ID
 
     if (!senderId || !receiverId) {
       console.error("❌ senderId یا receiverId خالی است.");
       return;
     }
 
-    console.log(`📡 Fetching: /api/chat/messages/?sender_id=${senderId}&receiver_id=${receiverId}`);
+    console.log("📡 Fetching messages from server...");
     const response = await fetch(`/api/chat/messages/?sender_id=${senderId}&receiver_id=${receiverId}`, {
       credentials: 'include'
     });
 
-    if (!response.ok) {
-      console.error(`❌ وضعیت درخواست: ${response.status}`);
-      throw new Error('خطا در دریافت پیام‌ها');
-    }
+    if (!response.ok) throw new Error(`خطا در دریافت پیام‌ها: ${response.status}`);
 
     const data = await response.json();
+    console.log("📡 Data received:", data);
+
     const chatMessages = document.getElementById("chatMessages");
+    if (!chatMessages) {
+      console.error("❌ chatMessages element not found!");
+      return;
+    }
     chatMessages.innerHTML = "";
 
-    (data.messages || []).forEach((msg, index) => {
+    // Render messages
+    data.messages.forEach((msg, index) => {
       const msgElem = document.createElement("div");
       msgElem.classList.add("chat-message");
       msgElem.dataset.id = msg.id ?? `local-${index}`;
-      msgElem.dataset.index = index;
 
       if ((msg.sender || "").trim().toLowerCase() === (window.currentUserEmail || "").trim().toLowerCase()) {
         msgElem.classList.add("me");
@@ -3287,6 +3372,9 @@ async function loadMessagesFromServer(senderId = null, receiverId = null) {
     scrollChatToBottom();
     saveMessagesToLocalStorage(receiverId);
 
+    // Mark messages as read for this chat
+    await markMessagesReadForUser(receiverId);
+
   } catch (error) {
     console.error("❌ خطا در loadMessagesFromServer:", error);
   } finally {
@@ -3294,6 +3382,63 @@ async function loadMessagesFromServer(senderId = null, receiverId = null) {
   }
 }
 
+// ======== Mark messages as read and update badges ========
+async function markMessagesReadForUser(senderId) {
+  try {
+    const markReadRes = await fetch('/api/chat/messages/mark_read/', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({ sender_id: senderId })
+    });
+
+    const markReadData = await markReadRes.json();
+    console.log("✅ mark_read response:", markReadData);
+
+    updateChatsBadge();        // Badge next to Chats button
+    updateNewMessagesBadge();  // Badge next to Friends link
+
+  } catch (err) {
+    console.error('❌ markMessagesReadForUser error:', err);
+  }
+}
+
+// ======== Fetch unread message count (for Friends & Chats badges) ========
+async function fetchUnreadMessagesCount() {
+  try {
+    const response = await fetch('/api/chat/message/unread_count/', {
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error(`خطا در دریافت تعداد پیام‌ها: ${response.status}`);
+
+    const data = await response.json();
+    const count = data.unread_count || 0;
+
+    // Update badge for Chats
+    const chatsBadge = document.getElementById('chatMessagesBadge');
+    if (chatsBadge) {
+      chatsBadge.textContent = count;
+      chatsBadge.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+
+    // Update badge for Friends (if using the same count)
+    const friendsBadge = document.getElementById('newMessagesBadge');
+    if (friendsBadge) {
+      friendsBadge.textContent = count;
+      friendsBadge.style.display = count > 0 ? 'inline-flex' : 'none';
+    }
+
+  } catch (err) {
+    console.error('❌ خطا در fetchUnreadMessagesCount:', err);
+  }
+}
+
+// Call immediately and every 5 seconds
+fetchUnreadMessagesCount();
+setInterval(fetchUnreadMessagesCount, 5000);
 
 
 
@@ -3974,6 +4119,45 @@ async function sendMessage(event) {
       }
     });
   }
+function updateNewMessagesBadge() {
+  const badge = document.getElementById("newMessagesBadge");
+  if (!badge) {
+    return;
+  }
+
+  fetch(`/api/chat/message/unread_count/`, { credentials: 'include' })
+    .then(response => response.json())
+    .then(data => {
+      const count = data.unread_count || 0;
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+    })
+    .catch(err => console.error("Error fetching unread messages:", err));
+}
+
+// بروزرسانی badge هر 10 ثانیه
+updateNewMessagesBadge();
+setInterval(updateNewMessagesBadge, 10000);
+
+updateNewMessagesBadge();
+setInterval(updateNewMessagesBadge, 10000);
+
+function showChatBadge(count) {
+  const badge = document.getElementById("chatUserBadge");
+  if (!badge) return;
+
+  if (count > 0) {
+    badge.textContent = count;
+    badge.style.display = "flex"; // ظاهر شود
+  } else {
+    badge.style.display = "none"; // مخفی شود
+  }
+}
+
 
   if (modals.friends.closeBtn && modals.friends.modal) {
     modals.friends.closeBtn.addEventListener('click', () => closeModal(modals.friends.modal));
@@ -4643,101 +4827,120 @@ function loadChatsList() {
 
       noMsg.style.display = "none";
 
-      chats.forEach(chat => {
-        const li = document.createElement("li");
+      fetch("/api/chat/message/unread_count/each/")
+        .then(res => res.json())
+        .then(unreadCounts => {
+          chats.forEach(chat => {
+            const li = document.createElement("li");
+            li.dataset.userId = chat.id;
+            li.style.cursor = "pointer";
+            li.style.display = "flex";
+            li.style.flexDirection = "row";
+            li.style.alignItems = "center";
+            li.style.gap = "10px";
+            li.style.padding = "8px 12px";
+            li.style.borderRadius = "12px";
+            li.style.transition = "background-color 0.2s ease, color 0.2s ease";
+            li.style.backgroundColor = "transparent";
+            li.style.direction = "ltr";
+            li.style.position = "relative";
 
-        li.style.cursor = "pointer";
-        li.style.display = "flex";
-        li.style.flexDirection = "row";
-        li.style.alignItems = "center";
-        li.style.gap = "10px";
-        li.style.padding = "8px 12px";
-        li.style.borderRadius = "12px";
-        li.style.transition = "background-color 0.2s ease, color 0.2s ease";
-        li.style.backgroundColor = "transparent";
-        li.style.direction = "ltr";
-        li.style.position = "relative"; // برای قرار دادن زمان
+            if (chat.avatar) {
+              const img = document.createElement("img");
+              img.src = chat.avatar;
+              img.style.width = "50px";
+              img.style.height = "50px";
+              img.style.borderRadius = "50%";
+              img.style.objectFit = "cover";
+              li.appendChild(img);
+            }
 
-        // avatar
-        if (chat.avatar) {
-          const img = document.createElement("img");
-          img.src = chat.avatar;
-          img.style.width = "50px";
-          img.style.height = "50px";
-          img.style.borderRadius = "50%";
-          img.style.objectFit = "cover";
-          li.appendChild(img);
-        }
+            const textBlock = document.createElement("div");
+            textBlock.style.display = "flex";
+            textBlock.style.flexDirection = "column";
+            textBlock.style.justifyContent = "center";
+            textBlock.style.overflow = "hidden";
+            textBlock.style.flex = "1";
 
-        // text block (name + last message)
-        const textBlock = document.createElement("div");
-        textBlock.style.display = "flex";
-        textBlock.style.flexDirection = "column";
-        textBlock.style.justifyContent = "center";
-        textBlock.style.overflow = "hidden";
-        textBlock.style.flex = "1";
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = chat.name;
+            nameSpan.style.fontWeight = "600";
+            nameSpan.style.fontSize = "15px";
+            nameSpan.style.color = "#222";
 
-        const nameSpan = document.createElement("span");
-        nameSpan.textContent = chat.name;
-        nameSpan.style.fontWeight = "600";
-        nameSpan.style.fontSize = "15px";
-        nameSpan.style.color = "#222";
+            const msgSpan = document.createElement("span");
+            msgSpan.textContent = chat.last_message || "پیامی وجود ندارد";
+            msgSpan.style.fontSize = "13px";
+            msgSpan.style.color = "#666";
+            msgSpan.style.whiteSpace = "nowrap";
+            msgSpan.style.overflow = "hidden";
+            msgSpan.style.textOverflow = "ellipsis";
 
-        const msgSpan = document.createElement("span");
-        msgSpan.textContent = chat.last_message || "پیامی وجود ندارد";
-        msgSpan.style.fontSize = "13px";
-        msgSpan.style.color = "#666";
-        msgSpan.style.whiteSpace = "nowrap";
-        msgSpan.style.overflow = "hidden";
-        msgSpan.style.textOverflow = "ellipsis";
+            textBlock.appendChild(nameSpan);
+            textBlock.appendChild(msgSpan);
+            li.appendChild(textBlock);
 
-        textBlock.appendChild(nameSpan);
-        textBlock.appendChild(msgSpan);
-        li.appendChild(textBlock);
+            if (chat.last_message_time) {
+              const timeSpan = document.createElement("span");
+              timeSpan.textContent = chat.last_message_time;
+              timeSpan.style.position = "absolute";
+              timeSpan.style.top = "8px";
+              timeSpan.style.right = "12px";
+              timeSpan.style.fontSize = "11px";
+              timeSpan.style.padding = "2px 6px";
+              timeSpan.style.backgroundColor = "rgba(0,0,0,0.05)";
+              timeSpan.style.borderRadius = "8px";
+              timeSpan.style.color = "#555";
+              li.appendChild(timeSpan);
+            }
 
-        // time span بالا سمت راست
-        if (chat.last_message_time) {
-          const timeSpan = document.createElement("span");
-          timeSpan.textContent = chat.last_message_time;
-          timeSpan.style.position = "absolute";
-          timeSpan.style.top = "8px";
-          timeSpan.style.right = "12px";
-          timeSpan.style.fontSize = "11px";
-          timeSpan.style.padding = "2px 6px";
-          timeSpan.style.backgroundColor = "rgba(0,0,0,0.05)";
-          timeSpan.style.borderRadius = "8px";
-          timeSpan.style.color = "#555";
-          li.appendChild(timeSpan);
-        }
+            // badge پیام‌های خوانده نشده
+            const unreadCount = unreadCounts[chat.id] || 0;
+            if (unreadCount > 0) {
+              const badge = document.createElement("span");
+              badge.classList.add("new-message-badge");
+              badge.textContent = unreadCount;
+              li.appendChild(badge);
+            }
 
-        // کلیک روی کاربر → باز شدن مودال و بارگذاری پیام‌ها
-        li.addEventListener("click", () => {
-          const chatModal = document.getElementById("chatModal");
-          chatModal.style.display = "flex";
+            li.addEventListener("click", () => {
+              const chatModal = document.getElementById("chatModal");
+              chatModal.style.display = "flex";
 
-          window.currentChatUserId = chat.id;
-          window.currentChatUserName = chat.name;
-          window.currentUserId = parseInt(document.body.dataset.userId);
-          window.currentUserEmail = document.body.dataset.userEmail;
+              window.currentChatUserId = chat.id;
+              window.currentChatUserName = chat.name;
+              window.currentUserId = parseInt(document.body.dataset.userId);
+              window.currentUserEmail = document.body.dataset.userEmail;
 
-          const chatUserNameAvatar = document.getElementById("chatUserNameAvatar");
-          chatUserNameAvatar.textContent = chat.name;
+              const chatUserNameAvatar = document.getElementById("chatUserNameAvatar");
+              chatUserNameAvatar.textContent = chat.name;
 
-          const chatUserAvatar = document.getElementById("chatUserAvatar");
-          if (chat.avatar) chatUserAvatar.src = chat.avatar;
+              const chatUserAvatar = document.getElementById("chatUserAvatar");
+              if (chat.avatar) chatUserAvatar.src = chat.avatar;
 
-          loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
-        });
+              const existingBadge = li.querySelector(".new-message-badge");
+              if (existingBadge) existingBadge.remove();
 
-        li.addEventListener("mouseover", () => {
-          li.style.backgroundColor = "rgba(0,0,0,0.05)";
-        });
-        li.addEventListener("mouseout", () => {
-          li.style.backgroundColor = "transparent";
-        });
+              fetch("/api/chat/messages/mark_read/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: chat.id })
+              });
 
-        list.appendChild(li);
-      });
+              loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
+            });
+
+            li.addEventListener("mouseover", () => {
+              li.style.backgroundColor = "rgba(0,0,0,0.05)";
+            });
+            li.addEventListener("mouseout", () => {
+              li.style.backgroundColor = "transparent";
+            });
+
+            list.appendChild(li);
+          });
+        })
+        .catch(err => console.error("Error fetching unread counts:", err));
     })
     .catch(err => {
       console.error("Error loading chats:", err);
@@ -4745,6 +4948,8 @@ function loadChatsList() {
       noMsg.textContent = "خطا در بارگذاری چت‌ها";
     });
 }
+
+
 
 
 
@@ -4784,10 +4989,10 @@ chatMessages.addEventListener("contextmenu", function (e) {
     selectedMessageElement = messageEl;
     currentMessageIdToDelete = messageEl.dataset.id;
 
-    const receiverName = messageEl.dataset.receiverName || "this user";
+    const chatUserNameAvatar = messageEl.dataset.chatUserNameAvatar || "this user";
     const kekewithSpan = document.getElementById("kekewith");
     if (kekewithSpan) {
-        kekewithSpan.textContent = receiverName;
+        kekewithSpan.textContent = chatUserNameAvatar;
     }
 
     // حذف هایلایت قبلی و انتخاب پیام فعلی
@@ -4814,6 +5019,36 @@ chatMessages.addEventListener("contextmenu", function (e) {
     messageMenu.classList.remove("hidden");
 });
 
+// === Open Delete Message Modal ===
+function openDeleteMessageModal() {
+  const modal = document.getElementById("deleteMessageModal");
+  const partnerNameSpan = document.getElementById("partner_name");
+
+  partnerNameSpan.textContent = chatUserNameAvatar || "این کاربر";
+
+  // get current partner name from your chat header
+  const currentPartner = document.getElementById("chatPartnerName").textContent.trim();
+
+  // replace "this user" with partner's actual name
+  partnerNameSpan.textContent = currentPartner;
+
+  // show modal
+  modal.style.display = "flex";
+  document.body.classList.add("modal1-open");
+}
+
+// === Close Modal ===
+document.getElementById("cancelDeleteMessageBtn").addEventListener("click", () => {
+  document.getElementById("deleteMessageModal").style.display = "none";
+  document.body.classList.remove("modal1-open");
+});
+
+// === Example: attach to all delete buttons ===
+document.querySelectorAll(".delete-message-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    openDeleteMessageModal();
+  });
+});
 
   // کلیک بیرون منوی راست‌کلیک باعث بسته شدن منو و لغو انتخاب پیام می‌شود
   document.addEventListener("click", (e) => {
@@ -4834,6 +5069,8 @@ deleteMessageBtn.addEventListener("click", () => {
     return;
   }
   messageMenu.classList.add("hidden");
+    const receiverName = selectedMessageElement.dataset.receiverName || "این کاربر";
+
   document.getElementById('deleteMessageModal').style.display = 'flex';
   document.body.classList.add('modal1-open');
 });
@@ -4908,7 +5145,8 @@ confirmDeleteMessageBtn.addEventListener('click', () => {
   document.getElementById('deleteMessageModal').style.display = 'none';
   document.body.classList.remove('modal1-open');
 
-  const deleteForAll = deleteForAllCheckbox ? deleteForAllCheckbox.checked : false;
+
+  const deleteForAll = deleteForAllCheckbox.checked;
   const url = `/api/chat/messages/${currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`;
 
   fetch(url, {
@@ -4939,6 +5177,18 @@ confirmDeleteMessageBtn.addEventListener('click', () => {
     currentMessageIdToDelete = null;
   });
 });
+
+function getCSRFToken() {
+  const name = 'csrftoken=';
+  const decodedCookie = decodeURIComponent(document.cookie);
+  const ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i].trim();
+    if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+  }
+  return '';
+}
+
 function getCSRFToken() {
   const name = 'csrftoken=';
   const decodedCookie = decodeURIComponent(document.cookie);
@@ -5118,7 +5368,7 @@ searchInput.addEventListener("input", function() {
           chatUserNameAvatar.textContent = user.name || "کاربر ناشناس";
 
           // Clear previous messages and input
-          const chatMessages = chatModal.querySelector(".chat-messages");
+const chatMessages = document.getElementById("chatMessages");
           const chatInput = chatModal.querySelector("#chatInput");
           if (chatMessages) chatMessages.innerHTML = "";
           if (chatInput) chatInput.value = "";
@@ -5549,7 +5799,7 @@ document.body.addEventListener("click", (e) => {
   const chatModal = document.getElementById("chatModal");
   const chatUserAvatar = chatModal.querySelector("#chatUserAvatar");
   const chatUserNameAvatar = chatModal.querySelector("#chatUserNameAvatar");
-  const chatMessages = chatModal.querySelector(".chat-messages");
+const chatMessages = document.getElementById("chatMessages");
   const chatInput = chatModal.querySelector("#chatInput");
 
   // آپدیت نام و آواتار کاربر
@@ -5603,9 +5853,100 @@ document.body.addEventListener("click", (e) => {
   }
 });
 
+function getCSRFToken() {
+  return document.cookie.split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+}
+
+function fetchMessages(senderId, receiverId) {
+  console.log("fetchMessages called:", senderId, receiverId);
+
+  if (!senderId || !receiverId) {
+    console.error("senderId و receiverId نمی‌توانند خالی باشند.");
+    return;
+  }
+
+  const chatModal = document.getElementById("chatModal");
+  if (!chatModal) {
+    console.error("chatModal element not found!");
+    return;
+  }
+
+  const chatMessages = document.getElementById("chatMessages");
+  if (!chatMessages) {
+    console.error("chatMessages element not found!");
+    return;
+  }
+
+  console.log("Fetching messages from server...");
+  const url = `/api/chat/messages/?sender_id=${encodeURIComponent(senderId)}&receiver_id=${encodeURIComponent(receiverId)}`;
+
+  fetch(url, { credentials: 'include' })
+    .then(res => {
+      console.log("Fetch response:", res);
+      if (!res.ok) throw new Error(`خطا در دریافت پیام‌ها: ${res.status} ${res.statusText}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log("Data received:", data);
+      if (!data.messages) return;
+
+      chatMessages.innerHTML = "";
+      data.messages.forEach(msg => {
+        console.log("Message:", msg);
+        const isMine = msg.sender === window.currentUserEmail;
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${isMine ? "mine" : "theirs"}`;
+        messageDiv.textContent = msg.message;
+
+        chatMessages.appendChild(messageDiv);
+      });
+
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      console.log("Marking messages as read...");
+      fetch(`/api/chat/messages/mark_read/`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'X-CSRFToken': getCSRFToken(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sender_id: senderId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("mark_read response:", data);
+        updateNewMessagesBadge();
+      })
+      .catch(err => console.error("Error marking messages as read:", err));
+    })
+    .catch(err => console.error("Error fetching messages:", err));
+}
 
 
+function updateNewMessagesBadge() {
+  const badge = document.getElementById("newMessagesBadge");
+  if (!badge) return;
 
+  fetch(`/api/chat/message/unread_count/`, { credentials: 'include' })
+    .then(response => {
+      if (!response.ok) throw new Error(`خطا در دریافت شمارنده: ${response.status}`);
+      return response.json();
+    })
+    .then(data => {
+      const count = data.unread_count || 0;
+      badge.textContent = count;
+      badge.style.display = count > 0 ? "inline-block" : "none";
+    })
+    .catch(err => console.error("Error fetching unread messages:", err));
+}
+
+// 🔹 آپدیت badge هر ۱۰ ثانیه
+updateNewMessagesBadge();
+setInterval(updateNewMessagesBadge, 10000);
 
 
 document.getElementById('closeFriendsModal').addEventListener('click', () => {
@@ -5616,42 +5957,8 @@ document.getElementById('closeFriendsModal').addEventListener('click', () => {
 document.getElementById('closeUserProfileModal').addEventListener('click', () => {
   modals.userProfile.style.display = 'none';
 });
-function fetchMessages(senderId, receiverId) {
-  if (!senderId || !receiverId) {
-    console.error("senderId و receiverId نمی‌توانند خالی باشند.");
-    return;
-  }
-
-  const url = `/api/chat/messages/?sender_id=${encodeURIComponent(senderId)}&receiver_id=${encodeURIComponent(receiverId)}`;
-
-  fetch(url, { credentials: 'include' })
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`خطا در دریافت پیام‌ها: ${res.status} ${res.statusText}`);
-      }
-      return res.json();
-    })
-    .then(data => {
-      if (data.messages) {
-        chatMessages.innerHTML = "";
-        data.messages.forEach(msg => {
-          console.log("📨 msg.sender:", msg.sender);
-          console.log("🙋 currentUserEmail:", window.currentUserEmail);
-
-          const isMine = msg.sender === window.currentUserEmail;
-
-          const messageDiv = document.createElement("div");
-          messageDiv.className = `message ${isMine ? "mine" : "theirs"}`;
-          messageDiv.textContent = msg.message;
 
 
-          chatMessages.appendChild(messageDiv);
-        });
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-    })
-    .catch(err => console.error("Error fetching messages:", err));
-}
 
 function getCookie(name) {
   let cookieValue = null;
@@ -5794,6 +6101,102 @@ function getCookie(name) {
   }
   return cookieValue;
 }
+function getCSRFToken() {
+  return document.cookie.split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+}
+
+function fetchMessages(senderId, receiverId) {
+  console.log("fetchMessages called:", senderId, receiverId);
+
+  if (!senderId || !receiverId) {
+    console.error("senderId و receiverId نمی‌توانند خالی باشند.");
+    return;
+  }
+
+  const chatModal = document.getElementById("chatModal");
+  if (!chatModal) {
+    console.error("chatModal element not found!");
+    return;
+  }
+
+const chatMessages = document.getElementById("chatMessages");
+  if (!chatMessages) {
+    console.error("chatMessages element not found!");
+    return;
+  }
+
+  console.log("Fetching messages from server...");
+  const url = `/api/chat/messages/?sender_id=${encodeURIComponent(senderId)}&receiver_id=${encodeURIComponent(receiverId)}`;
+
+  fetch(url, { credentials: 'include' })
+    .then(res => {
+      console.log("Fetch response:", res);
+      if (!res.ok) throw new Error(`خطا در دریافت پیام‌ها: ${res.status} ${res.statusText}`);
+      return res.json();
+    })
+    .then(data => {
+      console.log("Data received:", data);
+      if (!data.messages) return;
+
+      chatMessages.innerHTML = "";
+      data.messages.forEach(msg => {
+        console.log("Message:", msg);
+        const isMine = msg.sender === window.currentUserEmail;
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${isMine ? "mine" : "theirs"}`;
+        messageDiv.textContent = msg.message;
+
+        chatMessages.appendChild(messageDiv);
+      });
+
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      console.log("Marking messages as read...");
+      fetch(`/api/chat/messages/mark_read/`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'X-CSRFToken': getCSRFToken(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sender_id: senderId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log("mark_read response:", data);
+        updateNewMessagesBadge();
+      })
+      .catch(err => console.error("Error marking messages as read:", err));
+    })
+    .catch(err => console.error("Error fetching messages:", err));
+}
+
+
+function updateNewMessagesBadge() {
+  const badge = document.getElementById("newMessagesBadge");
+  if (!badge) return;
+
+  fetch(`/api/chat/message/unread_count/`, { credentials: 'include' })
+    .then(response => {
+      if (!response.ok) throw new Error(`خطا در دریافت شمارنده: ${response.status}`);
+      return response.json();
+    })
+    .then(data => {
+      const count = data.unread_count || 0;
+      badge.textContent = count;
+      badge.style.display = count > 0 ? "inline-block" : "none";
+    })
+    .catch(err => console.error("Error fetching unread messages:", err));
+}
+
+// 🔹 آپدیت badge هر ۱۰ ثانیه
+updateNewMessagesBadge();
+setInterval(updateNewMessagesBadge, 10000);
+
+
 
 function onEditMessageClick(e) {
   e.preventDefault();
@@ -6091,6 +6494,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+
 </script>
 </body>
 </html>

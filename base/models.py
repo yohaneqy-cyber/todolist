@@ -167,6 +167,9 @@ class ChatMessage(models.Model):
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
+    hidden_for_sender = models.BooleanField(default=False)
+    hidden_for_receiver = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     status = models.CharField(max_length=255, blank=True, default="")
 
