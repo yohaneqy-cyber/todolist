@@ -6,15 +6,16 @@
   <title>MySite</title>
   {% load static %}
   <style>
+/* برای موبایل */
 @media (max-width: 480px) {
   #chatContainer {
     height: 100vh !important; /* ارتفاع کامل برای موبایل */
   }
 
   #chatMessages {
-    padding-bottom: 80px !important; /* تنظیم padding-bottom برای موبایل */
-    max-height: calc(100vh - 80px) !important; /* تنظیم ارتفاع برای موبایل */
-    overflow-y: auto !important; /* اطمینان از فعال بودن اسکرول */
+    padding-bottom: 80px !important; /* فاصله فرم از پیام‌ها */
+    max-height: calc(100vh - 80px) !important; /* ارتفاع کانتینر پیام‌ها */
+    overflow-y: auto !important; /* اسکرول عمودی فعال */
   }
 
   #chatForm {
@@ -26,6 +27,15 @@
     width: 100% !important;
     border-radius: 0 0 12px 12px !important;
     z-index: 10 !important; /* برای بالاتر بودن فرم */
+  }
+}
+
+/* برای دسکتاپ */
+@media (min-width: 481px) {
+  #chatMessages {
+    padding-bottom: 100px !important; /* فاصله فرم از پیام‌ها */
+    max-height: calc(100vh - 100px) !important; /* تنظیم ارتفاع کانتینر پیام‌ها */
+    overflow-y: auto !important; /* اسکرول عمودی فعال */
   }
 }
 
