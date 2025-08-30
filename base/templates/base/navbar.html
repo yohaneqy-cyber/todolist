@@ -6,10 +6,6 @@
   <title>MySite</title>
   {% load static %}
   <style>
-#chatMessagesBadge,
-#newMessagesBadge {
-  display: none;
-}
 
 #openFriendsModal {
   position: relative;
@@ -2799,7 +2795,7 @@ body.dark-mode #chatDropdownMenu button span:last-child {
       {% if user.is_authenticated %}
         <a href="#" id="openFriendsModal" class="navbar-link">
           Friends
-          <span id="newMessagesBadge" class="badge">0</span>
+          <span id="newMessagesBadge" class="badge" style="display:none;"></span>
         </a>
         <a href="{% url 'dashbord' %}" class="navbar-link">Dashboard</a>
         
@@ -3416,12 +3412,9 @@ async function fetchUnreadMessagesCount() {
     const response = await fetch('/api/chat/message/unread_count/', {
       credentials: 'include',
     });
-    if (!response.ok) throw new Error(`Error fetching unread count: ${response.status}`);
-
     const data = await response.json();
     const count = data.unread_count || 0;
 
-    // Chats badge
     const chatsBadge = document.getElementById('chatMessagesBadge');
     if (chatsBadge) {
       if (count > 0) {
@@ -3429,10 +3422,10 @@ async function fetchUnreadMessagesCount() {
         chatsBadge.style.display = 'inline-flex';
       } else {
         chatsBadge.style.display = 'none';
+        chatsBadge.textContent = ''; // حتما پاک شود
       }
     }
 
-    // Friends badge
     const friendsBadge = document.getElementById('newMessagesBadge');
     if (friendsBadge) {
       if (count > 0) {
@@ -3440,15 +3433,15 @@ async function fetchUnreadMessagesCount() {
         friendsBadge.style.display = 'inline-flex';
       } else {
         friendsBadge.style.display = 'none';
+        friendsBadge.textContent = '';
       }
     }
 
   } catch (err) {
-    console.error('Error fetching unread messages:', err);
+    console.error('خطا در دریافت تعداد پیام‌ها:', err);
   }
 }
 
-// Call immediately and every 5 seconds
 fetchUnreadMessagesCount();
 setInterval(fetchUnreadMessagesCount, 5000);
 
