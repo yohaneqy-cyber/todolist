@@ -73,8 +73,8 @@ body.dark-mode #chatsSection li:hover {
   position: absolute;
   top: 30px;
   right: 12px; /* کنار avatar یا متن */
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background-color: rgba(115, 81, 196, 1);
   color: white;
@@ -3382,6 +3382,14 @@ async function loadMessagesFromServer(senderId = null, receiverId = null) {
   }
 }
 
+// ======== CSRF helper ========
+function getCSRFToken() {
+  const cookieValue = document.cookie.split('; ')
+    .find(row => row.startsWith('csrftoken='))
+    ?.split('=')[1];
+  return cookieValue || '';
+}
+
 // ======== Mark messages as read and update badges ========
 async function markMessagesReadForUser(senderId) {
   try {
@@ -3398,8 +3406,7 @@ async function markMessagesReadForUser(senderId) {
     const markReadData = await markReadRes.json();
     console.log("✅ mark_read response:", markReadData);
 
-    updateChatsBadge();        // Badge next to Chats button
-    updateNewMessagesBadge();  // Badge next to Friends link
+    updateAllBadges(); // بروزرسانی همه badge ها
 
   } catch (err) {
     console.error('❌ markMessagesReadForUser error:', err);
@@ -3407,7 +3414,7 @@ async function markMessagesReadForUser(senderId) {
 }
 
 // ======== Fetch unread message count (for Friends & Chats badges) ========
-async function fetchUnreadMessagesCount() {
+async function updateAllBadges() {
   try {
     const response = await fetch('/api/chat/message/unread_count/', {
       credentials: 'include',
@@ -3417,30 +3424,55 @@ async function fetchUnreadMessagesCount() {
     const data = await response.json();
     const count = data.unread_count || 0;
 
-    // Update badge for Chats
+    // Chats badge
     const chatsBadge = document.getElementById('chatMessagesBadge');
     if (chatsBadge) {
-      chatsBadge.textContent = count;
-      chatsBadge.style.display = count > 0 ? 'inline-flex' : 'none';
+      if (count > 0) {
+        chatsBadge.textContent = count;
+        chatsBadge.style.display = 'inline-flex';
+      } else {
+        chatsBadge.style.display = 'none';
+      }
     }
 
-    // Update badge for Friends (if using the same count)
+    // Friends badge
     const friendsBadge = document.getElementById('newMessagesBadge');
     if (friendsBadge) {
-      friendsBadge.textContent = count;
-      friendsBadge.style.display = count > 0 ? 'inline-flex' : 'none';
+      if (count > 0) {
+        friendsBadge.textContent = count;
+        friendsBadge.style.display = 'inline-flex';
+      } else {
+        friendsBadge.style.display = 'none';
+      }
     }
 
+    // Badge کنار هر کاربر در لیست چت
+    document.querySelectorAll("#chatsList li").forEach(li => {
+      const userId = li.dataset.userId;
+      let badge = li.querySelector(".new-message-badge");
+      const userCount = data.unread_per_user?.[userId] || 0;
+
+      if (userCount > 0) {
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.classList.add("new-message-badge");
+          li.appendChild(badge);
+        }
+        badge.textContent = userCount;
+        badge.style.display = 'flex';
+      } else if (badge) {
+        badge.style.display = 'none';
+      }
+    });
+
   } catch (err) {
-    console.error('❌ خطا در fetchUnreadMessagesCount:', err);
+    console.error('❌ خطا در updateAllBadges:', err);
   }
 }
 
-// Call immediately and every 5 seconds
-fetchUnreadMessagesCount();
-setInterval(fetchUnreadMessagesCount, 5000);
-
-
+// ======== Initial call & interval ========
+updateAllBadges();
+setInterval(updateAllBadges, 5000);
 
 document.addEventListener("DOMContentLoaded", () => {
   // === Elements ===
