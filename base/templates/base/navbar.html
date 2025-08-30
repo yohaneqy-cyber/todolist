@@ -6,38 +6,6 @@
   <title>MySite</title>
   {% load static %}
   <style>
-/* برای موبایل */
-@media (max-width: 480px) {
-  #chatContainer {
-    height: 100vh !important; /* ارتفاع کامل برای موبایل */
-  }
-
-  #chatMessages {
-    padding-bottom: 80px !important; /* فاصله فرم از پیام‌ها */
-    max-height: calc(100vh - 80px) !important; /* ارتفاع کانتینر پیام‌ها */
-    overflow-y: auto !important; /* اسکرول عمودی فعال */
-  }
-
-  #chatForm {
-    position: sticky !important; /* فرم چسبیده به پایین */
-    bottom: 0 !important;
-    padding: 10px !important;
-    backdrop-filter: blur(5px) !important;
-    width: 100% !important;
-    border-radius: 0 0 12px 12px !important;
-    z-index: 10 !important; /* برای بالاتر بودن فرم */
-  }
-}
-
-/* برای دسکتاپ */
-@media (min-width: 481px) {
-  #chatMessages {
-    padding-bottom: 100px !important; /* فاصله فرم از پیام‌ها */
-    max-height: calc(100vh - 100px) !important; /* تنظیم ارتفاع کانتینر پیام‌ها */
-    overflow-y: auto !important; /* اسکرول عمودی فعال */
-  }
-}
-
 
 #openFriendsModal {
   position: relative;
@@ -47,10 +15,10 @@
 #newMessagesBadge {
   position: absolute;
   left: -1px;   /* جای دایره کنار متن */
-  top: 0px;    /* بالاتر از متن لینک */
+  top: -4px;    /* بالاتر از متن لینک */
 
-  width: 12px;
-  height: 12px;
+  width: 15px;
+  height: 15px;
   background-color: rgba(115, 81, 196, 1);
   border-radius: 50%;
 
@@ -62,7 +30,7 @@
   font-weight: bold;
   color: white;
 
-  line-height: 12px; /* حتماً برابر با ارتفاع دایره */
+  line-height: 15px; /* حتماً برابر با ارتفاع دایره */
   padding: 0;
   text-align: center;
 }
@@ -74,11 +42,11 @@
 
 #chatMessagesBadge {
   position: absolute;
-  left: 1px;          /* دایره سر جای خودش */
+  left: -1.5px;          /* دایره سر جای خودش */
   top: 2px;        /* بالاتر از متن دکمه */
 
-  width: 12px;
-  height: 12px;
+  width: 15px;
+  height: 15px;
   background-color: rgba(115, 81, 196, 1);
   border-radius: 50%; /* کامل دایره */
 
@@ -103,14 +71,14 @@ body.dark-mode #chatsSection li:hover {
 
 .new-message-badge {
   position: absolute;
-  top: 35px;
+  top: 40px;
   right: 12px; /* کنار avatar یا متن */
-  width: 13px;
-  height: 13px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background-color: rgba(115, 81, 196, 1);
   color: white;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -6368,16 +6336,9 @@ function scrollChatToBottom() {
 
   const formHeight = chatForm ? chatForm.offsetHeight : 0;
 
-  // اسکرول وقتی پیام‌ها به ته صفحه نرسیدند
+  // اسکرول به پایین، ولی پیام‌ها زیر فرم نروند
   chatMessages.scrollTop = chatMessages.scrollHeight - formHeight;
 }
-
-const chatMessages = document.getElementById("chatMessages");
-if (chatMessages) {
-  const observer = new MutationObserver(scrollChatToBottom);
-  observer.observe(chatMessages, { childList: true });
-}
-
 
 // اگر پیام‌ها داینامیک اضافه می‌شوند، از MutationObserver استفاده کنید
 const chatMessages = document.getElementById("chatMessages");
