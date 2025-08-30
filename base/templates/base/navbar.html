@@ -71,7 +71,7 @@ body.dark-mode #chatsSection li:hover {
 
 .new-message-badge {
   position: absolute;
-  top: 30px;
+  top: 35px;
   right: 12px; /* کنار avatar یا متن */
   width: 13px;
   height: 13px;
@@ -481,18 +481,25 @@ body.dark-mode .chat-dropdown-menu button:hover {
 
 /* فرم چت */
 #chatForm {
-  position: absolute; /* چسباندن به پایین لیست پیام‌ها */
-  bottom: 2%;
-  left: 10%;
-  width: 80%;
-  padding: 12px;
+  position: absolute !important; /* فرم چسبیده به پایین کانتینر */
+  bottom: 2% !important;
+  left: 10% !important;
+  width: 80% !important;
+  padding: 12px !important;
   display: flex !important;
-  gap: 8px;
-  justify-content: center; /* افقی وسط */
-  border-radius: 0 0 12px 12px;
-  box-sizing: border-box;
-  z-index: 10;
+  gap: 8px !important;
+  justify-content: center !important;
+  border-radius: 0 0 12px 12px !important;
+  box-sizing: border-box !important;
+  z-index: 10 !important;
 }
+
+#chatMessages {
+  padding-bottom: 180px !important; /* فاصله پیام‌ها از پایین، تقریبا ارتفاع فرم */
+  overflow-y: auto !important;
+  max-height: calc(100vh - 80px) !important; /* بالای فرم */
+}
+
 
 #chatInput {
   flex-grow: 1;
@@ -5466,8 +5473,13 @@ function renderMessages(messages) {
   });
 
   // 🔹 اسکرول به پایین
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  const isScrolledToBottom = chatMessages.scrollHeight - chatMessages.scrollTop === chatMessages.clientHeight;
+  
+  if (isScrolledToBottom || chatMessages.scrollHeight - chatMessages.scrollTop <= 20) {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
 }
+
 
 let windowCurrentChatUserId = null;
 
@@ -6318,13 +6330,25 @@ document.getElementById("chatForm").addEventListener("submit", async (e) => {
 // تابع کمکی برای اسکرول کردن به پایین چت
 function scrollChatToBottom() {
   const chatMessages = document.getElementById("chatMessages");
-  if (chatMessages) {
-    // اضافه کردن یک فاصله برابر ارتفاع فرم
-    const chatForm = document.getElementById("chatForm");
-    const formHeight = chatForm ? chatForm.offsetHeight : 0;
-    chatMessages.scrollTop = chatMessages.scrollHeight - formHeight;
-  }
+  const chatForm = document.getElementById("chatForm");
+
+  if (!chatMessages) return;
+
+  const formHeight = chatForm ? chatForm.offsetHeight : 0;
+
+  // اسکرول به پایین، ولی پیام‌ها زیر فرم نروند
+  chatMessages.scrollTop = chatMessages.scrollHeight - formHeight;
 }
+
+// اگر پیام‌ها داینامیک اضافه می‌شوند، از MutationObserver استفاده کنید
+const chatMessages = document.getElementById("chatMessages");
+const chatForm = document.getElementById("chatForm");
+
+if (chatMessages) {
+  const observer = new MutationObserver(scrollChatToBottom);
+  observer.observe(chatMessages, { childList: true });
+}
+
 
 // بعد از ارسال یا ویرایش پیام:
 async function afterMessageUpdate() {
