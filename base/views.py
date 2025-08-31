@@ -1154,14 +1154,25 @@ def check_block_status(request, user_id):
     })
 
 
+from django.db.models import Count
+
 @csrf_exempt
 @login_required
 def unread_message_count(request):
-    count = ChatMessage.objects.filter(
-        receiver=request.user, is_read=False
-    ).count()
-    return JsonResponse({'unread_count': count})
+    unread_counts = (
+        ChatMessage.objects
+        .filter(receiver=request.user, is_read=False)
+        .values("sender_id")
+        .annotate(count=Count("id"))
+    )
 
+    unread_by_user = {item["sender_id"]: item["count"] for item in unread_counts}
+    total_count = sum(unread_by_user.values())
+
+    return JsonResponse({
+        "unread_count": total_count,   # برای هر جای قدیمی که هنوز data.unread_count استفاده می‌کنه
+        "unread_by_user": unread_by_user  # برای فیلتر پیام‌های میوت شده
+    })
 
 
 @login_required
