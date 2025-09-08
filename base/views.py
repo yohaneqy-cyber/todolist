@@ -1214,6 +1214,10 @@ def unread_message_count(request):
         "unread_by_user": unread_by_user  # برای فیلتر پیام‌های میوت شده
     })
 
+@login_required
+def friend_requests_count(request):
+    count = FriendRequest.objects.filter(to_user=request.user, is_accepted=False).count()
+    return JsonResponse({'count':count})
 
 @login_required
 def unread_message_count_each(request):

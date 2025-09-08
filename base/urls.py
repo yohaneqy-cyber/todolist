@@ -59,4 +59,5 @@ urlpatterns = [
         name='send_message'
     ),
     path('api/delete-chat/<int:user_id>/', DeleteChatApi.as_view(), name='delete-chat'),
+    path("api/friends/requests/count/", views.friend_requests_count, name="friend_requests_count"),
 ]

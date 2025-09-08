@@ -6,6 +6,51 @@
   <title>MySite</title>
   {% load static %}
   <style>
+/* دکمه Requests */
+#requestsTabBtn {
+  position: relative; /* بسیار مهم */
+  background-color: transparent;
+  border: none;
+  color: #2980b9;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+/* هاور و فوکوس */
+#requestsTabBtn:hover,
+#requestsTabBtn:focus {
+  color: #fff;
+  background: linear-gradient(45deg, #4dabf5, #64b5f6);
+  transform: scale(1.07);
+}
+
+/* Badge کنار دکمه */
+#requestsBadge {
+  position: absolute;
+  left: -1px;   /* جای دایره کنار متن */
+  top: -4px;    /* بالاتر از متن لینک */
+
+  width: 15px;
+  height: 15px;
+  background-color: rgba(115, 81, 196, 1);
+  border-radius: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+
+  line-height: 15px; /* حتماً برابر با ارتفاع دایره */
+  padding: 0;
+  text-align: center;
+}
 
 /* وقتی بلاک شد: فرم از پایین به آرامی بیرون می‌رود */
 .chat-form-blocked {
@@ -2852,7 +2897,10 @@ body.dark-mode #chatDropdownMenu button span:last-child {
 
       <div style="margin-bottom: 15px;">
         <button id="searchTabBtn">Search</button>
-        <button id="requestsTabBtn">Requests</button>
+        <button id="requestsTabBtn">
+          Requests
+          <span id="requestsBadge" class="badge">0</span>
+        </button>
         <button id="friendsTabBtn">Friends</button>
         <button id="chatsBtn">
           Chats
@@ -4393,26 +4441,91 @@ let editingMessageId = null;
       }
     });
   }
-function updateNewMessagesBadge() {
+  function getMutedChats() {
+  // گرفتن آرایه کاربرهای میوت شده از localStorage
+  const list = JSON.parse(localStorage.getItem("mutedChats") || "[]");
+  return list.map(id => String(id)); // همه آی‌دی‌ها به رشته تبدیل می‌شوند
+}
+
+async function updateNewMessagesBadge() {
   const badge = document.getElementById("newMessagesBadge");
   if (!badge) return;
 
-  fetch(`/api/chat/message/unread_count/`, { credentials: "include" })
-    .then(response => response.json())
-    .then(data => {
-      const muted = getMutedChats(); // لیست کاربرهای میوت
-      let count = 0;
+  const muted = getMutedChats().map(id => String(id));
+  let total = 0;
+  let unreadByUser = {};
 
-      if (data.unread_by_user) {
-        for (const [userId, num] of Object.entries(data.unread_by_user)) {
-          if (muted.includes(String(userId))) {
-            // 📌 اگه کاربر میوت باشه، شمارنده‌ش رو صفر کن
-            data.unread_by_user[userId] = 0;
-          } else {
-            count += num;
-          }
+  try {
+    const [msgsRes, friendsRes] = await Promise.all([
+      fetch("/api/chat/message/unread_count/", {
+        credentials: "include",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      }),
+      fetch("/api/friends/requests/count/", {
+        credentials: "include",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      }),
+    ]);
+
+    let msgsData = {};
+    if (msgsRes.ok && msgsRes.headers.get("content-type")?.includes("application/json")) {
+      msgsData = await msgsRes.json();
+    }
+
+    if (msgsData && msgsData.unread_by_user) {
+      for (const [userId, count] of Object.entries(msgsData.unread_by_user)) {
+        if (!muted.includes(String(userId))) {
+          const c = Number(count) || 0;
+          unreadByUser[userId] = c;
+          total += c;
         }
       }
+    } else if (typeof msgsData.unread_count !== "undefined") {
+      total += Number(msgsData.unread_count) || 0;
+    }
+
+    let friendsData = {};
+    if (friendsRes.ok && friendsRes.headers.get("content-type")?.includes("application/json")) {
+      friendsData = await friendsRes.json();
+    }
+
+    const friendRequests = Number(friendsData.count) || 0;
+    total += friendRequests;
+
+  } catch (err) {
+    console.error("updateNewMessagesBadge error:", err);
+  }
+
+  if (total > 0) {
+    badge.textContent = String(total);
+    badge.style.display = "inline-block";
+  } else {
+    badge.textContent = "";
+    badge.style.display = "none";
+  }
+
+  const currentChatUserId = String(window.currentChatUserId || "");
+  if (currentChatUserId && unreadByUser[currentChatUserId]) {
+    showChatBadge(unreadByUser[currentChatUserId]);
+  } else {
+    showChatBadge(0);
+  }
+}
+
+// تابع مخصوص بروزرسانی Requests Badge
+async function updateRequestsBadge() {
+  const badge = document.getElementById("requestsBadge");
+  if (!badge) return;
+
+  try {
+    const res = await fetch("/api/friends/requests/count/", {
+      credentials: "include",
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    });
+
+    if (res.ok && res.headers.get("content-type")?.includes("application/json")) {
+      const data = await res.json();
+      const count = Number(data.count) || 0;
 
       if (count > 0) {
         badge.textContent = count;
@@ -4421,11 +4534,27 @@ function updateNewMessagesBadge() {
         badge.textContent = "";
         badge.style.display = "none";
       }
-    })
-    .catch(err => console.error("Error fetching unread messages:", err));
+    } else {
+      console.warn("⚠️ updateRequestsBadge: response not JSON or failed", res.status);
+      badge.style.display = "none";
+    }
+  } catch (err) {
+    console.error("🔥 updateRequestsBadge error:", err);
+    badge.style.display = "none";
+  }
 }
 
+// اجرای اولیه و زمان‌بندی برای بروزرسانی خودکار
+updateRequestsBadge();
+setInterval(updateRequestsBadge, 5000);
 
+async function safeText(res) {
+  try {
+    return await res.text();
+  } catch {
+    return "<no-text>";
+  }
+}
 
 function showChatBadge(count) {
   const badge = document.getElementById("chatUserBadge");
@@ -4433,11 +4562,65 @@ function showChatBadge(count) {
 
   if (count > 0) {
     badge.textContent = count;
-    badge.style.display = "flex"; // ظاهر شود
+    badge.style.display = "flex";
   } else {
-    badge.style.display = "none"; // مخفی شود
+    badge.style.display = "none";
   }
 }
+
+// اجرا و زمان‌بندی
+updateNewMessagesBadge();
+setInterval(updateNewMessagesBadge, 5000);
+
+
+  async function safeText(res) {
+    try {
+      return await res.text();
+    } catch {
+      return "<no-text>";
+    }
+  }
+
+  function showChatBadge(count) {
+    const badge = document.getElementById("chatUserBadge");
+    if (!badge) return;
+
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = "flex";
+    } else {
+      badge.style.display = "none";
+    }
+  }
+
+  // اجرا و رفرش خودکار
+  updateNewMessagesBadge();
+  setInterval(updateNewMessagesBadge, 5000);
+
+async function safeText(res) {
+  try {
+    return await res.text();
+  } catch {
+    return "<no-text>";
+  }
+}
+
+function showChatBadge(count) {
+  const badge = document.getElementById("chatUserBadge");
+  if (!badge) return;
+
+  if (count > 0) {
+    badge.textContent = count;
+    badge.style.display = "flex";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+// اجرا و رفرش خودکار
+updateNewMessagesBadge();
+setInterval(updateNewMessagesBadge, 5000);
+
 
 
   if (modals.friends.closeBtn && modals.friends.modal) {
