@@ -201,6 +201,7 @@ ALLOWED_HOSTS = [
     'tododo-aim2.onrender.com',      
     'localhost',
     '127.0.0.1',
+    'testserver',
 ]
 
 

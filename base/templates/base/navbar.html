@@ -7,6 +7,23 @@
   {% load static %}
   <style>
 
+/* وقتی بلاک شد: فرم از پایین به آرامی بیرون می‌رود */
+.chat-form-blocked {
+  transform: translateX(-50%) translateY(150vh); /* خارج شدن کامل از پایین */
+  opacity: 0; /* محو شدن */
+  pointer-events: none; /* غیر فعال شدن */
+  transition: transform 2s ease-in-out, opacity 2s ease-in-out !important; /* انیمیشن آرام و نرم */
+}
+#chatForm.active {
+  display: flex !important; /* فقط وقتی کلاس active گرفت نشون بده */
+}
+
+.muted-badge {
+  background-color: #aaa !important; /* دایره خاکستری */
+  color: #fff !important;
+}
+
+
 #openFriendsModal {
   position: relative;
   display: inline-block;
@@ -3112,18 +3129,41 @@ body.dark-mode #chatDropdownMenu button span:last-child {
 
 <script>
   window.currentUserId = {% if request.user.is_authenticated %}{{ request.user.id }}{% else %}null{% endif %};
-  window.currentUserEmail = {% if request.user.is_authenticated %}"{{ request.user.email|escapejs }}"{% else %}null{% endif %};
-  window.currentChatUserId = {{ chat_user.id|default:"null" }};
-  window.currentUserEmail = "{{ request.user.email|escapejs }}";
-  window.currentChatUserId = user.id; // کاربر مقابل
+  window.currentChatUserId = {% if chat_user %}{{ chat_user.id }}{% else %}null{% endif %};
 
+  if (window.currentChatUserId !== null) {
+    localStorage.setItem("currentChatUserId", window.currentChatUserId);
+  }
+  console.log("[DEBUG] window.currentChatUserId:", window.currentChatUserId);
+    window.addEventListener("DOMContentLoaded", () => {
+      const uid = getActiveChatUserId();
+      if (!uid) return;
+
+      window.currentChatUserId = uid;
+
+      const chatForm = document.getElementById("chatForm");
+      const unblockBtn = document.getElementById("unblockBtn");
+      const chatInput = document.getElementById("chatInput");
+
+      if (!chatForm || !unblockBtn || !chatInput) return;
+
+      fetch(`/api/check-block-status/${uid}/`, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+        .then(res => res.json())
+        .then(data => {
+          console.log("[DEBUG] Block status after refresh:", data);
+          applyBlockUI(data.blockedByMe, data.blockedByOther);
+        })
+        .catch(err => console.error("[DEBUG] Block status fetch error:", err));
+    });
 </script>
+
+
+
 
 
 <script>
   const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
-
-  // تابع گرفتن CSRF Token از کوکی
+  const storedUID = localStorage.getItem("currentChatUserId");
   window.currentUserId = {% if request.user.is_authenticated %}{{ request.user.id }}{% else %}null{% endif %};
   window.currentUserEmail = {% if request.user.is_authenticated %}"{{ request.user.email|escapejs }}"{% else %}null{% endif %};
 
@@ -3413,25 +3453,6 @@ async function markMessagesReadForUser(senderId) {
   }
 }
 
-function toggleMuteChat(userId) {
-  let mutedChats = getMutedChats();
-  let isMuted = mutedChats.includes(userId);
-
-  if (isMuted) {
-    // آنمیوت کن
-    mutedChats = mutedChats.filter(id => id !== userId);
-    setMutedChats(mutedChats);
-    updateMuteMenuText(false); // متن/آیکون آپدیت بشه
-  } else {
-    // میوت کن
-    mutedChats.push(userId);
-    setMutedChats(mutedChats);
-    updateMuteMenuText(true);
-  }
-
-  // اجرای دوباره شمارش پیام‌ها تا Badge درست شه
-  fetchUnreadMessagesCount();
-}
 
 
 // ======== Fetch unread message count (for Friends & Chats badges) ========
@@ -3443,21 +3464,26 @@ async function fetchUnreadMessagesCount() {
     const data = await response.json();
 
     // گرفتن لیست چت‌های میوت شده از localStorage
-    const mutedChats = JSON.parse(localStorage.getItem("mutedChats") || "[]");
+    const mutedChats = JSON.parse(localStorage.getItem("mutedChats") || "[]")
+      .map(id => String(id)); // ✅ همه string
 
-    // اگر سرور فقط unread_count برمی‌گردونه:
-    // const count = data.unread_count || 0;
-
-    // اگر سرور لیست پیام‌ها (با user_id) برمی‌گردونه:
     let count = 0;
-    if (Array.isArray(data.unread_messages)) {
-      count = data.unread_messages.filter(
-        msg => !mutedChats.includes(msg.user_id)
-      ).length;
+
+    if (data.unread_by_user) {
+      for (const [userId, c] of Object.entries(data.unread_by_user)) {
+        if (mutedChats.includes(String(userId))) {
+          // 📌 اگه کاربر میوت باشه، شمارنده‌ش رو صفر کن
+          data.unread_by_user[userId] = 0;
+        } else {
+          // 📌 فقط غیرمیوت‌ها رو حساب کن
+          count += c;
+        }
+      }
     } else {
       count = data.unread_count || 0;
     }
 
+    // 📌 آپدیت badge ها
     const chatsBadge = document.getElementById('chatMessagesBadge');
     if (chatsBadge) {
       if (count > 0) {
@@ -3465,7 +3491,7 @@ async function fetchUnreadMessagesCount() {
         chatsBadge.style.display = 'inline-flex';
       } else {
         chatsBadge.style.display = 'none';
-        chatsBadge.textContent = ''; // حتما پاک شود
+        chatsBadge.textContent = '';
       }
     }
 
@@ -3485,9 +3511,9 @@ async function fetchUnreadMessagesCount() {
   }
 }
 
-
 fetchUnreadMessagesCount();
 setInterval(fetchUnreadMessagesCount, 5000);
+
 
 
 
@@ -3499,6 +3525,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeUserProfileModalBtn = document.getElementById("closeUserProfileModal");
   const chatOptionsBtn = document.getElementById("chatOptionsBtn");
   const chatModalContent = chatOptionsBtn.closest(".chat-modal-content");
+
+  console.log("💡 DOM Loaded, elements initialized.");
 
   // === Create Dropdown Menu ===
   const dropdownMenu = document.createElement("div");
@@ -3513,29 +3541,75 @@ document.addEventListener("DOMContentLoaded", () => {
   dropdownMenu.style.zIndex = "1001";
   dropdownMenu.classList.add("chat-dropdown-menu");
 
+  console.log("💡 Dropdown menu element created:", dropdownMenu);
+
   // === Dropdown Items Config ===
-  const options = [
-    {
-      text: "Block User",
-      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
-            </svg>`,
-      onClick: () => {
-        if (!window.currentChatUserId) {
-          alert("No user selected to block.");
-          return;
+// ===== Block User Option =====
+const options = [
+  {
+    text: "Block User",
+    icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
+          </svg>`,
+    onClick: async function () {
+      const userId = String(window.currentChatUserId);
+      if (!userId) return alert("No user selected to block.");
+
+      const blockedUsers = getBlockedUsers();
+      const isBlocked = blockedUsers.includes(userId);
+
+      try {
+        if (isBlocked) {
+          await unblockUser(userId);
+
+          // ✅ Update the JS object itself
+          this.text = "Block User";
+          this.icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+                          viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
+                      </svg>`;
+
+          const chatInput = document.getElementById("chatInput");
+          const sendBtn = document.getElementById("chatSendBtn");
+          if (chatInput) chatInput.disabled = false;
+          if (sendBtn) sendBtn.disabled = false;
+        } else {
+          await blockUser(userId);
+
+          // ✅ Update the JS object itself
+          this.text = "Unblock User";
+          this.icon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+                          viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0"/>
+                      </svg>`;
+
+          const chatInput = document.getElementById("chatInput");
+          const sendBtn = document.getElementById("chatSendBtn");
+          if (chatInput) chatInput.disabled = true;
+          if (sendBtn) sendBtn.disabled = true;
         }
-
-        // Block the user
-        blockUser(window.currentChatUserId);
-
-        // Immediately update dropdown to show "Unblock User" with check SVG
-        updateBlockMenuText(true);
+      } catch (err) {
+        console.error("Error blocking/unblocking user:", err);
       }
-    },
+
+      const dropdownMenu = document.querySelector("#chatDropdownMenu");
+      if (dropdownMenu) dropdownMenu.style.display = "none";
+
+      // 🔹 Re-render the dropdown after updating
+      renderDropdown(); // <-- your function that generates the dropdown from `options`
+    }
+  },
+
+
+
+
     {
       text: "Mute Chat",
       icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
@@ -3546,6 +3620,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <line x1="1" y1="1" x2="23" y2="23"></line>
             </svg>`,
       onClick: () => {
+        console.log("🔹 Mute Clicked. Current User ID:", window.currentChatUserId);
         if (!window.currentChatUserId) {
           alert("No user selected to mute.");
           return;
@@ -3553,18 +3628,84 @@ document.addEventListener("DOMContentLoaded", () => {
         toggleMuteChat(window.currentChatUserId);
       }
     },
-    {
-      text: "Delete Chat",
-      icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-               <path d="M3 6h18"/>
-               <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-               <path d="M10 11v6"/>
-               <path d="M14 11v6"/>
-               <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-             </svg>`
-    },
+{
+  text: "Delete Chat",
+  icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+           <path d="M3 6h18"/>
+           <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+           <path d="M10 11v6"/>
+           <path d="M14 11v6"/>
+           <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+         </svg>`,
+  onClick: () => {
+    const userId = window.currentChatUserId;
+    if (!userId) return alert("No user selected to delete chat.");
+
+    console.log("🗑 Deleting chat for userId:", userId);
+
+    // Close chat modal
+    const chatModal = document.getElementById("chatModal");
+    if (chatModal) {
+      chatModal.style.display = "none";
+      document.body.classList.remove("modal-open");
+      console.log("✖️ Chat modal closed");
+    }
+
+    // Call backend API to delete chat (optional: adjust method if needed)
+    fetch(`/api/delete-chat/${userId}/`, {
+      method: "POST", 
+      credentials: "include",
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log("✅ Chat deleted on server:", data);
+
+      // Remove chat from Chats tab UI
+      const chatsList = document.getElementById("chatsList");
+      if (chatsList) {
+        const chatItem = chatsList.querySelector(`[data-user-id="${userId}"]`);
+        if (chatItem) {
+          chatItem.remove();
+          console.log("✅ Removed from chatsList");
+        }
+      }
+
+      // Only remove from search tab if you want
+      // const searchList = document.getElementById("userList");
+      // if (searchList) {
+      //   const searchItem = searchList.querySelector(`[data-user-id="${userId}"]`);
+      //   if (searchItem) searchItem.remove();
+      // }
+
+      // Clear currentChatUserId if matches
+      if (localStorage.getItem("currentChatUserId") === String(userId)) {
+        localStorage.removeItem("currentChatUserId");
+        console.log("🗑 currentChatUserId removed");
+      }
+
+      // Show "No Chat Yet" if Chats tab is empty
+      if (chatsList && chatsList.children.length === 0) {
+        const noMsg = document.getElementById("noChatsMsg");
+        if (noMsg) {
+          noMsg.style.display = "block";
+          noMsg.textContent = "No Chat Yet";
+        }
+      }
+
+      // Refresh chats list from server to ensure consistency
+      if (typeof loadChatsList === "function") {
+        console.log("♻️ Refreshing chat list...");
+        loadChatsList();
+      }
+    })
+    .catch(err => console.error("💥 Delete chat error:", err));
+  }
+},
+
+
     {
       text: "Report User",
       icon: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
@@ -3579,203 +3720,406 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   ];
 
-function updateBlockMenuText(isBlocked) {
-  const dropdownMenu = document.getElementById("chatDropdownMenu");
-  if (!dropdownMenu) return;
+  // === Debug ===
+  console.log("💡 Dropdown options:", options);
 
-  const buttons = Array.from(dropdownMenu.querySelectorAll("button"));
-  buttons.forEach(btn => {
-    const spanText = btn.querySelector("span:last-child");
-    if (!spanText) return;
-
-    if (spanText.textContent.includes("Block") || spanText.textContent.includes("Unblock")) {
-      let newText, iconSVG;
-
-      if (isBlocked) {
-        newText = "Unblock This User";
-        iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                       viewBox="0 0 24 24" fill="none" stroke="green"
-                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                     <path d="M5 13l4 4L19 7"/>
-                   </svg>`;
-      } else {
-        newText = "Block This User";
-        iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                       viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                     <circle cx="12" cy="12" r="10"/>
-                     <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
-                   </svg>`;
-      }
-
-      const newBtn = btn.cloneNode(true);
-      newBtn.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${iconSVG}<span>${newText}</span></span>`;
-      newBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (isBlocked) {
-          unblockUser(window.currentChatUserId);
-        } else {
-          blockUser(window.currentChatUserId);
-        }
-        dropdownMenu.style.display = "none";
-      });
-      btn.replaceWith(newBtn);
-    }
-  });
-}
-
-  // === Build Dropdown Items ===
-// === Build Dropdown Items with hover ===
+  // === Build Dropdown Items with hover ===
 options.forEach(opt => {
   const item = document.createElement("button");
 
-  // Click event
+  let label = opt.text;
+  let icon = opt.icon;
+
+  // اگر گزینه بلاک است، کلاس block-btn بده
+  if (opt.text.includes("Block")) {
+    item.classList.add("block-btn");
+  }
+
+  if (opt.text.includes("Mute")) {
+    item.dataset.action = "mute";
+    const mutedChats = getMutedChats();
+    const isMuted = mutedChats.includes(String(window.currentChatUserId));
+    console.log("🔍 Initial build check. User:", window.currentChatUserId, "isMuted:", isMuted);
+
+    if (isMuted) {
+      label = "Unmute Chat";
+      // ایموجی 🔔 برای Unmute
+      icon = `<span style="font-size:18px;">🔔</span>`;
+    }
+  }
+
   if (opt.onClick) {
     item.addEventListener("click", (e) => {
       e.stopPropagation();
       opt.onClick();
+
+      // بعد از کلیک اگر Mute/Unmute بود، متن و آیکون را تغییر بده
+      if (item.dataset.action === "mute") {
+        const mutedChats = getMutedChats();
+        const isNowMuted = mutedChats.includes(String(window.currentChatUserId));
+        const spanText = item.querySelector(".menu-text");
+        const iconSpan = item.querySelector("svg, span");
+
+        if (spanText && iconSpan) {
+          if (isNowMuted) {
+            spanText.textContent = "Unmute Chat";
+            iconSpan.outerHTML = `<span style="font-size:18px;">🔔</span>`;
+          } else {
+            spanText.textContent = "Mute Chat";
+            iconSpan.outerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                   </svg>`;
+          }
+        }
+      }
+
       dropdownMenu.style.display = "none";
     });
   }
 
-  // Inner HTML with icon + text
-  item.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${opt.icon}<span>${opt.text}</span></span>`;
+  item.innerHTML = `
+    <span style="display:flex;align-items:center;gap:8px">
+      ${icon}
+      <span class="menu-text">${label}</span>
+    </span>`;
 
-  // Basic styles
+  // استایل‌ها
   item.style.display = "block";
   item.style.width = "100%";
   item.style.padding = "8px 16px";
   item.style.border = "none";
-  item.style.background = "transparent"; // Important: allow hover
+  item.style.background = "transparent";
   item.style.textAlign = "left";
   item.style.cursor = "pointer";
   item.style.borderRadius = "6px";
   item.style.transition = "background-color 0.2s ease";
-
-  // Hover effect
   item.addEventListener("mouseenter", () => item.style.backgroundColor = "#f0f0f0");
   item.addEventListener("mouseleave", () => item.style.backgroundColor = "transparent");
 
   dropdownMenu.appendChild(item);
 });
-// گرفتن لیست میوت‌شده‌ها از localStorage
+
+function removeChatFromAllLists(userId) {
+  userId = String(userId);
+  console.log("🚀 removeChatFromAllLists called for userId:", userId);
+
+  // حذف از Chats tab (اگر موجود باشد)
+  const chatsList = document.getElementById("chatsList");
+  if (chatsList) {
+    const chatItem = chatsList.querySelector(`[data-user-id="${userId}"]`);
+    if (chatItem) {
+      chatItem.remove();
+      console.log("✅ Removed from chatsList");
+    }
+  }
+
+  // حذف از Search tab (اگر موجود باشد)
+  const searchList = document.getElementById("userList");
+  if (searchList) {
+    const searchItem = searchList.querySelector(`[data-user-id="${userId}"]`);
+    if (searchItem) {
+      searchItem.remove();
+      console.log("✅ Removed from searchList");
+    }
+  }
+
+  // پاک کردن currentChatUserId
+  if (localStorage.getItem("currentChatUserId") === userId) {
+    localStorage.removeItem("currentChatUserId");
+    console.log("🗑 currentChatUserId removed");
+  }
+
+  // اگر Chats tab خالی است، پیام "No Chat Yet"
+  if (chatsList && chatsList.children.length === 0) {
+    const noMsg = document.getElementById("noChatsMsg");
+    if (noMsg) {
+      noMsg.style.display = "block";
+      noMsg.textContent = "No Chat Yet";
+    }
+  }
+
+  // رفرش کامل لیست‌ها تا هر دو تب همزمان آپدیت شوند
+  if (typeof loadChatsList === "function") {
+    console.log("♻️ Refreshing chat list...");
+    loadChatsList();
+  }
+  if (typeof loadSearchList === "function") {
+    console.log("♻️ Refreshing search list...");
+    loadSearchList();
+  }
+}
+
+
+
+  console.log("💡 Dropdown items appended.");
+
+  // === Mute/Unmute Functions ===
 function getMutedChats() {
-  return JSON.parse(localStorage.getItem("mutedChats") || "[]");
+  const muted = JSON.parse(localStorage.getItem("mutedChats") || "[]");
+  const strMuted = muted.map(id => String(id)); // ✅ همه string
+  console.log("💾 getMutedChats (as string):", strMuted);
+  return strMuted;
 }
 
-// ذخیره‌کردن میوت‌شده‌ها در localStorage
 function setMutedChats(list) {
-  localStorage.setItem("mutedChats", JSON.stringify(list));
+  const strList = list.map(id => String(id)); // ✅ همه string
+  console.log("💾 setMutedChats (as string):", strList);
+  localStorage.setItem("mutedChats", JSON.stringify(strList));
 }
 
-// تغییر وضعیت mute/unmute یک چت
 function toggleMuteChat(userId) {
+  userId = String(userId); // ✅ اطمینان از اینکه string است
+  console.log("🔹 toggleMuteChat for user:", userId);
   let mutedChats = getMutedChats();
   let isMuted = mutedChats.includes(userId);
-
   if (isMuted) {
-    // آنمیوت کن
     mutedChats = mutedChats.filter(id => id !== userId);
     setMutedChats(mutedChats);
-    updateMuteMenuText(false); // متن/آیکون آپدیت بشه
+    updateMuteMenuText(false);
   } else {
-    // میوت کن
     mutedChats.push(userId);
     setMutedChats(mutedChats);
     updateMuteMenuText(true);
   }
-
-  // اجرای دوباره شمارش پیام‌ها تا Badge درست شه
   fetchUnreadMessagesCount();
 }
+
 function updateMuteMenuText(isMuted) {
   const dropdownMenu = document.getElementById("chatDropdownMenu");
   if (!dropdownMenu) return;
 
-  const buttons = Array.from(dropdownMenu.querySelectorAll("button"));
-  buttons.forEach(btn => {
-    const spanText = btn.querySelector("span:last-child");
-    if (!spanText) return;
+  const btn = dropdownMenu.querySelector('button[data-action="mute"]');
+  if (!btn) return;
 
-    if (spanText.textContent.includes("Mute") || spanText.textContent.includes("Unmute")) {
-      let newText, iconSVG;
+  const spanText = btn.querySelector(".menu-text");
+  if (!spanText) return;
 
-      if (isMuted) {
-        newText = "Unmute Chat";
-        iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                       viewBox="0 0 24 24" fill="none" stroke="green"
-                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                     <path d="M5 13l4 4L19 7"/>
-                   </svg>`;
-      } else {
-        newText = "Mute Chat";
-        iconSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
-                      viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                    <line x1="1" y1="1" x2="23" y2="23"></line>
-                  </svg>`;
-      }
+  if (isMuted) {
+    // Bell SVG برای Unmute
+    btn.innerHTML = `
+      <span style="display:flex;align-items:center;gap:8px">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="menu-text">Unmute Chat</span>
+      </span>
+    `;
+  } else {
+    // Bell with slash SVG برای Mute
+    btn.innerHTML = `
+      <span style="display:flex;align-items:center;gap:8px">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h12"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+        <span class="menu-text">Mute Chat</span>
+      </span>
+    `;
+  }
+}
+function applyBlockState(userId, isBlocked) {
+  const chatForm = document.getElementById("chatForm");
+  const chatInput = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("chatSendBtn");
 
-      const newBtn = btn.cloneNode(true);
-      newBtn.innerHTML = `<span style="display:flex;align-items:center;gap:8px">${iconSVG}<span>${newText}</span></span>`;
-      newBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggleMuteChat(window.currentChatUserId);
-        dropdownMenu.style.display = "none";
-      });
-      btn.replaceWith(newBtn);
+  // غیر فعال کردن فرم و دکمه‌ها
+  if (chatForm) chatForm.style.display = isBlocked ? "none" : "flex";
+  if (chatInput) chatInput.disabled = isBlocked;
+  if (sendBtn) sendBtn.disabled = isBlocked;
+
+  // آپدیت متن و آیکون دراپ‌داون
+  updateBlockMenuText(isBlocked);
+}
+// ===== Helpers =====
+function getBlockedUsers() {
+  return JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(id => String(id));
+}
+function setBlockedUsers(list) {
+  localStorage.setItem("blockedUsers", JSON.stringify(list.map(id => String(id))));
+}
+
+// ===== Apply Block/Unblock State =====
+function applyBlockState(userId, isBlocked) {
+  const chatForm = document.getElementById("chatForm");
+  const chatInput = document.getElementById("chatInput");
+  const sendBtn = document.getElementById("chatSendBtn");
+
+  if (chatForm) chatForm.style.display = isBlocked ? "none" : "flex";
+  if (chatInput) chatInput.disabled = isBlocked;
+  if (sendBtn) sendBtn.disabled = isBlocked;
+
+  updateBlockMenuText(isBlocked);
+}
+
+// ===== Block User =====
+function blockUser(userId) {
+  userId = String(userId);
+
+  // اضافه کردن به لیست بلاک شده‌ها
+  let blockedUsers = getBlockedUsers();
+  if (!blockedUsers.includes(userId)) {
+    blockedUsers.push(userId);
+    setBlockedUsers(blockedUsers);
+  }
+
+  // ذخیره وضعیت بلاک
+  window.isChatBlocked = true;
+
+  applyBlockState(userId, true);
+
+  // غیر فعال کردن فرم چت و دکمه ارسال فقط اگر پنجره چت با همان کاربر باز است
+  if (window.currentChatUserId === userId) {
+    const chatInput = document.getElementById("chatInput");
+    const sendBtn = document.getElementById("chatSendBtn");
+
+    if (chatInput) {
+      chatInput.disabled = true;
+      chatInput.placeholder = "❌ شما این کاربر را بلاک کرده‌اید";
     }
-  });
+
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.title = "شما این کاربر را بلاک کرده‌اید";
+    }
+
+    alert("❌ شما این کاربر را بلاک کرده‌اید؛ ارسال پیام غیر فعال شد.");
+  }
+}
+// ===== Unblock User =====
+function unblockUser(userId) {
+  userId = String(userId);
+
+  // حذف از localStorage
+  let blockedUsers = getBlockedUsers().filter(id => id !== userId);
+  setBlockedUsers(blockedUsers);
+
+  localStorage.removeItem(`blocked_${userId}`);
+
+  // اعمال وضعیت آن‌بلاک روی فرم و دکمه‌ها
+  applyBlockState(userId, false);
+
+  // بروزرسانی متن و آیکون منو
+  updateBlockMenuText(false);
+
+  // بستن منوی دراپ‌داون
+  const dropdownMenu = document.getElementById("chatDropdownMenu");
+  if (dropdownMenu) dropdownMenu.style.display = "none";
+}
+
+// ===== هنگام لود یا باز شدن چت برای یک یوزر =====
+function initBlockUI(userId) {
+  const isBlocked = localStorage.getItem(`blocked_${userId}`) === "true";
+  applyBlockState(userId, isBlocked);
+  updateBlockMenuText(isBlocked);
+}
+
+// ===== Update Block Menu Text & SVG =====
+function updateBlockMenuText(isBlocked) {
+  const dropdownMenu = document.getElementById("chatDropdownMenu");
+  if (!dropdownMenu) return;
+
+  const btn = dropdownMenu.querySelector(".block-btn .menu-text");
+  if (!btn) return;
+
+  const iconSpan = btn.previousElementSibling;
+
+  if (isBlocked) {
+    btn.textContent = "Unblock User";
+    if (iconSpan) {
+      iconSpan.outerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0"/>
+      </svg>`;
+    }
+  } else {
+    btn.textContent = "Block User";
+    if (iconSpan) {
+      iconSpan.outerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
+      </svg>`;
+    }
+  }
 }
 
   // === Append Dropdown to Chat Modal ===
   chatModalContent.appendChild(dropdownMenu);
 
-  // === Toggle Dropdown on Button Click ===
-  chatOptionsBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const rect = chatOptionsBtn.getBoundingClientRect();
-    const modalRect = chatModalContent.getBoundingClientRect();
-    dropdownMenu.style.left = `${rect.left - modalRect.left}px`;
-    dropdownMenu.style.top = `${rect.bottom - modalRect.top + 4}px`;
-    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
-  });
+// === Toggle Dropdown on Button Click ===
+chatOptionsBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
 
-  // === Prevent Closing When Clicking Inside Menu ===
-  dropdownMenu.addEventListener("click", e => e.stopPropagation());
+  const userId = String(window.currentChatUserId);
+  if (!userId) return;
 
-  // === Close Dropdown When Clicking Outside ===
-  document.addEventListener("click", () => {
-    dropdownMenu.style.display = "none";
-  });
+  // === Mute button dynamic update with SVG ===
+  const muteBtn = dropdownMenu.querySelector('button[data-action="mute"]');
+  if (muteBtn) {
+    const mutedChats = getMutedChats();
+    const isMuted = mutedChats.includes(userId);
 
-  // === Avatar Profile Modal ===
-  if (chatUserAvatar) {
-    chatUserAvatar.style.cursor = "pointer";
-    chatUserAvatar.addEventListener("click", () => {
-      if (!window.currentChatUserId) {
-        alert("No user selected.");
-        return;
-      }
-
-      fetch(`/user_profile_ajax/${window.currentChatUserId}/`, {
-        headers: { "X-Requested-With": "XMLHttpRequest" }
-      })
-        .then(res => res.ok ? res.text() : Promise.reject("Failed to load profile"))
-        .then(html => {
-          contentContainer.innerHTML = html;
-          userProfileModal.style.display = "flex";
-          document.body.classList.add("modal1-open");
-        })
-        .catch(err => {
-          console.error(err);
-          contentContainer.innerHTML = "<p style='color:red'>Error loading profile.</p>";
-          userProfileModal.style.display = "flex";
-        });
-    });
+    if (isMuted) {
+      // Unmute Bell SVG
+      muteBtn.innerHTML = `
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span class="menu-text">Unmute Chat</span>
+        </span>
+      `;
+    } else {
+      // Mute Bell with slash SVG
+      muteBtn.innerHTML = `
+        <span style="display:flex;align-items:center;gap:6px">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h12"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+          <span class="menu-text">Mute Chat</span>
+        </span>
+      `;
+    }
   }
+
+  // === Block button dynamic update ===
+  const blockBtn = dropdownMenu.querySelector(".block-btn .menu-text");
+  if (blockBtn) {
+    const blockedUsers = getBlockedUsers();
+    const isBlocked = blockedUsers.includes(userId);
+
+    blockBtn.textContent = isBlocked ? "Unblock User" : "Block User";
+
+    const iconSpan = blockBtn.previousElementSibling;
+    if (iconSpan) {
+      if (isBlocked) {
+        iconSpan.outerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0"/>
+        </svg>`;
+      } else {
+        iconSpan.outerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="6.5" y1="6.5" x2="17.5" y2="17.5"/>
+        </svg>`;
+      }
+    }
+  }
+
+  // === Position dropdown ===
+  const rect = chatOptionsBtn.getBoundingClientRect();
+  const modalRect = chatModalContent.getBoundingClientRect();
+  dropdownMenu.style.left = `${rect.left - modalRect.left}px`;
+  dropdownMenu.style.top = `${rect.bottom - modalRect.top + 4}px`;
+
+  // === Toggle dropdown visibility ===
+  dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+});
+
 
   // === Close Profile Modal ===
   if (closeUserProfileModalBtn) {
@@ -3791,131 +4135,6 @@ function updateMuteMenuText(isMuted) {
         userProfileModal.style.display = "none";
         document.body.classList.remove("modal1-open");
       }
-    });
-  }
-
-// === Apply Block UI ===
-function applyBlockUI(isBlocked = null, blockedByOther = false) {
-  const chatForm = document.getElementById("chatForm");
-  const unblockBtn = document.getElementById("unblockBtn");
-  const chatInput = document.getElementById("chatInput");
-  const userId = window.currentChatUserId || localStorage.getItem("currentChatUserId");
-
-  if (!chatForm || !unblockBtn || !chatInput) return;
-
-  // حالت وقتی خودت کسی رو بلاک کردی → هیچ تغییری نده
-  if (isBlocked) {
-    chatForm.classList.add("chatForm-hidden"); // همون حالت فعلی خودت
-    unblockBtn.style.display = "block";
-    chatInput.disabled = false; // فعال باشه
-    chatInput.placeholder = "";
-    return; // مهم! برگرد تا بقیه کد اجرا نشه
-  }
-
-  // وقتی طرف مقابل تو رو بلاک کرده
-  if (blockedByOther) {
-    chatForm.classList.remove("chatForm-hidden");
-    unblockBtn.style.display = "none"; // چون تو نمی‌تونی آنبلاک کنی
-    chatInput.disabled = true;
-    chatInput.value = "";
-    chatInput.placeholder = "❌ شما بلاک شدی";
-    return;
-  }
-
-  // حالت عادی
-  chatForm.classList.remove("chatForm-hidden");
-  unblockBtn.style.display = "none";
-  chatInput.disabled = false;
-  chatInput.placeholder = "";
-}
-
-
-
-  // === Block / Unblock ===
-function blockUser(userId) {
-  fetch(`/api/block-user/${userId}/`, {
-    method: "POST",
-    headers: {
-      "X-Requested-With": "XMLHttpRequest",
-      "X-CSRFToken": getCSRFToken(),
-    },
-  })
-  .then(res => res.ok ? res.json() : Promise.reject("Failed to block"))
-  .then(() => {
-    localStorage.setItem(`blocked_${userId}`, "1");
-    applyBlockUI(true);
-    updateBlockMenuText(true);
-  })
-  .catch(err => console.error(err));
-}
-
-function unblockUser(userId) {
-  fetch(`/api/unblock-user/${userId}/`, {
-    method: "POST",
-    headers: {
-      "X-Requested-With": "XMLHttpRequest",
-      "X-CSRFToken": getCSRFToken(),
-    },
-  })
-  .then(res => res.ok ? res.json() : Promise.reject("Failed to unblock"))
-  .then(() => {
-    localStorage.removeItem(`blocked_${userId}`);
-    applyBlockUI(false);
-    updateBlockMenuText(false);
-  })
-  .catch(err => console.error(err));
-}
-
-function checkIfBlockedByOtherUser(userId) {
-  fetch(`/api/is-blocked/${userId}/`, {
-    headers: { "X-Requested-With": "XMLHttpRequest" }
-  })
-  .then(res => res.json())
-  .then(data => {
-    // data.youBlocked => you blocked them (leave UI as-is)
-    // data.blockedByOther => they blocked you
-    applyBlockUI(data.youBlocked, data.blockedByOther);
-  })
-  .catch(err => console.error("Check block failed:", err));
-}
-
-// Call this on page load or when opening chat
-document.addEventListener("DOMContentLoaded", () => {
-  const userId = window.currentChatUserId || localStorage.getItem("currentChatUserId");
-  if (userId) checkIfBlockedByOtherUser(userId);
-});
-
-
-
-  // === Unblock Button Click ===
-  const unblockBtn = document.getElementById("unblockBtn");
-  if (unblockBtn) {
-    unblockBtn.addEventListener("click", () => {
-      if (window.currentChatUserId) unblockUser(window.currentChatUserId);
-    });
-  }
-
-  // === Check block status on page load from server ===
-  const userId = window.currentChatUserId || localStorage.getItem("currentChatUserId");
-  if (userId) {
-    console.log("DEBUG: Checking block status on page load for userId", userId);
-    fetch(`/api/check-block-status/${userId}/`, { // باید { blockedByMe: true/false } برگردونه
-      headers: { "X-Requested-With": "XMLHttpRequest" },
-    })
-    .then(res => res.json())
-    .then(data => {
-      console.log("DEBUG: Server block status:", data);
-      const blocked = !!data.blockedByMe;
-
-      if (blocked) localStorage.setItem(`blocked_${userId}`, "1");
-      else localStorage.removeItem(`blocked_${userId}`);
-
-      applyBlockUI(blocked);
-      updateBlockMenuText(blocked);
-    })
-    .catch(err => {
-      console.error("DEBUG: Failed to fetch block status", err);
-      applyBlockUI(); // fallback
     });
   }
 
@@ -4029,6 +4248,10 @@ document.addEventListener("DOMContentLoaded", () => {
 async function sendMessage(event) {
   event.preventDefault();
   event.stopPropagation();
+  console.log("🛠 sendMessage called",
+    "currentUserId=", window.currentUserId,
+    "currentChatUserId=", window.currentChatUserId
+  );
 
   const chatInput = document.getElementById("chatInput");
   if (!chatInput) return;
@@ -4038,6 +4261,13 @@ async function sendMessage(event) {
 
   if (!window.currentUserId || !window.currentChatUserId) {
     alert("یک کاربر برای چت انتخاب کنید.");
+    return;
+  }
+
+  // 🔹 بررسی بلاک بودن کاربر
+  const blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(String);
+  if (blockedUsers.includes(String(window.currentChatUserId))) {
+    alert("❌ شما نمی‌توانید به این کاربر پیام ارسال کنید. کاربر بلاک شده است.");
     return;
   }
 
@@ -4107,88 +4337,6 @@ let editingMessageId = null;
 });
 
 
-async function sendMessage(event) {
-  event.preventDefault();
-  event.stopPropagation();
-
-  console.log("✅ sendMessage triggered");
-
-  const chatInput = document.getElementById("chatInput");
-  if (!chatInput) {
-    console.warn("❗ chatInput not found in DOM");
-    return;
-  }
-
-  const message = chatInput.value.trim();
-  if (!message) {
-    console.log("⚠️ Empty message, nothing to send.");
-    return;
-  }
-
-  if (!window.currentUserId || !window.currentChatUserId) {
-    alert("یک کاربر برای چت انتخاب کنید.");
-    return;
-  }
-
-  try {
-    let response;
-
-    if (isEditing && editingMessageId) {
-      // 🔹 حالت ویرایش → PUT
-      console.log(`✏️ Editing message ID: ${editingMessageId}`);
-      response = await fetch(`/api/chat/messages/${editingMessageId}/`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCSRFToken()
-        },
-        credentials: "include",
-        body: JSON.stringify({ message: message })
-      });
-
-      isEditing = false;
-      editingMessageId = null;
-    } else {
-      // 🔹 حالت ارسال پیام جدید → POST
-      response = await fetch("/api/chat/messages/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCSRFToken()
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          sender_id: window.currentUserId,
-          receiver_id: window.currentChatUserId,
-          message: message
-        })
-      });
-    }
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      alert("❌ خطا: " + (data.error || "خطای نامشخص"));
-      console.error("Server error:", data);
-      return;
-    }
-
-    chatInput.value = "";
-
-    if (typeof loadMessagesFromServer === "function") {
-      await loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
-    }
-
-    if (window.innerWidth > 768) {
-      chatInput.focus();
-    }
-
-  } catch (error) {
-    alert("❌ خطا در ارتباط با سرور.");
-    console.error("❌ Fetch error:", error);
-  }
-}
-
 
 
 
@@ -4252,12 +4400,17 @@ function updateNewMessagesBadge() {
   fetch(`/api/chat/message/unread_count/`, { credentials: "include" })
     .then(response => response.json())
     .then(data => {
-      const muted = getMutedChats(); // لیست میوت شده‌ها
+      const muted = getMutedChats(); // لیست کاربرهای میوت
       let count = 0;
 
       if (data.unread_by_user) {
         for (const [userId, num] of Object.entries(data.unread_by_user)) {
-          if (!muted.includes(userId)) count += num;
+          if (muted.includes(String(userId))) {
+            // 📌 اگه کاربر میوت باشه، شمارنده‌ش رو صفر کن
+            data.unread_by_user[userId] = 0;
+          } else {
+            count += num;
+          }
         }
       }
 
@@ -4265,11 +4418,13 @@ function updateNewMessagesBadge() {
         badge.textContent = count;
         badge.style.display = "inline-block";
       } else {
+        badge.textContent = "";
         badge.style.display = "none";
       }
     })
     .catch(err => console.error("Error fetching unread messages:", err));
 }
+
 
 
 function showChatBadge(count) {
@@ -4940,6 +5095,9 @@ function loadChatsList() {
   const noMsg = document.getElementById("noChatsMsg");
   list.innerHTML = "";
 
+  // لیست کاربرهای میوت شده از localStorage
+  const muted = JSON.parse(localStorage.getItem("mutedChats") || "[]").map(id => String(id));
+
   fetch("/api/chats-list/")
     .then(res => res.json())
     .then(data => {
@@ -4947,7 +5105,7 @@ function loadChatsList() {
 
       if (!chats || chats.length === 0) {
         noMsg.style.display = "block";
-        noMsg.textContent = "هیچ چتی وجود ندارد";
+        noMsg.textContent = "No Chat Yet";
         return;
       }
 
@@ -5020,11 +5178,44 @@ function loadChatsList() {
               li.appendChild(timeSpan);
             }
 
-            // badge پیام‌های خوانده نشده
             const unreadCount = unreadCounts[chat.id] || 0;
+
+            // اگر کاربر میوت شده باشه، اضافه کردن ایموجی 🔇 سمت چپ
+            if (muted.includes(String(chat.id))) {
+              const muteSVG = document.createElement("span");
+              muteSVG.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 24 24" 
+                    width="16" height="16" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    stroke-width="2" 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round">
+                  <path d="M11 5L6 9H3v6h3l5 4V5z"></path>
+                  <line x1="23" y1="9" x2="17" y2="15"></line>
+                  <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
+              `;
+              muteSVG.style.marginRight = "20px";
+              muteSVG.style.marginBottom = "-29px";
+              muteSVG.style.display = "inline-flex";
+              muteSVG.style.alignItems = "center";
+              muteSVG.style.verticalAlign = "middle";
+              li.appendChild(muteSVG);
+            }
+
+
+
+            // badge پیام‌های خوانده نشده
             if (unreadCount > 0) {
               const badge = document.createElement("span");
               badge.classList.add("new-message-badge");
+
+              if (muted.includes(String(chat.id))) {
+                badge.classList.add("muted-badge");
+              }
+
               badge.textContent = unreadCount;
               li.appendChild(badge);
             }
@@ -5077,16 +5268,14 @@ function loadChatsList() {
 
 
 
-
-
 // --- Close chat modal ---
 document.getElementById("closeChatModal").addEventListener("click", () => {
-  document.getElementById("chatModal").style.display = "none";
-});
+  const chatModal = document.getElementById("chatModal");
+  chatModal.style.display = "none";
 
-// --- Close chat modal ---
-document.getElementById("closeChatModal").addEventListener("click", () => {
-  document.getElementById("chatModal").style.display = "none";
+  // پاک کردن UID فعال
+  window.currentChatUserId = null;
+  localStorage.removeItem("currentChatUserId");
 });
 
 
@@ -5595,71 +5784,52 @@ function renderMessages(messages) {
 }
 
 
-let windowCurrentChatUserId = null;
-
-function openChatModal(userId, userName, userAvatar) {
-  userId = parseInt(userId);
-  windowCurrentChatUserId = userId;
-
-  if (!window.currentUserId || !windowCurrentChatUserId) {
-    console.error("❌ شناسه کاربر یا مخاطب تعریف نشده است.");
-    return;
-  }
+async function openChatModal(userId, userName, userAvatar) {
+  userId = String(userId);
+  window.currentChatUserId = userId;
 
   const chatModal = document.getElementById("chatModal");
-
-  // ریست کامل مودال
-  const messagesContainer = chatModal.querySelector(".chat-messages");
-  if (messagesContainer) messagesContainer.innerHTML = "";
-
-  const profileAvatar = chatModal.querySelector("#chatUserAvatar");
-  const profileName = chatModal.querySelector("#chatUserNameAvatar");
-
-  if (profileAvatar) profileAvatar.src = userAvatar || "/static/images/default-avatar.png";
-  if (profileName) profileName.textContent = userName || "کاربر ناشناس";
-
-  // **Make avatar and name clickable to open profile modal**
-  const userProfileModal = document.getElementById("userProfileModal");
-  const userProfileContent = document.getElementById("userProfileContent");
-
-  function openProfileModal() {
-    if (!userProfileModal || !userProfileContent) return;
-
-    userProfileModal.style.display = "flex";
-    userProfileModal.dataset.userid = windowCurrentChatUserId;
-
-    // Load profile content via AJAX
-    fetch(`/user_profile_ajax/${windowCurrentChatUserId}/`, {
-      headers: { "X-Requested-With": "XMLHttpRequest" }
-    })
-    .then(res => res.text())
-    .then(html => {
-      userProfileContent.innerHTML = html;
-    })
-    .catch(err => {
-      userProfileContent.innerHTML = "خطا در بارگذاری اطلاعات کاربر.";
-      console.error("User profile load error:", err);
-    });
-  }
-
-  if (profileAvatar) {
-    profileAvatar.style.cursor = "pointer";
-    profileAvatar.onclick = openProfileModal;
-  }
-  if (profileName) {
-    profileName.style.cursor = "pointer";
-    profileName.onclick = openProfileModal;
-  }
-
-  // نمایش مودال
+  document.getElementById("chatUserAvatar").src = userAvatar;
+  document.getElementById("chatUserName").textContent = userName;
   chatModal.style.display = "flex";
+  document.body.classList.add("modal-open");
 
-  // بارگذاری پیام‌ها **بعد از آپدیت state**
-  setTimeout(() => {
-    loadMessages(window.currentUserId, windowCurrentChatUserId);
-  }, 0);
+  try {
+    const res = await fetch(`/api/check-block-status/${userId}/`, { credentials: "include" });
+    const data = await res.json(); // data.blockedByMe, data.blockedByOther
+
+    // ذخیره localStorage برای persist
+    localStorage.setItem("currentBlockStatus", JSON.stringify(data));
+
+    // اعمال وضعیت بلاک روی فرم
+    const chatInput = document.getElementById("chatInput");
+    const sendBtn = document.getElementById("chatSendBtn");
+
+    if (data.blockedByMe || data.blockedByOther) {
+      if (chatInput) {
+        chatInput.disabled = true;
+        chatInput.placeholder = data.blockedByMe ? "شما این کاربر را بلاک کرده‌اید" : "این کاربر شما را بلاک کرده است";
+      }
+      if (sendBtn) sendBtn.disabled = true;
+    } else {
+      if (chatInput) chatInput.disabled = false;
+      if (sendBtn) sendBtn.disabled = false;
+    }
+  } catch (err) {
+    console.error("Error checking block status:", err);
+  }
 }
 
+
+
+// On page load, restore block state if a chat was previously open
+window.addEventListener("DOMContentLoaded", () => {
+  const storedUserId = localStorage.getItem("currentChatUserId");
+  if (storedUserId) {
+    window.currentChatUserId = storedUserId;
+    restoreBlockState();
+  }
+});
 
 
 // 📩 بارگذاری پیام‌ها بین دو نفر
@@ -5865,56 +6035,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// تابع برای ارسال پیام
-async function sendMessage(event) {
-  event.preventDefault();
-
-  const message = chatInput.value.trim();
-  if (!message) return;
-
-  if (!window.currentUserId || !window.currentChatUserId) {
-    alert("یک کاربر برای چت انتخاب کنید.");
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/chat/messages/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken") // یا getCSRFToken
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        sender_id: window.currentUserId,
-        receiver_id: window.currentChatUserId,
-        message: message
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      alert("خطا در ارسال پیام: " + (data.error || "خطای نامشخص"));
-      console.error("Server error:", data);
-      return;
-    }
-
-    chatInput.value = "";
-
-    // بارگذاری مجدد پیام‌ها
-    if (typeof loadMessagesFromServer === "function") {
-      loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
-    }
-
-  } catch (error) {
-    alert("خطا در ارسال پیام. لطفا دوباره تلاش کنید.");
-    console.error("Fetch error:", error);
-  }
-}
 
 
 
+
+// کلیک روی دکمه چت برای باز کردن مودال
 // کلیک روی دکمه چت برای باز کردن مودال
 document.body.addEventListener("click", (e) => {
   const btn = e.target.closest(".chat-btn");
@@ -6056,29 +6181,6 @@ function fetchMessages(senderId, receiverId) {
     })
     .catch(err => console.error("Error fetching messages:", err));
 }
-
-
-function updateNewMessagesBadge() {
-  const badge = document.getElementById("newMessagesBadge");
-  if (!badge) return;
-
-  fetch(`/api/chat/message/unread_count/`, { credentials: 'include' })
-    .then(response => {
-      if (!response.ok) throw new Error(`خطا در دریافت شمارنده: ${response.status}`);
-      return response.json();
-    })
-    .then(data => {
-      const count = data.unread_count || 0;
-      badge.textContent = count;
-      badge.style.display = count > 0 ? "inline-block" : "none";
-    })
-    .catch(err => console.error("Error fetching unread messages:", err));
-}
-
-// 🔹 آپدیت badge هر ۱۰ ثانیه
-updateNewMessagesBadge();
-setInterval(updateNewMessagesBadge, 10000);
-
 
 document.getElementById('closeFriendsModal').addEventListener('click', () => {
   modals.friends.style.display = 'none';
@@ -6304,30 +6406,6 @@ const chatMessages = document.getElementById("chatMessages");
     })
     .catch(err => console.error("Error fetching messages:", err));
 }
-
-
-function updateNewMessagesBadge() {
-  const badge = document.getElementById("newMessagesBadge");
-  if (!badge) return;
-
-  fetch(`/api/chat/message/unread_count/`, { credentials: 'include' })
-    .then(response => {
-      if (!response.ok) throw new Error(`خطا در دریافت شمارنده: ${response.status}`);
-      return response.json();
-    })
-    .then(data => {
-      const count = data.unread_count || 0;
-      badge.textContent = count;
-      badge.style.display = count > 0 ? "inline-block" : "none";
-    })
-    .catch(err => console.error("Error fetching unread messages:", err));
-}
-
-// 🔹 آپدیت badge هر ۱۰ ثانیه
-updateNewMessagesBadge();
-setInterval(updateNewMessagesBadge, 10000);
-
-
 
 function onEditMessageClick(e) {
   e.preventDefault();

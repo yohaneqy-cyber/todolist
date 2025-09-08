@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import DeleteChatApi
 
 urlpatterns = [
     path('login/', views.LoginPage, name='login'),
@@ -46,11 +47,16 @@ urlpatterns = [
     path('api/chat/messages/<int:pk>/', views.MessageUpdateDeleteView.as_view(), name='chat-message-edit-delete'),
     path('api/user/profile/<int:user_id>/', views.get_user_profile, name='get_user_profile'),
     path('api/block-user/<int:user_id>/', views.block_user, name='block_user'),
-    path('api/unblock-user/<int:user_id>/', views.unblock_user, name='unblock_user'),
+    path('api/unblock/<int:user_id>/', views.unblock_user, name='unblock_user'),
     path('api/chats-list/', views.chats_list, name='chats-list'),
-    path('api/check-block-status/', views.check_block_status, name='check-block-status'),
-    path("api/is-blocked/<int:user_id>/", views.is_blocked, name="is_blocked"),
+    path('api/check-block-status/<int:user_id>/', views.check_block_status, name='check-block-status'),
     path('api/chat/message/unread_count/',  views.unread_message_count, name='unread-message-count'),
     path('api/chat/messages/mark_read/', views.mark_messages_read, name='mark-messages-read'),
-    path('api/chat/message/unread_count/each/', views.unread_message_count_each, name='unread_count_each')
+    path('api/chat/message/unread_count/each/', views.unread_message_count_each, name='unread_count_each'),
+    path(
+        'send-message/<int:receiver_id>/',
+        views.send_message,
+        name='send_message'
+    ),
+    path('api/delete-chat/<int:user_id>/', DeleteChatApi.as_view(), name='delete-chat'),
 ]

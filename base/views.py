@@ -985,8 +985,46 @@ def unblock_user(request, user_id):
         return JsonResponse({'error': 'User not found'}, status=404)
 
     Block.objects.filter(blocker=request.user, blocked=blocked_user).delete()
-
     return JsonResponse({'success': True})
+
+from django.http import JsonResponse
+from .models import Block
+
+@csrf_exempt
+def send_message(request, user_id):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Login required"}, status=403)
+
+    try:
+        receiver = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)
+
+    # 👇 چک بلاک شدن
+    if Block.objects.filter(blocker=request.user, blocked=receiver).exists():
+        return JsonResponse({"error": "You blocked this user"}, status=403)
+
+    if Block.objects.filter(blocker=receiver, blocked=request.user).exists():
+        return JsonResponse({"error": "You are blocked by this user"}, status=403)
+
+    # اینجا کد ذخیره پیام
+    message = ChatMessage.objects.create(
+        sender=request.user,
+        receiver=receiver,
+        text=request.POST.get("text", "")
+    )
+
+    return JsonResponse({
+        "success": True,
+        "message": {
+            "id": message.id,
+            "text": message.text,
+            "sender": request.user.username
+        }
+    })
 
 from django.db.models import Q
 from rest_framework import generics, status
@@ -1131,27 +1169,29 @@ def chats_list(request):
     return JsonResponse({"chats": chats})
 
 
-@login_required
-def is_blocked(request, user_id):
-    other_user = get_object_or_404(User, id=user_id)
 
-    you_blocked = Block.objects.filter(blocker=request.user, blocked=other_user).exists()
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Block  # مدل بلاک خودت
+
+@csrf_exempt
+def check_block_status(request, user_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Login required"}, status=403)
+
+    try:
+        other_user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+    blocked_by_me = Block.objects.filter(blocker=request.user, blocked=other_user).exists()
     blocked_by_other = Block.objects.filter(blocker=other_user, blocked=request.user).exists()
 
     return JsonResponse({
-        "youBlocked": you_blocked,
+        "blockedByMe": blocked_by_me,
         "blockedByOther": blocked_by_other
     })
 
-@login_required
-def check_block_status(request, user_id):
-    other_user = get_object_or_404(User, id=user_id)
-    blocked_by_me = Block.objects.filter(blocker=request.user, blocked=other_user).exists()
-    blocked_me = Block.objects.filter(blocker=other_user, blocked=request.user).exists()
-    return JsonResponse({
-        "blockedByMe": blocked_by_me,
-        "blockedMe": blocked_me,
-    })
 
 
 from django.db.models import Count
@@ -1211,3 +1251,23 @@ def mark_messages_read(request):
         return JsonResponse({"success": True})
     
     return JsonResponse({"error": "POST required"}, status=405)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class DeleteChatApi(View):
+    def post(self, request, user_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Login required"}, status=403)
+        
+        try:
+            other_user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User not found"}, status=404)
+
+        # حذف همه پیام‌ها بین کاربر و کاربر مقابل
+        ChatMessage.objects.filter(
+            Q(sender=request.user, receiver=other_user) |
+            Q(sender=other_user, receiver=request.user)
+        ).delete()
+
+        return JsonResponse({"success": True, "message": "Chat deleted"})
