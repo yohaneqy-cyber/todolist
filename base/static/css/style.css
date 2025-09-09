@@ -1866,6 +1866,7 @@ html.dark-mode, body.dark-mode select:-webkit-autofill {
 }
 
 .profile-container {
+  position: relative !important; 
   max-width: 480px !important;
   margin: 50px auto;
   padding: 35px 40px;
@@ -3021,4 +3022,50 @@ textarea[name="bio"] {
   .auth-input {
     padding: 12px 14px;
   }
+}
+
+.three-dots-menu {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  cursor: pointer;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.three-dots-menu:hover {
+  color: #000;
+}
+
+
+.dropdown-menu {
+  display: none; /* hidden by default */
+  position: absolute;
+  top: 30px;  /* below the three dots */
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 100;
+  min-width: 140px;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f44336;
+  color: #fff;
+  border-radius: 6px;
 }

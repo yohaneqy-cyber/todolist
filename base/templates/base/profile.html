@@ -3,22 +3,118 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/style.css' %}?{% now 'U' %}">
+<style>
+/* Three-dot vertical menu */
+.three-dots-menu {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+}
+
+.three-dots-menu svg {
+  width: 24px;
+  height: 24px;
+}
+
+.dropdown-menu {
+  display: none; /* hidden by default */
+  position: absolute;
+  top: 30px; /* below the three dots */
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 100;
+  min-width: 140px;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f44336;
+  color: #fff;
+  border-radius: 6px;
+}
+
+body.dark-mode .three-dots-menu svg {
+  fill: #ddd;
+}
+
+body.dark-mode .dropdown-menu {
+  background-color: #2c2c2c;
+  border: 1px solid #444;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+
+body.dark-mode .dropdown-menu button {
+  color: #ddd;
+}
+
+body.dark-mode .dropdown-menu button:hover {
+  background-color: #e53935;
+  color: #fff;
+}
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="profile-container">
-  <h1>Welcome To Your Profile {{ user.name }}</h1>
 
+  <!-- Three-dots vertical menu -->
+  <div class="three-dots-menu" id="threeDotsMenu">
+    <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="5" r="2"/>
+      <circle cx="12" cy="12" r="2"/>
+      <circle cx="12" cy="19" r="2"/>
+    </svg>
+    <div class="dropdown-menu" id="dropdownMenu">
+      <button type="button" onclick="deleteProfile()" style="display: flex; align-items: center; gap: 4px;">
+        <!-- Realistic Trash Can SVG -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display: inline-block;">
+          <path d="M3 6h18v2H3V6zm2 3h14l-1 12H6L5 9zm3 2v8h2v-8H8zm4 0v8h2v-8h-2zM9 4V2h6v2h5v2H4V4h5z"/>
+        </svg>
+        Delete Avatar
+      </button>
+    </div>
+
+
+  </div>
+
+  <!-- Avatar -->
   <div class="navbar-avatar">
-    {% if user.avatar %}
-      <img src="{{ user.avatar.url }}" alt="Avatar" class="profile-avatar">
-    {% else %}
-      <div class="avatar-placeholder">
+    <img 
+      src="{% if user.avatar %}{{ user.avatar.url }}{% endif %}" 
+      alt="Avatar" 
+      class="profile-avatar" 
+      id="avatarPreview"
+      style="{% if not user.avatar %}display:none;{% endif %}"
+    >
+    {% if not user.avatar %}
+      <div class="avatar-placeholder" id="avatarPlaceholder">
         {{ user.name|slice:":1"|upper }}
       </div>
     {% endif %}
   </div>
 
+
+
+  <!-- Profile Form -->
   <form method="POST" enctype="multipart/form-data" class="profile-form">
     {% csrf_token %}
 
@@ -29,7 +125,6 @@
         <div class="error">{{ form.avatar.errors }}</div>
       {% endif %}
     </div>
-
 
     <div class="form-group">
       {{ form.name.label_tag }}
@@ -58,4 +153,93 @@
     <button type="submit" class="profile-submit-btn">Save Changes</button>
   </form>
 </div>
+
+<!-- Scripts -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const avatarInput = document.querySelector("#id_avatar") || document.querySelector("#avatarInput");
+  const avatarPreview = document.getElementById("avatarPreview");
+  const avatarPlaceholder = document.getElementById("avatarPlaceholder");
+
+  if (avatarInput) {
+    avatarInput.addEventListener("change", function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          avatarPreview.src = e.target.result;
+          avatarPreview.style.display = "block";
+          if (avatarPlaceholder) {
+            avatarPlaceholder.style.display = "none";
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+});
+
+  // Toggle dropdown visibility
+  document.getElementById("threeDotsMenu").addEventListener("click", function(event) {
+    event.stopPropagation();
+    const menu = document.getElementById("dropdownMenu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  });
+
+  // Close dropdown if clicking outside
+  document.addEventListener("click", function() {
+    const menu = document.getElementById("dropdownMenu");
+    menu.style.display = "none";
+  });
+
+  // Delete avatar function
+  function deleteProfile() {
+    const avatarInput = document.querySelector("#id_avatar") || document.querySelector("#avatarInput");
+    const avatarPreview = document.getElementById("avatarPreview");
+    const avatarPlaceholder = document.getElementById("avatarPlaceholder");
+
+    // ✅ اگر کاربر فقط پیش‌نمایش انتخاب کرده (قبل سیو)
+    if (avatarInput && avatarInput.files.length > 0) {
+      avatarInput.value = ""; // پاک کردن فایل انتخابی
+      avatarPreview.src = "";
+      avatarPreview.style.display = "none";
+
+      if (avatarPlaceholder) {
+        avatarPlaceholder.style.display = "flex";
+      } else {
+        const avatarContainer = document.querySelector(".navbar-avatar");
+        avatarContainer.innerHTML = `
+          <div id="avatarPlaceholder" class="avatar-placeholder">
+            No avatar set
+          </div>
+        `;
+      }
+      return; // دیگه به سرور درخواست نمی‌زنیم
+    }
+
+    // ✅ اگر آواتار ذخیره‌شده باشه → حذف از سرور
+    fetch("{% url 'delete_avatar' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const avatarContainer = document.querySelector(".navbar-avatar");
+        avatarContainer.innerHTML = `
+          <div id="avatarPlaceholder" class="avatar-placeholder">
+            {{ user.name|slice:":1"|upper }}
+          </div>
+        `;
+      } else {
+        alert(data.error || "Something went wrong.");
+      }
+    })
+    .catch(err => console.error("Error:", err));
+  }
+</script>
+
 {% endblock %}

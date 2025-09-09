@@ -688,7 +688,7 @@ def friend_requests_api(request):
             "from_user_id": user.id,
             "from_user_name": getattr(user, "name", "Unknown"),
             "from_user_email": getattr(user, "email", ""),
-            "from_user_avatar": request.build_absolute_uri(user.avatar.url) if user.avatar else "/static/default-avatar.png"
+            "from_user_avatar": request.build_absolute_uri(user.avatar.url) if user.avatar else None
         })
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -811,7 +811,7 @@ def friends_list_api(request):
 
         name = getattr(friend, "name", "Unknown")
         email = getattr(friend, "email", "")
-        avatar = "/static/default-avatar.png"
+        avatar = None
         if hasattr(friend, "avatar") and friend.avatar:
             avatar = request.build_absolute_uri(friend.avatar.url)
         elif hasattr(friend, "profile") and getattr(friend.profile, "avatar", None):
@@ -1193,9 +1193,6 @@ def check_block_status(request, user_id):
     })
 
 
-
-from django.db.models import Count
-
 @csrf_exempt
 @login_required
 def unread_message_count(request):
@@ -1230,7 +1227,6 @@ def unread_message_count_each(request):
 
     return JsonResponse(result)
 
-import json
 
 @login_required
 def mark_messages_read(request):
@@ -1275,3 +1271,15 @@ class DeleteChatApi(View):
         ).delete()
 
         return JsonResponse({"success": True, "message": "Chat deleted"})
+
+
+def delete_avatar(request):
+    if request.method == 'POST':
+        user = request.user
+        if user.avatar:
+            user.avatar.delete(save=False)
+            user.avatar = None
+            user.save()
+            return JsonResponse({"success": True})
+        return JsonResponse({"success": False, "error": "No avatar set"})
+    return JsonResponse({"success": False, "error": "Invalid request"})
