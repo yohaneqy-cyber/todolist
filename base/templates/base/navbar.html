@@ -6,6 +6,13 @@
   <title>MySite</title>
   {% load static %}
   <style>
+
+#chatUserAvatar,
+#chatUserAvatarPlaceholder,
+#chatUserNameAvatar {
+  -webkit-tap-highlight-color: transparent !important; /* برای iOS و اندروید */
+  outline: none !important; /* جلوگیری از حاشیه پیش‌فرض */
+}
 /* دکمه Requests */
 #requestsTabBtn {
   position: relative; /* بسیار مهم */
@@ -4620,46 +4627,63 @@ document.addEventListener('keydown', e => {
 
 // تابع باز کردن مودال
 function openModal(modal, options = {}) {
-  modal.style.display = 'flex';
-  modal.setAttribute('aria-hidden', 'false');
+  if (!modal) return;
 
-  // اگر options شامل کاربر هست (مثل chatModal)
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
+
   if (options.user) {
-    const user = options.user; // { id, name, avatar }
+    const user = options.user;
+
     const chatUserAvatar = modal.querySelector("#chatUserAvatar");
     const chatUserNameAvatar = modal.querySelector("#chatUserNameAvatar");
     const container = modal.querySelector("#chatUserProfile");
 
-    // حذف placeholder قدیمی اگر وجود دارد
+    if (!chatUserAvatar || !chatUserNameAvatar || !container) return;
+
+    // Remove old placeholder if exists
     const existingPlaceholder = modal.querySelector("#chatUserAvatarPlaceholder");
     if (existingPlaceholder) existingPlaceholder.remove();
 
     chatUserNameAvatar.textContent = user.name || "user";
 
-    if (user.avatar) {
+    if (user.avatar && user.avatar.trim() !== "") {
       chatUserAvatar.style.display = "block";
       chatUserAvatar.src = user.avatar;
+
+      // If image fails to load, fallback to placeholder
+      chatUserAvatar.onerror = () => {
+        chatUserAvatar.style.display = "none";
+        createPlaceholder(container, user);
+      };
     } else {
       chatUserAvatar.style.display = "none";
-
-      const placeholder = document.createElement("div");
-      placeholder.id = "chatUserAvatarPlaceholder";
-      placeholder.textContent = user.name ? user.name.charAt(0).toUpperCase() : "?";
-      placeholder.style.width = "56px";
-      placeholder.style.height = "56px";
-      placeholder.style.borderRadius = "50%";
-      placeholder.style.backgroundColor = "#aaa";
-      placeholder.style.color = "#fff";
-      placeholder.style.display = "flex";
-      placeholder.style.alignItems = "center";
-      placeholder.style.justifyContent = "center";
-      placeholder.style.fontWeight = "600";
-      placeholder.style.fontSize = "22px";
-
-      container.insertBefore(placeholder, container.firstChild);
+      createPlaceholder(container, user);
     }
   }
+
+  // ---- helper for placeholder ----
+  function createPlaceholder(container, user) {
+    const placeholder = document.createElement("div");
+    placeholder.id = "chatUserAvatarPlaceholder";
+    placeholder.textContent = user.name ? user.name.charAt(0).toUpperCase() : "?";
+    Object.assign(placeholder.style, {
+      width: "56px",
+      height: "56px",
+      borderRadius: "50%",
+      backgroundColor: "#aaa",
+      color: "#fff",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontWeight: "600",
+      fontSize: "22px",
+    });
+    container.insertBefore(placeholder, container.firstChild);
+  }
 }
+
+
 
 // تابع بستن مودال
 function closeModal(modal) {
@@ -5020,7 +5044,6 @@ function loadChatsList() {
               timeSpan.style.right = "12px";
               timeSpan.style.fontSize = "11px";
               timeSpan.style.padding = "2px 6px";
-              timeSpan.style.backgroundColor = "rgba(0,0,0,0.05)";
               timeSpan.style.borderRadius = "8px";
               timeSpan.style.color = "#555";
               li.appendChild(timeSpan);
@@ -5061,56 +5084,113 @@ function loadChatsList() {
             }
 
             // کلیک روی آیتم چت
-            li.addEventListener("click", () => {
-              const chatModal = document.getElementById("chatModal");
-              const chatUserAvatar = document.getElementById("chatUserAvatar");
-              const chatUserNameAvatar = document.getElementById("chatUserNameAvatar");
+li.addEventListener("click", () => {
+  console.log("Clicked chat:", chat.id);
 
-              chatModal.style.display = "flex";
-              window.currentChatUserId = chat.id;
+  const chatModal = document.getElementById("chatModal");
+  const chatUserProfile = chatModal.querySelector("#chatUserProfile");
+  const chatUserAvatar = chatModal.querySelector("#chatUserAvatar");
+  const chatUserNameAvatar = chatModal.querySelector("#chatUserNameAvatar");
 
-              chatUserNameAvatar.textContent = chat.name;
+  window.currentChatUserId = chat.id;
 
-              // نمایش avatar یا دایره خاکستری
-              const existingPlaceholder = document.getElementById("chatUserAvatarPlaceholder");
-              if (existingPlaceholder) existingPlaceholder.remove();
+  // پاک کردن placeholder قدیمی
+  const existingPlaceholder = chatModal.querySelector("#chatUserAvatarPlaceholder");
+  if (existingPlaceholder) existingPlaceholder.remove();
 
-              if (chat.avatar) {
-                chatUserAvatar.style.display = "block";
-                chatUserAvatar.src = chat.avatar;
-              } else {
-                chatUserAvatar.style.display = "none";
+  // آپدیت نام
+  if (chatUserNameAvatar) chatUserNameAvatar.textContent = chat.name;
 
-                const placeholder = document.createElement("div");
-                placeholder.id = "chatUserAvatarPlaceholder";
-                placeholder.textContent = chat.name ? chat.name.charAt(0).toUpperCase() : "?";
-                placeholder.style.width = "56px";
-                placeholder.style.height = "56px";
-                placeholder.style.borderRadius = "50%";
-                placeholder.style.backgroundColor = "#aaa";
-                placeholder.style.color = "#fff";
-                placeholder.style.display = "flex";
-                placeholder.style.alignItems = "center";
-                placeholder.style.justifyContent = "center";
-                placeholder.style.fontWeight = "600";
-                placeholder.style.fontSize = "22px";
+  let avatarElement;
 
-                const container = document.getElementById("chatUserProfile");
-                container.insertBefore(placeholder, container.firstChild);
-              }
+  // تابع ساخت placeholder
+  function makePlaceholder() {
+    chatUserAvatar.style.display = "none";
+    const placeholder = document.createElement("div");
+    placeholder.id = "chatUserAvatarPlaceholder";
+    placeholder.textContent = chat.name ? chat.name.charAt(0).toUpperCase() : "?";
+    Object.assign(placeholder.style, {
+      width: "56px",
+      height: "56px",
+      borderRadius: "50%",
+      backgroundColor: "#aaa",
+      color: "#fff",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontWeight: "600",
+      fontSize: "22px"
+    });
+    chatUserProfile.insertBefore(placeholder, chatUserProfile.firstChild);
+    return placeholder;
+  }
 
-              // حذف badge پیام خوانده نشده
-              const existingBadge = li.querySelector(".new-message-badge");
-              if (existingBadge) existingBadge.remove();
+  // اگر آواتار وجود داشت
+  if (chat.avatar && chat.avatar.trim() !== "") {
+    chatUserAvatar.style.display = "block";
+    chatUserAvatar.src = chat.avatar;
+    avatarElement = chatUserAvatar;
 
-              fetch("/api/chat/messages/mark_read/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: chat.id })
-              });
+    chatUserAvatar.onerror = () => {
+      avatarElement = makePlaceholder();
+    };
+  } else {
+    avatarElement = makePlaceholder();
+  }
 
-              loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
-            });
+  // attach click برای باز کردن پروفایل
+  function openProfileModal() {
+    const userProfileModal = document.getElementById("userProfileModal");
+    const userProfileContent = document.getElementById("userProfileContent");
+    if (!userProfileModal || !userProfileContent) return;
+
+    userProfileModal.style.display = "flex";
+    userProfileModal.dataset.userid = window.currentChatUserId;
+
+    fetch(`/user_profile_ajax/${window.currentChatUserId}/`, {
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+      .then(res => res.text())
+      .then(html => {
+        userProfileContent.innerHTML = html;
+      })
+      .catch(() => {
+        userProfileContent.innerHTML = "خطا در بارگذاری اطلاعات کاربر.";
+      });
+  }
+
+  [avatarElement, chatUserNameAvatar].forEach(el => {
+    if (!el) return;
+    el.style.cursor = "pointer";
+    el.onclick = openProfileModal;
+  });
+
+  chatModal.style.display = "flex";
+  chatModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+
+  // پاک کردن محتوای قبلی
+  const chatMessages = document.getElementById("chatMessages");
+  const chatInput = chatModal.querySelector("#chatInput");
+  if (chatInput) chatInput.value = "";
+  if (chatMessages) chatMessages.innerHTML = "";
+
+  // حذف badge پیام خوانده نشده
+  const existingBadge = li.querySelector(".new-message-badge");
+  if (existingBadge) existingBadge.remove();
+
+  // بارگذاری پیام‌ها
+  if (typeof loadMessagesFromServer === "function") {
+    loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
+  }
+
+  // علامت گذاری پیام‌ها به عنوان خوانده شده
+  fetch("/api/chat/messages/mark_read/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: chat.id })
+  });
+});
 
             li.addEventListener("mouseover", () => li.style.backgroundColor = "rgba(0,0,0,0.05)");
             li.addEventListener("mouseout", () => li.style.backgroundColor = "transparent");
@@ -5879,11 +5959,13 @@ searchInput.addEventListener("input", function() {
         };
 
         // Chat button
+        // Chat button
         const chatBtn = document.createElement("button");
         chatBtn.classList.add("chat-btn");
         chatBtn.title = `${user.name}`;
         chatBtn.setAttribute("data-user-id", user.id);
         chatBtn.setAttribute("data-user-name", user.name);
+        chatBtn.setAttribute("data-user-avatar", user.avatar || ""); // ✅ اینجا اضافه شد
 
         chatBtn.style.position = "relative";
         chatBtn.style.padding = "4px";
@@ -5902,11 +5984,12 @@ searchInput.addEventListener("input", function() {
 
         chatBtn.innerHTML = `
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round">
+              stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
         `;
+
 
         chatBtn.addEventListener("click", () => {
           // Set current chat user
@@ -6223,7 +6306,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // کلیک روی دکمه چت برای باز کردن مودال
-// کلیک روی دکمه چت برای باز کردن مودال
 document.body.addEventListener("click", (e) => {
   const btn = e.target.closest(".chat-btn");
   if (!btn) return;
@@ -6232,8 +6314,6 @@ document.body.addEventListener("click", (e) => {
   const userName = btn.getAttribute("data-user-name");
   const userAvatar = btn.getAttribute("data-user-avatar");
   if (!userId) return alert("کاربر انتخاب نشده!");
-
-  console.log("Opening chat modal for user:", userId, userName);
 
   window.currentChatUserId = parseInt(userId);
 
@@ -6247,36 +6327,46 @@ document.body.addEventListener("click", (e) => {
   if (existingPlaceholder) existingPlaceholder.remove();
 
   // آپدیت نام
-  if (chatUserNameAvatar) chatUserNameAvatar.textContent = userName || "کاربر ناشناس";
-  console.log("Updated chatUserNameAvatar text:", chatUserNameAvatar.textContent);
+  if (chatUserNameAvatar) {
+    chatUserNameAvatar.textContent = userName || "کاربر ناشناس";
+  }
 
   let avatarElement;
 
-  if (userAvatar) {
-    chatUserAvatar.style.display = "block";
-    chatUserAvatar.src = userAvatar;
-    avatarElement = chatUserAvatar;
-    console.log("Avatar exists, using real avatar");
-  } else {
+  // تابع ساخت placeholder
+  function makePlaceholder() {
     chatUserAvatar.style.display = "none";
-
     const placeholder = document.createElement("div");
     placeholder.id = "chatUserAvatarPlaceholder";
     placeholder.textContent = userName ? userName.charAt(0).toUpperCase() : "?";
-    placeholder.style.width = "56px";
-    placeholder.style.height = "56px";
-    placeholder.style.borderRadius = "50%";
-    placeholder.style.backgroundColor = "#aaa";
-    placeholder.style.color = "#fff";
-    placeholder.style.display = "flex";
-    placeholder.style.alignItems = "center";
-    placeholder.style.justifyContent = "center";
-    placeholder.style.fontWeight = "600";
-    placeholder.style.fontSize = "22px";
-
+    Object.assign(placeholder.style, {
+      width: "56px",
+      height: "56px",
+      borderRadius: "50%",
+      backgroundColor: "#aaa",
+      color: "#fff",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontWeight: "600",
+      fontSize: "22px"
+    });
     chatUserProfile.insertBefore(placeholder, chatUserProfile.firstChild);
-    avatarElement = placeholder;
-    console.log("Avatar missing, using placeholder:", placeholder.textContent);
+    return placeholder;
+  }
+
+  // اگر آواتار وجود داشت
+  if (userAvatar && userAvatar.trim() !== "") {
+    chatUserAvatar.style.display = "block";
+    chatUserAvatar.src = userAvatar;
+    avatarElement = chatUserAvatar;
+
+    // اگه عکس لود نشد، fallback به placeholder
+    chatUserAvatar.onerror = () => {
+      avatarElement = makePlaceholder();
+    };
+  } else {
+    avatarElement = makePlaceholder();
   }
 
   // attach click برای باز کردن پروفایل
@@ -6285,30 +6375,25 @@ document.body.addEventListener("click", (e) => {
     const userProfileContent = document.getElementById("userProfileContent");
     if (!userProfileModal || !userProfileContent) return;
 
-    console.log("Opening user profile modal for user:", window.currentChatUserId);
-
     userProfileModal.style.display = "flex";
     userProfileModal.dataset.userid = window.currentChatUserId;
 
     fetch(`/user_profile_ajax/${window.currentChatUserId}/`, {
       headers: { "X-Requested-With": "XMLHttpRequest" }
     })
-    .then(res => res.text())
-    .then(html => { 
-      userProfileContent.innerHTML = html; 
-      console.log("User profile loaded"); 
-    })
-    .catch(err => {
-      userProfileContent.innerHTML = "خطا در بارگذاری اطلاعات کاربر.";
-      console.error("User profile load error:", err);
-    });
+      .then(res => res.text())
+      .then(html => {
+        userProfileContent.innerHTML = html;
+      })
+      .catch(() => {
+        userProfileContent.innerHTML = "خطا در بارگذاری اطلاعات کاربر.";
+      });
   }
 
   [avatarElement, chatUserNameAvatar].forEach(el => {
+    if (!el) return;
     el.style.cursor = "pointer";
-    el.onclick = null; // پاک کردن onclick قبلی
     el.onclick = openProfileModal;
-    console.log("Attached click to element:", el.id || el.textContent);
   });
 
   chatModal.style.display = "flex";
@@ -6325,9 +6410,9 @@ document.body.addEventListener("click", (e) => {
   if (typeof loadMessagesFromServer === "function") {
     loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
   }
-
-  console.log("Chat modal opened");
 });
+
+
 
 function getCSRFToken() {
   return document.cookie.split('; ')
