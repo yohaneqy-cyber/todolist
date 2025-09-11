@@ -672,7 +672,7 @@ body.dark-mode .chat-dropdown-menu button:hover {
 /* ریسپانسیو برای موبایل */
 @media (max-width: 480px) {
   #chatMessages {
-    padding: 16px 12px 160px !important; /* padding-bottom بیشتر برای فرم موبایل */
+    padding: 16px 12px 175px !important; /* padding-bottom بیشتر برای فرم موبایل */
     font-size: 16px !important;          /* فونت کمی کوچکتر */
     background-position: center center !important;
     background-size: cover !important;
@@ -3131,13 +3131,14 @@ body.dark-mode #chatDropdownMenu button span:last-child {
 
 <!-- منوی کلیک راست -->
 <div id="messageMenu" class="context-menu hidden">
-  <button id="editMessage" class="context-btn">
+  <button id="editMessage" type="button" class="context-btn">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2 2 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
     </svg>
     <span>Edit</span>
   </button>
+
 
   <button id="deleteMessage" class="context-btn">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -3767,6 +3768,18 @@ const options = [
 },
 
   ];
+let isDropdownOpen = false;
+
+// تابع باز و بسته کردن دراپ‌داون
+function toggleDropdown() {
+  if (!isDropdownOpen) {
+    dropdownMenu.style.display = "block";
+    isDropdownOpen = true;
+  } else {
+    dropdownMenu.style.display = "none";
+    isDropdownOpen = false;
+  }
+}
 
   // === Debug ===
   console.log("💡 Dropdown options:", options);
@@ -4193,8 +4206,9 @@ function updateBlockMenuText(isBlocked) {
   chatModalContent.appendChild(dropdownMenu);
 
 // === Toggle Dropdown on Button Click ===
+
 chatOptionsBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
+  e.stopPropagation(); // جلوگیری از trigger شدن listener روی document
 
   const userId = String(window.currentChatUserId);
   if (!userId) return;
@@ -4206,7 +4220,6 @@ chatOptionsBtn.addEventListener("click", (e) => {
     const isMuted = mutedChats.includes(userId);
 
     if (isMuted) {
-      // Unmute Bell SVG
       muteBtn.innerHTML = `
         <span style="display:flex;align-items:center;gap:6px">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -4217,7 +4230,6 @@ chatOptionsBtn.addEventListener("click", (e) => {
         </span>
       `;
     } else {
-      // Mute Bell with slash SVG
       muteBtn.innerHTML = `
         <span style="display:flex;align-items:center;gap:6px">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -4262,7 +4274,18 @@ chatOptionsBtn.addEventListener("click", (e) => {
   dropdownMenu.style.top = `${rect.bottom - modalRect.top + 4}px`;
 
   // === Toggle dropdown visibility ===
-  dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+  dropdownMenu.style.display = "block";
+  isDropdownOpen = true;
+});
+
+// === Close dropdown when clicking outside ===
+document.addEventListener("click", (e) => {
+  if (isDropdownOpen) {
+    if (!dropdownMenu.contains(e.target) && e.target !== chatOptionsBtn) {
+      dropdownMenu.style.display = "none";
+      isDropdownOpen = false;
+    }
+  }
 });
 
 
@@ -4285,14 +4308,47 @@ chatOptionsBtn.addEventListener("click", (e) => {
 
 });
 
+// وقتی روی پیام کلیک می‌کنیم، آن را انتخاب می‌کنیم
+document.querySelectorAll(".chat-message").forEach(msgEl => {
+  msgEl.addEventListener("click", () => {
+    selectedMessageElement = msgEl;
+    console.log("✅ selectedMessageElement set:", selectedMessageElement.dataset.id);
+  });
+});
+
+// دکمه Edit
+document.getElementById("editMessage").addEventListener("click", (e) => {
+  e.preventDefault();
+  console.log("✅ Edit button clicked");
+
+  if (!selectedMessageElement) {
+    alert("پیامی انتخاب نشده است.");
+    return;
+  }
+
+  const textEl = selectedMessageElement.querySelector(".message-text");
+  if (!textEl) {
+    alert("متن پیام پیدا نشد.");
+    return;
+  }
+
+  chatInput.value = textEl.textContent;
+  window.editingMessageId = selectedMessageElement.dataset.id;
+
+  messageMenu.classList.add("hidden");
+  chatInput.focus();
+
+  console.log("Editing message ID set:", window.editingMessageId);
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const chatForm = document.getElementById("chatForm");
   const chatInput = document.getElementById("chatInput");
 
-  // Set your current user & chat user globally
   window.currentUserId = window.currentUserId || null;
   window.currentChatUserId = window.currentChatUserId || null;
   window.currentUserEmail = window.currentUserEmail || null;
+  window.editingMessageId = null; // برای ویرایش پیام
 
   function getCSRFToken() {
     const name = "csrftoken";
@@ -4306,144 +4362,138 @@ document.addEventListener("DOMContentLoaded", () => {
     return null;
   }
 
-// ===== Toast Notification =====
-function showBlockedToast(message = "You Are Blocked By This User!") {
-  const containerId = "toastContainer";
-  let container = document.getElementById(containerId);
+  // ===== Toast برای بلاک شدن =====
+  function showBlockedToast(message = "You Are Blocked By This User!") {
+    const containerId = "toastContainer";
+    let container = document.getElementById(containerId);
+    if (!container) {
+      container = document.createElement("div");
+      container.id = containerId;
+      container.style.position = "fixed";
+      container.style.top = "20px";
+      container.style.right = "20px";
+      container.style.zIndex = "9999";
+      document.body.appendChild(container);
+    }
 
-  if (!container) {
-    container = document.createElement("div");
-    container.id = containerId;
-    container.style.position = "fixed";
-    container.style.top = "20px";
-    container.style.right = "20px";
-    container.style.zIndex = "9999";
-    document.body.appendChild(container);
-  }
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.style.cssText = `
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #f44336;
+      color: white;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      min-width: 250px;
+      max-width: 300px;
+      font-family: sans-serif;
+      animation: slideIn 0.5s ease-out;
+    `;
+    toast.innerHTML = `<span>${message}</span><span class="toast-close" style="cursor:pointer; font-weight:bold; margin-left:12px;">&times;</span>`;
 
-  const toast = document.createElement("div");
-  toast.className = "toast";
-  toast.style.cssText = `
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #f44336;
-    color: white;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    min-width: 250px;
-    max-width: 300px;
-    font-family: sans-serif;
-    animation: slideIn 0.5s ease-out;
-  `;
-  toast.innerHTML = `<span>${message}</span><span class="toast-close" style="cursor:pointer; font-weight:bold; margin-left:12px;">&times;</span>`;
-
-  // Close button
-  toast.querySelector(".toast-close").addEventListener("click", () => {
-    toast.style.animation = "slideOut 0.5s forwards";
-    setTimeout(() => toast.remove(), 500);
-  });
-
-  container.appendChild(toast);
-
-  // Auto-remove after 5 seconds
-  setTimeout(() => {
-    toast.style.animation = "slideOut 0.5s forwards";
-    setTimeout(() => toast.remove(), 500);
-  }, 5000);
-}
-
-// ===== Keyframe animations (add to <style> in your page or dynamically) =====
-const styleEl = document.createElement("style");
-styleEl.textContent = `
-@keyframes slideIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
-@keyframes slideOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
-`;
-document.head.appendChild(styleEl);
-
-// ===== Send Message Function =====
-async function sendMessage(event) {
-  event.preventDefault();
-  event.stopPropagation();
-
-  if (!chatInput || !window.currentUserId || !window.currentChatUserId) return;
-
-  const message = chatInput.value.trim();
-  if (!message) return;
-
-  // Refresh blocked users list from localStorage
-  let blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(String);
-
-  // Enable input if user is not blocked
-  if (!blockedUsers.includes(String(window.currentChatUserId))) {
-    chatInput.disabled = false;
-    const sendBtn = document.getElementById("chatSendBtn");
-    if (sendBtn) sendBtn.disabled = false;
-  }
-
-  // Client-side block check
-  if (blockedUsers.includes(String(window.currentChatUserId))) {
-    showBlockedToast();
-    return;
-  }
-
-  try {
-    const response = await fetch(`/api/chat/send/${window.currentChatUserId}/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCSRFToken(),
-        "X-Requested-With": "XMLHttpRequest"
-      },
-      credentials: "include",
-      body: JSON.stringify({ message })
+    toast.querySelector(".toast-close").addEventListener("click", () => {
+      toast.style.animation = "slideOut 0.5s forwards";
+      setTimeout(() => toast.remove(), 500);
     });
 
-    const data = await response.json().catch(() => ({}));
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.animation = "slideOut 0.5s forwards";
+      setTimeout(() => toast.remove(), 500);
+    }, 5000);
+  }
 
-    // Server-side block response
-    if (response.status === 403 || data.blocked) {
+  // ===== Send or Edit Message =====
+  async function sendMessage(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log("sendMessage called, editingMessageId:", window.editingMessageId);
+
+    if (!chatInput || !window.currentUserId || !window.currentChatUserId) return;
+
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    // بررسی بلاک شدن
+    let blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(String);
+    if (blockedUsers.includes(String(window.currentChatUserId))) {
       showBlockedToast();
       return;
     }
 
-    if (!response.ok) {
-      alert("❌ Cannot send message: " + (data.error || JSON.stringify(data)));
-      return;
+    try {
+      let url, method;
+      if (window.editingMessageId) {
+        // === ویرایش پیام ===
+        url = `/api/chat/messages/${window.editingMessageId}/`;
+        method = "PATCH"; // مطمئن شوید backend از PATCH پشتیبانی می‌کند
+      } else {
+        // === ارسال پیام جدید ===
+        url = `/api/chat/send/${window.currentChatUserId}/`;
+        method = "POST";
+      }
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        credentials: "include",
+        body: JSON.stringify({ message })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.status === 403 || data.blocked) {
+        showBlockedToast();
+        return;
+      }
+
+      if (!response.ok) {
+        alert("❌ Cannot send message: " + (data.error || JSON.stringify(data)));
+        return;
+      }
+
+      chatInput.value = "";
+      console.log("✅ Message sent/edited successfully:", data);
+
+      // بعد از ویرایش یا ارسال، editingMessageId را ریست می‌کنیم
+      window.editingMessageId = null;
+
+      if (typeof loadMessagesFromServer === "function") {
+        await loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
+      }
+    } catch (err) {
+      console.error("❌ Error sending message:", err);
+      alert("❌ Server error. Try again.");
     }
-
-    chatInput.value = "";
-    console.log("✅ Message sent successfully:", data);
-
-    // Reload messages if function exists
-    if (typeof loadMessagesFromServer === "function") {
-      await loadMessagesFromServer(window.currentUserId, window.currentChatUserId);
-    }
-
-    // After sending successfully, refresh blocked users again
-    blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(String);
-    if (!blockedUsers.includes(String(window.currentChatUserId))) {
-      chatInput.disabled = false;
-      const sendBtn = document.getElementById("chatSendBtn");
-      if (sendBtn) sendBtn.disabled = false;
-    }
-
-  } catch (err) {
-    console.error("❌ Error sending message:", err);
-    alert("❌ Server error. Try again.");
   }
-}
 
+  // ===== اتصال به دکمه ویرایش پیام =====
+  window.onEditMessageClick = function(messageEl) {
+    if (!messageEl) return alert("پیامی انتخاب نشده است.");
 
+    const textEl = messageEl.querySelector(".message-text");
+    if (!textEl) return alert("متن پیام پیدا نشد.");
 
-  // Attach sendMessage to the form submit
+    chatInput.value = textEl.textContent;
+    window.editingMessageId = messageEl.dataset.id;
+
+    selectedMessageElement = messageEl;
+    chatInput.focus();
+
+    console.log("Editing message ID set:", window.editingMessageId);
+  };
+
+  // ===== اتصال فرم =====
   if (chatForm) chatForm.addEventListener("submit", sendMessage);
 });
-
-
-
 
 
   // تابع عمومی برای باز کردن چت از هرجایی
@@ -7000,9 +7050,37 @@ function getCSRFToken() {
     ?.split('=')[1];
 }
 
+const editMessageBtn = document.getElementById("editMessage");
+
+editMessageBtn.addEventListener("click", function(e) {
+  e.preventDefault(); // جلوگیری از ارسال فرم
+  e.stopPropagation(); // جلوگیری از bubble به parent ها
+
+  if (!selectedMessageElement) {
+    alert("پیامی انتخاب نشده است.");
+    return;
+  }
+
+  const textEl = selectedMessageElement.querySelector(".message-text");
+  if (!textEl) {
+    alert("متن پیام پیدا نشد.");
+    return;
+  }
+
+  // متن پیام را داخل input برای ویرایش قرار می‌دهیم
+  chatInput.value = textEl.textContent;
+  editingMessageId = selectedMessageElement.dataset.id;
+
+  // بستن منوی context
+  messageMenu.classList.add("hidden");
+
+  chatInput.focus();
+});
 
 function onEditMessageClick(e) {
   e.preventDefault();
+  console.log("✅ onEditMessageClick called"); // این خط مطمئن می‌کند تابع صدا زده می‌شود
+
 
   if (!selectedMessageElement) {
     alert("پیامی انتخاب نشده است.");
