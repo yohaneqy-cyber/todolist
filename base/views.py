@@ -1027,7 +1027,10 @@ def send_message(request, user_id):
 
     if blocked_by_receiver:
         print(f"❌ Receiver ({receiver.email}) has blocked Sender ({request.user.email}). Message not allowed.")
-        return JsonResponse({"error": "You are blocked by this user. Cannot send message."}, status=403)
+        return JsonResponse({
+            "blocked": True,
+            "message": "You are blocked by this user."
+        }, status=403)
 
     # ===== READ MESSAGE =====
     try:
