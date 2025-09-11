@@ -4,6 +4,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
 from django.db.models import Count
+from django.db import transaction
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -828,7 +829,6 @@ def friends_list_api(request):
 
 
 
-from django.db import transaction
 
 @login_required
 @require_POST
@@ -900,9 +900,7 @@ class ChatMessageApi(View):
                 'is_read': msg.is_read,
             })
 
-        # ✅ تعداد پیام‌های خوانده نشده فقط برای گیرنده
         unread_count = messages.filter(receiver=receiver, is_read=False).count()
-
         return JsonResponse({'messages': data, 'unread_count': unread_count}, safe=False)
 
     def post(self, request):
@@ -923,9 +921,16 @@ class ChatMessageApi(View):
             except User.DoesNotExist:
                 return JsonResponse({"error": "User not found"}, status=404)
 
-            if Block.objects.filter(blocker=receiver, blocked=sender).exists():
-                return JsonResponse({"error": "You are blocked by this user"}, status=403)
+            # 🔒 دو طرفه کردن بلاک: اگر هرکدام بلاک کرده باشند پیام ممنوع است
+            blocked = Block.objects.filter(
+                Q(blocker=sender, blocked=receiver) |
+                Q(blocker=receiver, blocked=sender)
+            ).exists()
+            
+            if blocked:
+                return JsonResponse({"error": "Messaging not allowed. One of the users has blocked the other."}, status=403)
 
+            # ✅ ذخیره پیام
             msg = ChatMessage.objects.create(
                 sender=sender, receiver=receiver, message=content, is_read=False
             )
@@ -943,30 +948,31 @@ class ChatMessageApi(View):
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
-        
+
 
 @csrf_exempt
 def block_user(request, user_id):
     if request.method != "POST":
         return JsonResponse({"error": "POST required"}, status=405)
-
-    # بررسی لاگین بودن کاربر
+    
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Login required"}, status=403)
-
+    
     try:
         blocked_user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return JsonResponse({"error": "User not found"}, status=404)
 
-    # بلاک کردن کاربر با استفاده از مدل Block
+    # 🔹 Create block: only user -> blocked_user (one-way)
     block, created = Block.objects.get_or_create(
         blocker=request.user,
         blocked=blocked_user
     )
 
-    if not created:
-        return JsonResponse({"success": False, "message": "User already blocked"})
+    if created:
+        print(f"✅ {request.user} blocked {blocked_user}")  # debug log
+    else:
+        print(f"⚠️ {request.user} already blocked {blocked_user}")
 
     return JsonResponse({"success": True})
 
@@ -984,11 +990,18 @@ def unblock_user(request, user_id):
     except User.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
 
-    Block.objects.filter(blocker=request.user, blocked=blocked_user).delete()
-    return JsonResponse({'success': True})
+    # 🔹 Delete only the block created by request.user (one-way)
+    deleted_count, _ = Block.objects.filter(
+        blocker=request.user,
+        blocked=blocked_user
+    ).delete()
 
-from django.http import JsonResponse
-from .models import Block
+    if deleted_count:
+        print(f"✅ {request.user} unblocked {blocked_user}")
+    else:
+        print(f"⚠️ No block existed from {request.user} to {blocked_user}")
+
+    return JsonResponse({'success': True})
 
 @csrf_exempt
 def send_message(request, user_id):
@@ -1003,33 +1016,45 @@ def send_message(request, user_id):
     except User.DoesNotExist:
         return JsonResponse({"error": "User not found"}, status=404)
 
-    # 👇 چک بلاک شدن
-    if Block.objects.filter(blocker=request.user, blocked=receiver).exists():
-        return JsonResponse({"error": "You blocked this user"}, status=403)
+    # ===== DEBUG LOGS =====
+    print(f"📤 Sender: {request.user.id} ({request.user.email})")
+    print(f"📥 Receiver: {receiver.id} ({receiver.email})")
 
-    if Block.objects.filter(blocker=receiver, blocked=request.user).exists():
-        return JsonResponse({"error": "You are blocked by this user"}, status=403)
+    # ===== CHECK BLOCK STATUS (ONE-WAY) =====
+    blocked_by_receiver = Block.objects.filter(blocker=receiver, blocked=request.user).exists()
 
-    # اینجا کد ذخیره پیام
+    print("🔒 Blocked by receiver?", blocked_by_receiver)
+
+    if blocked_by_receiver:
+        print(f"❌ Receiver ({receiver.email}) has blocked Sender ({request.user.email}). Message not allowed.")
+        return JsonResponse({"error": "You are blocked by this user. Cannot send message."}, status=403)
+
+    # ===== READ MESSAGE =====
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    message_text = data.get("message", "").strip()
+    if not message_text:
+        return JsonResponse({"error": "Message cannot be empty"}, status=400)
+
+    # ===== CREATE MESSAGE =====
     message = ChatMessage.objects.create(
         sender=request.user,
         receiver=receiver,
-        text=request.POST.get("text", "")
+        message=message_text
     )
 
-    return JsonResponse({
-        "success": True,
-        "message": {
-            "id": message.id,
-            "text": message.text,
-            "sender": request.user.username
-        }
-    })
+    print(f"✅ Message created: {message.id} -> {message.message}")
 
-from django.db.models import Q
-from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+    return JsonResponse({
+        "id": message.id,
+        "sender": request.user.email,
+        "receiver": receiver.email,
+        "message": message.message,
+        "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+    })
 
 class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ChatMessage.objects.all()
@@ -1113,10 +1138,6 @@ def save_resized_avatars(image_path, user_id):
     return base_name
 
 
-from django.db.models import Q
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-
 @login_required
 def chats_list(request):
     user = request.user
@@ -1169,10 +1190,6 @@ def chats_list(request):
     return JsonResponse({"chats": chats})
 
 
-
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from .models import Block  # مدل بلاک خودت
 
 @csrf_exempt
 def check_block_status(request, user_id):

@@ -23,7 +23,6 @@ class ChatMessageSerializers(serializers.ModelSerializer):
         request = self.context.get('request')
         if obj.avatar and hasattr(obj.avatar, 'url'):
             return request.build_absolute_uri(obj.avatar.url)
-        return request.build_absolute_uri('/media/avatars/default-avatar.png')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -38,7 +37,6 @@ class UserSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if obj.avatar and hasattr(obj.avatar, 'url'):
             return request.build_absolute_uri(obj.avatar.url)
-        return request.build_absolute_uri('/media/avatars/default-avatar.png')
     
     def get_last_message(self, obj):
         request = self.context.get('request')

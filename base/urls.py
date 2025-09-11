@@ -53,11 +53,7 @@ urlpatterns = [
     path('api/chat/message/unread_count/',  views.unread_message_count, name='unread-message-count'),
     path('api/chat/messages/mark_read/', views.mark_messages_read, name='mark-messages-read'),
     path('api/chat/message/unread_count/each/', views.unread_message_count_each, name='unread_count_each'),
-    path(
-        'send-message/<int:receiver_id>/',
-        views.send_message,
-        name='send_message'
-    ),
+    path('api/chat/send/<int:user_id>/', views.send_message, name='send_message'),
     path('api/delete-chat/<int:user_id>/', DeleteChatApi.as_view(), name='delete-chat'),
     path("api/friends/requests/count/", views.friend_requests_count, name="friend_requests_count"),
     path("delete-avatar/", views.delete_avatar, name="delete_avatar"),

@@ -204,6 +204,7 @@ ALLOWED_HOSTS = [
     'testserver',
 ]
 
+DEBUG = True
 
 # برای استفاده از استاتیک فشرده و کش شده:
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
