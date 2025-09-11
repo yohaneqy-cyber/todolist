@@ -4310,11 +4310,21 @@ document.addEventListener("click", (e) => {
 
 // وقتی روی پیام کلیک می‌کنیم، آن را انتخاب می‌کنیم
 document.querySelectorAll(".chat-message").forEach(msgEl => {
-  msgEl.addEventListener("click", () => {
+  // برای دسکتاپ
+  msgEl.addEventListener("click", (e) => {
+    e.stopPropagation(); // جلوگیری از اجرای sendMessage ناخواسته
     selectedMessageElement = msgEl;
-    console.log("✅ selectedMessageElement set:", selectedMessageElement.dataset.id);
+    console.log("✅ selectedMessageElement set (click):", selectedMessageElement.dataset.id);
+  });
+
+  // برای موبایل
+  msgEl.addEventListener("touchstart", (e) => {
+    e.stopPropagation();
+    selectedMessageElement = msgEl;
+    console.log("✅ selectedMessageElement set (touch):", selectedMessageElement.dataset.id);
   });
 });
+
 
 // دکمه Edit
 document.getElementById("editMessage").addEventListener("click", (e) => {
