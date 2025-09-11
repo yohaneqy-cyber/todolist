@@ -3348,7 +3348,7 @@ function loadMessagesFromLocalStorage(userId, receiverName) {
     chatMessages.appendChild(msgElem);
   });
 
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  chatMessages.Top = chatMessages.scrollHeight;
 }
 
 
@@ -7024,11 +7024,15 @@ function scrollChatToBottom() {
 
   if (!chatMessages) return;
 
-  const formHeight = chatForm ? chatForm.offsetHeight : 0;
+  // اگر فرم داریم، padding-bottom مساوی فرم بدهیم
+  if (chatForm) {
+    chatMessages.style.paddingBottom = chatForm.offsetHeight + "px";
+  }
 
-  // اسکرول به پایین، ولی پیام‌ها زیر فرم نروند
-  chatMessages.scrollTop = chatMessages.scrollHeight - formHeight;
+  // اسکرول به پایین
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
 
 // اگر پیام‌ها داینامیک اضافه می‌شوند، از MutationObserver استفاده کنید
 const chatMessages = document.getElementById("chatMessages");
