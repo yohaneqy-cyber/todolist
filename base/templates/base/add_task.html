@@ -72,8 +72,32 @@
     </div>
 
     <div class="buttons-container">
-    <a href="{% url 'home' %}" class="link-cancel">Cancel</a>
-    <button class="btn-save">Save</button>
+        <a href="{% url 'home' %}" class="link-cancel">Cancel</a>
+        <button type="submit" class="btn-save">Save</button>
     </div>
 </form>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const saveBtn = document.querySelector(".btn-save");
+    const form = saveBtn.closest("form");
+
+    if (!saveBtn || !form) return;
+
+    form.addEventListener("submit", (e) => {
+        // اگر دکمه قبلاً غیرفعال شده باشد، اجازه submit نده
+        if (saveBtn.disabled) {
+            e.preventDefault();
+            return;
+        }
+
+        // بعد از اولین کلیک دکمه را غیرفعال کن
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+
+        // اطمینان از اینکه فقط یک بار فرم ارسال شود
+        // (در صورتی که از AJAX استفاده نشود، فرم استاندارد submit می‌شود)
+    });
+});
+</script>
 {% endblock content %}
