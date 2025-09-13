@@ -4317,12 +4317,19 @@ document.querySelectorAll(".chat-message").forEach(msgEl => {
     console.log("✅ selectedMessageElement set (click):", selectedMessageElement.dataset.id);
   });
 
-  msgEl.addEventListener("touchstart", (e) => {
-    e.preventDefault();     // جلوگیری از تبدیل لمس به کلیک
-    e.stopPropagation();    // جلوگیری از ارسال به والدها
+msgEl.addEventListener("touchstart", (e) => {
+  e.stopPropagation();
+  this.longPressTimer = setTimeout(() => {
     selectedMessageElement = msgEl;
-    console.log("✅ selectedMessageElement set (touch):", selectedMessageElement.dataset.id);
-  });
+    console.log("📌 Long press -> selected:", selectedMessageElement.dataset.id);
+    // اینجا منو باز کن
+    messageMenu.classList.remove("hidden");
+  }, 500); // نیم ثانیه نگه داشتن
+});
+
+msgEl.addEventListener("touchend", () => {
+  clearTimeout(this.longPressTimer);
+});
 
 });
 
