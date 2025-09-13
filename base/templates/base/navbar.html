@@ -7025,28 +7025,38 @@ function openMessageMenuFor(messageEl) {
   messageMenu.style.display = "block";
 
   const gapHorizontal = 12;
+  const gapVertical = 8; // فاصله کمی از پیام
   const msgRect = messageEl.getBoundingClientRect();
   const menuWidth = messageMenu.offsetWidth;
   const menuHeight = messageMenu.offsetHeight;
-  const gapVertical = 150;
 
   let posX, posY;
+
+  // پیش‌فرض نمایش بالای پیام
   posY = msgRect.top - menuHeight - gapVertical;
 
+  // اگر بالای صفحه رفت، منو را پایین پیام قرار بده
   if (posY < 0) {
     posY = msgRect.bottom + gapVertical;
   }
 
+  // اطمینان از اینکه منو از پایین صفحه بیرون نرود
+  if (posY + menuHeight > window.innerHeight) {
+    posY = window.innerHeight - menuHeight - gapVertical;
+  }
+
+  // تعیین موقعیت افقی
   if (messageEl.classList.contains("me")) {
     posX = msgRect.left - menuWidth - gapHorizontal;
-    if (posX < 0) posX = gapHorizontal;
+    if (posX < gapHorizontal) posX = gapHorizontal;
   } else {
     posX = msgRect.right + gapHorizontal;
-    if (posX + menuWidth > window.innerWidth) {
+    if (posX + menuWidth > window.innerWidth - gapHorizontal) {
       posX = window.innerWidth - menuWidth - gapHorizontal;
     }
   }
 
+  // اعمال موقعیت‌ها
   messageMenu.style.left = `${posX}px`;
   messageMenu.style.top = `${posY}px`;
   messageMenu.style.position = "fixed";
