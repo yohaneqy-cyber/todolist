@@ -6660,19 +6660,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // کلیک راست روی پیام‌ها
-    document.addEventListener("contextmenu", (e) => {
-        const messageEl = e.target.closest(".chat-message");
-        if (!messageEl) {
-            messageMenu.classList.add("hidden");
-            document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
-            selectedMessageId = null;
-            selectedMessageElement = null;
-            return;
-        }
+document.addEventListener("contextmenu", (e) => {
+    const messageEl = e.target.closest(".chat-message");
+    if (!messageEl) {
+        messageMenu.classList.add("hidden");
+        document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
+        selectedMessageId = null;
+        selectedMessageElement = null;
+        return;
+    }
 
-        e.preventDefault();
-        openMessageMenuFor(messageEl);
-    });
+    e.preventDefault();
+
+    // باز کردن منو جلوی پیام
+    openMessageMenuFor(messageEl);
+
+    // بررسی اینکه منو از صفحه خارج نشود
+    const menuRect = messageMenu.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let newLeft = menuRect.left;
+    let newTop = menuRect.top;
+
+    if (menuRect.right > viewportWidth) {
+        newLeft -= (menuRect.right - viewportWidth + 8);
+    }
+    if (menuRect.left < 0) {
+        newLeft += Math.abs(menuRect.left) + 8;
+    }
+    if (menuRect.bottom > viewportHeight) {
+        newTop -= (menuRect.bottom - viewportHeight + 8);
+    }
+    if (menuRect.top < 0) {
+        newTop += Math.abs(menuRect.top) + 8;
+    }
+
+    messageMenu.style.left = `${newLeft}px`;
+    messageMenu.style.top = `${newTop}px`;
+});
+
 
     // بستن منو وقتی بیرون کلیک می‌کنیم
     document.addEventListener("click", (e) => {
