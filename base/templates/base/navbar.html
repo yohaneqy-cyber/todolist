@@ -4317,12 +4317,13 @@ document.querySelectorAll(".chat-message").forEach(msgEl => {
     console.log("✅ selectedMessageElement set (click):", selectedMessageElement.dataset.id);
   });
 
-  // برای موبایل
   msgEl.addEventListener("touchstart", (e) => {
-    e.stopPropagation();
+    e.preventDefault();     // جلوگیری از تبدیل لمس به کلیک
+    e.stopPropagation();    // جلوگیری از ارسال به والدها
     selectedMessageElement = msgEl;
     console.log("✅ selectedMessageElement set (touch):", selectedMessageElement.dataset.id);
   });
+
 });
 
 
