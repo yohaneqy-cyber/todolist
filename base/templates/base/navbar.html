@@ -6956,15 +6956,29 @@ function openMessageMenuFor(messageEl) {
 
     // محاسبه موقعیت پیام
     const rect = messageEl.getBoundingClientRect();
+    const menuHeight = messageMenu.offsetHeight;
+    const menuWidth = messageMenu.offsetWidth;
+    const padding = 10; // فاصله از پیام
+
     let top = rect.top + window.scrollY;
     let left;
 
+    // محاسبه افقی
     if (messageEl.classList.contains("me")) {
-        // پیام سمت راست → منو کمی به چپ
-        left = rect.left + window.scrollX - messageMenu.offsetWidth - 10;
+        left = rect.left + window.scrollX - menuWidth - padding;
+        if (left < padding) left = padding; // جلوگیری از خروج منو از سمت چپ
     } else {
-        // پیام سمت چپ → منو کمی به راست
-        left = rect.right + window.scrollX + 10;
+        left = rect.right + window.scrollX + padding;
+        if (left + menuWidth > window.innerWidth - padding) {
+            left = window.innerWidth - menuWidth - padding; // جلوگیری از خروج منو از سمت راست
+        }
+    }
+
+    // محاسبه عمودی
+    if (top + menuHeight > window.scrollY + window.innerHeight) {
+        // اگر منو از پایین صفحه بیرون می‌رود → منو را بالای پیام قرار بده
+        top = top - menuHeight - padding;
+        if (top < window.scrollY + padding) top = window.scrollY + padding; // جلوگیری از خروج از بالا
     }
 
     // نمایش منو
@@ -7095,10 +7109,11 @@ editMessageBtn.addEventListener("click", function(e) {
   chatInput.focus();
 });
 
+
 function onEditMessageClick(e) {
   e.preventDefault();
-  console.log("✅ onEditMessageClick called"); // این خط مطمئن می‌کند تابع صدا زده می‌شود
-
+  e.stopPropagation(); // جلوگیری از bubble شدن و submit ناخواسته
+  console.log("✅ onEditMessageClick called");
 
   if (!selectedMessageElement) {
     alert("پیامی انتخاب نشده است.");
@@ -7112,15 +7127,26 @@ function onEditMessageClick(e) {
   }
 
   chatInput.value = textEl.textContent;
-  editingMessageId = selectedMessageElement.dataset.id;
+  window.editingMessageId = selectedMessageElement.dataset.id;
 
+  // بستن منوی context
   messageMenu.classList.add("hidden");
+
   chatInput.focus();
 }
 
+// اتصال همزمان برای دسکتاپ و موبایل
 editBtn.addEventListener("click", onEditMessageClick);
 editBtn.addEventListener("touchstart", onEditMessageClick);
 
+let touchHandled = false;
+
+editBtn.addEventListener("touchstart", (e) => {
+  if (touchHandled) return;
+  touchHandled = true;
+  onEditMessageClick(e);
+  setTimeout(() => touchHandled = false, 500); // بعد نیم ثانیه فلگ ریست شود
+});
 
 // تابع کمکی برای اسکرول کردن به پایین چت
 function scrollChatToBottom() {
