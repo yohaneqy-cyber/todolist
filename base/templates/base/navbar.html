@@ -7225,19 +7225,8 @@ function onEditMessageClick(e) {
   if (typeof messageMenu !== "undefined") messageMenu.classList.add("hidden");
 }
 
-
-// اتصال همزمان برای دسکتاپ و موبایل
-editBtn.addEventListener("click", onEditMessageClick);
-editBtn.addEventListener("touchstart", onEditMessageClick);
-
-let touchHandled = false;
-
-editBtn.addEventListener("touchstart", (e) => {
-  if (touchHandled) return;
-  touchHandled = true;
-  onEditMessageClick(e);
-  setTimeout(() => touchHandled = false, 500); // بعد نیم ثانیه فلگ ریست شود
-});
+// ⚡ اتصال تنها با pointerdown
+editBtn.addEventListener("pointerdown", onEditMessageClick);
 
 // تابع کمکی برای اسکرول کردن به پایین چت
 function scrollChatToBottom() {
@@ -7274,11 +7263,6 @@ async function afterMessageUpdate() {
   scrollChatToBottom(); // 🔹 اسکرول با در نظر گرفتن فرم
 }
 
-
-
-
-editBtn.addEventListener("click", onEditMessageClick);
-editBtn.addEventListener("touchstart", onEditMessageClick);
 
 
 // فرض می‌گیریم این متغیر سراسری در بالا تعریف شده:
