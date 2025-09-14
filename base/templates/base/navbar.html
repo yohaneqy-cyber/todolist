@@ -5992,22 +5992,72 @@ chatMessages.addEventListener("contextmenu", function (e) {
 });
 
 // === Open Delete Message Modal ===
-function openDeleteMessageModal() {
-  const modal = document.getElementById("deleteMessageModal");
-  const partnerNameSpan = document.getElementById("partner_name");
+let messageToDelete = null; // ⚠️ این خط باید در بالای اسکریپت باشد
 
-  partnerNameSpan.textContent = chatUserNameAvatar || "این کاربر";
+const deleteModal = document.getElementById("deleteMessageModal");
 
-  // get current partner name from your chat header
-  const currentPartner = document.getElementById("chatPartnerName").textContent.trim();
-
-  // replace "this user" with partner's actual name
-  partnerNameSpan.textContent = currentPartner;
-
-  // show modal
-  modal.style.display = "flex";
-  document.body.classList.add("modal1-open");
+function openDeleteMessageModal(messageEl) {
+  console.log("🟢 openDeleteMessageModal called with messageEl:", messageEl);
+  messageToDelete = messageEl; // مقداردهی پیام برای حذف
+  deleteForAllCheckbox.checked = true;
+  deleteModal.style.display = "flex";
 }
+
+function closeDeleteMessageModal() {
+  deleteModal.style.display = "none";
+  messageToDelete = null;
+}
+
+// لغو حذف
+cancelDeleteBtn.addEventListener("click", closeDeleteMessageModal);
+
+// تایید حذف
+confirmDeleteBtn.addEventListener("click", async () => {
+  // پیام انتخاب شده برای حذف
+  const messageEl = messageToDelete;
+  const messageId = messageEl?.dataset.id || window.editingMessageId;
+
+  try {
+    // حذف از DOM اگر هنوز وجود دارد
+    if (messageEl) {
+      messageEl.remove();
+      messageToDelete = null;
+    }
+
+    // پاک کردن input اگر پیام در حال ویرایش است
+    if (window.editingMessageId && window.editingMessageId === messageId) {
+      console.log("🟢 Clearing input for deleted message");
+      chatInput.value = "";
+      window.editingMessageId = null;
+      selectedMessageElement = null;
+    }
+
+    // DELETE request به سرور فقط اگر ID موجود است
+    if (messageId) {
+      try {
+        const response = await fetch(`/api/chat/messages/${messageId}/`, {
+          method: "DELETE",
+          headers: {
+            "X-CSRFToken": getCSRFToken(),
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json"
+          },
+          credentials: "include"
+        });
+        if (!response.ok) console.warn("❌ Message may already be deleted on server");
+      } catch(e) {
+        console.warn("⚠️ Could not send DELETE request", e);
+      }
+    }
+
+  } catch (err) {
+    console.error("❌ Error deleting message:", err);
+  } finally {
+    closeDeleteMessageModal();
+  }
+});
+
+
 
 // === Close Modal ===
 document.getElementById("cancelDeleteMessageBtn").addEventListener("click", () => {
@@ -7149,28 +7199,32 @@ editMessageBtn.addEventListener("click", function(e) {
 
 function onEditMessageClick(e) {
   e.preventDefault();
-  e.stopPropagation(); // جلوگیری از bubble شدن و submit ناخواسته
-  console.log("✅ onEditMessageClick called");
+  e.stopPropagation();
 
-  if (!selectedMessageElement) {
-    alert("پیامی انتخاب نشده است.");
-    return;
-  }
+  // پیدا کردن پیام مربوط به دکمه Edit فعلی
+  const messageElement = e.target.closest(".message-item"); 
+  if (!messageElement) return;
 
-  const textEl = selectedMessageElement.querySelector(".message-text");
+  // ست کردن پیام انتخابی همان لحظه
+  selectedMessageElement = messageElement;
+  window.editingMessageId = messageElement.dataset.id;
+
+  // پر کردن input
+  const textEl = messageElement.querySelector(".message-text");
   if (!textEl) {
-    alert("متن پیام پیدا نشد.");
+    chatInput.value = "";
+    window.editingMessageId = null;
+    selectedMessageElement = null;
     return;
   }
 
   chatInput.value = textEl.textContent;
-  window.editingMessageId = selectedMessageElement.dataset.id;
-
-  // بستن منوی context
-  messageMenu.classList.add("hidden");
-
   chatInput.focus();
+
+  // بستن منوی context اگر دارید
+  if (typeof messageMenu !== "undefined") messageMenu.classList.add("hidden");
 }
+
 
 // اتصال همزمان برای دسکتاپ و موبایل
 editBtn.addEventListener("click", onEditMessageClick);

@@ -1059,6 +1059,10 @@ def send_message(request, user_id):
         "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S")
     })
 
+from rest_framework import status
+from rest_framework.response import Response
+from django.db.models import Q
+
 class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ChatMessage.objects.all()
     serializer_class = ChatMessageSerializers
@@ -1087,23 +1091,22 @@ class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         delete_for_all = request.query_params.get('delete_for_all', 'false').lower() == 'true'
 
         if delete_for_all:
-            # Delete message completely for everyone
+            # حذف کامل پیام برای همه
             instance.delete()
-            return Response({'success': True, 'message': 'پیام برای همه حذف شد'}, status=status.HTTP_204_NO_CONTENT)
-        
-        # Delete only for the current user
+            return Response({'success': True, 'message': 'پیام برای همه حذف شد'}, status=status.HTTP_200_OK)
+
+        # فقط حذف برای کاربر فعلی
         if instance.sender == request.user:
-            # Sender deletes for self only: mark hidden_for_sender
-            instance.hidden_for_sender = True  # Make sure this field exists in model
+            instance.hidden_for_sender = True
             instance.save()
-            return Response({'success': True, 'message': 'پیام فقط برای شما حذف شد'})
+            return Response({'success': True, 'message': 'پیام فقط برای شما حذف شد'}, status=status.HTTP_200_OK)
+
         elif instance.receiver == request.user:
-            # Receiver deletes for self only: mark hidden_for_receiver
-            instance.hidden_for_receiver = True  # Make sure this field exists in model
+            instance.hidden_for_receiver = True
             instance.save()
-            return Response({'success': True, 'message': 'پیام فقط برای شما حذف شد'})
-        else:
-            return Response({'error': 'شما اجازه حذف این پیام را ندارید'}, status=403)
+            return Response({'success': True, 'message': 'پیام فقط برای شما حذف شد'}, status=status.HTTP_200_OK)
+
+        return Response({'error': 'شما اجازه حذف این پیام را ندارید'}, status=status.HTTP_403_FORBIDDEN)
 
 
 @api_view(['GET'])
