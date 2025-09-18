@@ -122,6 +122,9 @@ DATABASES = {
     }
 }
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://tododo-aim2.onrender.com"
+]
 
 
 # Password validation
