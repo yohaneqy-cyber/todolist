@@ -12,17 +12,19 @@ class ChatMessageSerializers(serializers.ModelSerializer):
     sender_email = serializers.EmailField(source='sender.email', read_only=True)
     receiver_email = serializers.EmailField(source='receiver.email', read_only=True)
     avatar_url = serializers.SerializerMethodField()
+    edited = serializers.BooleanField(read_only=True)  # ✅ ensure this is included
 
     class Meta:
         model = ChatMessage
-        fields = ['id', 'sender', 'sender_email', 'receiver', 'receiver_email', 'message', 'timestamp', 'edited', 'status', 'avatar_url']
-        read_only_fields = ['id', 'sender', 'receiver', 'timestamp', 'edited', 'status', 'avatar_url']
-
+        fields = ['id', 'sender', 'sender_email', 'receiver', 'receiver_email', 
+                  'message', 'timestamp', 'edited', 'status', 'avatar_url']
+        read_only_fields = ['id', 'sender', 'receiver', 'timestamp', 'status', 'avatar_url']
 
     def get_avatar_url(self, obj):
         request = self.context.get('request')
-        if obj.avatar and hasattr(obj.avatar, 'url'):
+        if hasattr(obj, 'avatar') and obj.avatar and hasattr(obj.avatar, 'url'):
             return request.build_absolute_uri(obj.avatar.url)
+        return None
 
 
 class UserSerializer(serializers.ModelSerializer):

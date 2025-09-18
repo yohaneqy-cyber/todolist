@@ -48,18 +48,20 @@ INSTALLED_APPS = [
     'base.apps.BaseConfig',
     'rest_framework',
     'rest_framework_simplejwt',
+    'channels',
 ]
 
 ASGI_APPLICATION = "todolist.asgi.application"
 
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
             "hosts": [("127.0.0.1", 6379)],
         },
     },
 }
+
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
@@ -213,3 +215,17 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = True   # فقط روی HTTPS فعال باشد
 CSRF_COOKIE_SECURE = True  
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",  # or DEBUG
+    },
+}

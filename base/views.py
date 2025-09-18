@@ -867,6 +867,16 @@ def user_profile_ajax(request, user_id):
     return render(request, 'base/user_profile.html', {'user': user})    
 
 
+from django.views import View
+from django.http import JsonResponse
+from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+import json
+from .models import ChatMessage, User, Block
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class ChatMessageApi(View):
 
@@ -893,12 +903,17 @@ class ChatMessageApi(View):
             local_time = timezone.localtime(msg.timestamp) if msg.timestamp else None
             data.append({
                 'id': msg.id,
+                'sender_id': msg.sender.id,
+                'receiver_id': msg.receiver.id,
                 'sender': msg.sender.email,
                 'receiver': msg.receiver.email,
                 'message': msg.message,
-                'timestamp': local_time.strftime("%H:%M:%S") if local_time else '',
+                # 12-hour format with AM/PM
+                'timestamp': local_time.strftime("%I:%M %p") if local_time else '',
                 'is_read': msg.is_read,
+                'edited': msg.edited,
             })
+
 
         unread_count = messages.filter(receiver=receiver, is_read=False).count()
         return JsonResponse({'messages': data, 'unread_count': unread_count}, safe=False)
@@ -921,7 +936,7 @@ class ChatMessageApi(View):
             except User.DoesNotExist:
                 return JsonResponse({"error": "User not found"}, status=404)
 
-            # 🔒 دو طرفه کردن بلاک: اگر هرکدام بلاک کرده باشند پیام ممنوع است
+            # 🔒 Block check
             blocked = Block.objects.filter(
                 Q(blocker=sender, blocked=receiver) |
                 Q(blocker=receiver, blocked=sender)
@@ -930,7 +945,7 @@ class ChatMessageApi(View):
             if blocked:
                 return JsonResponse({"error": "Messaging not allowed. One of the users has blocked the other."}, status=403)
 
-            # ✅ ذخیره پیام
+            # ✅ Create message
             msg = ChatMessage.objects.create(
                 sender=sender, receiver=receiver, message=content, is_read=False
             )
@@ -939,12 +954,50 @@ class ChatMessageApi(View):
 
             return JsonResponse({
                 'id': msg.id,
+                'sender_id': msg.sender.id,
+                'receiver_id': msg.receiver.id,
                 'sender': msg.sender.email,
                 'receiver': msg.receiver.email,
                 'message': msg.message,
                 'timestamp': local_time.strftime("%H:%M:%S") if local_time else '',
                 'is_read': msg.is_read,
+                'edited': msg.edited,  # <-- include edited status
             }, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    # ===== Optional PATCH endpoint for editing messages =====
+    def patch(self, request, message_id=None):
+        try:
+            data = json.loads(request.body)
+            content = data.get('message', '').strip()
+
+            if not content:
+                return JsonResponse({"error": "Empty message"}, status=400)
+
+            try:
+                msg = ChatMessage.objects.get(id=message_id)
+            except ChatMessage.DoesNotExist:
+                return JsonResponse({"error": "Message not found"}, status=404)
+
+            msg.message = content
+            msg.edited = True  # mark as edited
+            msg.save()
+
+            local_time = timezone.localtime(msg.timestamp) if msg.timestamp else None
+
+            return JsonResponse({
+                'id': msg.id,
+                'sender_id': msg.sender.id,
+                'receiver_id': msg.receiver.id,
+                'sender': msg.sender.email,
+                'receiver': msg.receiver.email,
+                'message': msg.message,
+                'timestamp': local_time.strftime("%H:%M:%S") if local_time else '',
+                'is_read': msg.is_read,
+                'edited': msg.edited,
+            })
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
@@ -1056,7 +1109,7 @@ def send_message(request, user_id):
         "sender": request.user.email,
         "receiver": receiver.email,
         "message": message.message,
-        "timestamp": message.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        "timestamp": message.timestamp.strftime("%H:%M")
     })
 
 from rest_framework import status
@@ -1086,27 +1139,28 @@ class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         instance.save()
         return Response(self.get_serializer(instance).data)
 
-    def destroy(self, request, *args, **kwargs):
+    def destroy(self, request, *args, **kwargs):  # ⚡ این باید بیرون از update باشه
         instance = self.get_object()
-        delete_for_all = request.query_params.get('delete_for_all', 'false').lower() == 'true'
+        delete_for_all = (
+            request.query_params.get('delete_for_all', 'false').lower() == 'true'
+        )
 
         if delete_for_all:
-            # حذف کامل پیام برای همه
-            instance.delete()
-            return Response({'success': True, 'message': 'پیام برای همه حذف شد'}, status=status.HTTP_200_OK)
+            instance.deleted_for_all = True
+            instance.hidden_for_sender = True
+            instance.hidden_for_receiver = True
+            instance.save()
+            return Response(
+                {'success': True, 'message': 'پیام برای همه حذف شد'}, status=200
+            )
 
         # فقط حذف برای کاربر فعلی
         if instance.sender == request.user:
             instance.hidden_for_sender = True
-            instance.save()
-            return Response({'success': True, 'message': 'پیام فقط برای شما حذف شد'}, status=status.HTTP_200_OK)
-
         elif instance.receiver == request.user:
             instance.hidden_for_receiver = True
-            instance.save()
-            return Response({'success': True, 'message': 'پیام فقط برای شما حذف شد'}, status=status.HTTP_200_OK)
-
-        return Response({'error': 'شما اجازه حذف این پیام را ندارید'}, status=status.HTTP_403_FORBIDDEN)
+        instance.save()
+        return Response({'success': True, 'message': 'پیام فقط برای شما حذف شد'}, status=200)
 
 
 @api_view(['GET'])
@@ -1306,3 +1360,45 @@ def delete_avatar(request):
             return JsonResponse({"success": True})
         return JsonResponse({"success": False, "error": "No avatar set"})
     return JsonResponse({"success": False, "error": "Invalid request"})
+
+from django.http import JsonResponse
+from django.db.models import Q
+
+@login_required
+def get_messages(request):
+    chat_user_id = request.GET.get("chat_user_id")
+    last_message_id = int(request.GET.get("last_message_id", 0))
+
+    if not chat_user_id:
+        return JsonResponse({"messages": [], "deleted_message_ids": []})
+
+    # همه پیام‌های بین دو کاربر
+    messages_qs = ChatMessage.objects.filter(
+        Q(sender=request.user, receiver_id=chat_user_id) |
+        Q(receiver=request.user, sender_id=chat_user_id)
+    ).order_by("id")
+
+    # پیام‌های جدیدتر از آخرین آی‌دی
+    new_messages = messages_qs.filter(id__gt=last_message_id)
+
+    # 📌 پیام‌هایی که باید برای این کاربر پاک نشون داده بشن
+    deleted_messages = messages_qs.filter(
+        Q(deleted_for_all=True) |
+        Q(sender=request.user, hidden_for_sender=True) |
+        Q(receiver=request.user, hidden_for_receiver=True)
+    ).values_list("id", flat=True)
+
+    return JsonResponse({
+        "messages": [
+            {
+                "id": msg.id,
+                "sender": msg.sender.email,
+                "receiver": msg.receiver.email,
+                "message": msg.message,
+                "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                "is_edited": msg.edited,
+            }
+            for msg in new_messages
+        ],
+        "deleted_message_ids": list(deleted_messages),
+    })
