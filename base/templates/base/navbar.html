@@ -678,7 +678,7 @@ body.dark-mode .chat-dropdown-menu button:hover {
 /* ریسپانسیو برای موبایل */
 @media (max-width: 480px) {
   #chatMessages {
-    padding: 16px 12px 175px !important; /* padding-bottom بیشتر برای فرم موبایل */
+    padding: 16px 12px 183px !important; /* padding-bottom بیشتر برای فرم موبایل */
     font-size: 16px !important;          /* فونت کمی کوچکتر */
     background-position: center center !important;
     background-size: cover !important;
@@ -4589,7 +4589,7 @@ async function pollMessages() {
   } catch (err) {
     console.error("Polling error:", err);
   } finally {
-    setTimeout(pollMessages, 2000);
+    setTimeout(pollMessages, 1000);
   }
 }
 
