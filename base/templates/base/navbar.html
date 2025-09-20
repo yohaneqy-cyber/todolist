@@ -4474,10 +4474,8 @@ function shouldDisplayMessage(msg) {
 function appendMessageToUI(msg, isTemp = false) {
   if (!chatMessages) return null;
 
-  // ⚠️ پیام حذف شده را نادیده بگیر
   if (!shouldDisplayMessage(msg) && !isTemp) return null;
 
-  // اطمینان از وجود فیلد edited
   msg.edited = msg.edited || msg.is_edited || false;
 
   let msgElem = document.querySelector(`.chat-message[data-id='${msg.id}']`);
@@ -4486,15 +4484,19 @@ function appendMessageToUI(msg, isTemp = false) {
     msgElem.className = "chat-message";
     msgElem.dataset.id = msg.id;
 
-    // اگر پیام موقت است، اضافه کردن کلاس
-    if (isTemp) msgElem.classList.add("temp-message");
+    // ⚠️ اضافه کردن sender_id و receiver_id برای بلاک چک
+    msgElem.dataset.senderId = msg.sender_id;
+    msgElem.dataset.receiverId = msg.receiver_id;
 
+    if (isTemp) msgElem.classList.add("temp-message");
     chatMessages.appendChild(msgElem);
   }
 
+  // کلاس‌های پیام
   msgElem.className = "chat-message";
   msgElem.classList.add(msg.sender_id === window.currentUserId ? "me" : "them");
 
+  // متن پیام
   let textEl = msgElem.querySelector(".message-text");
   if (!textEl) {
     textEl = document.createElement("span");
@@ -4503,6 +4505,7 @@ function appendMessageToUI(msg, isTemp = false) {
   }
   textEl.textContent = msg.message;
 
+  // زمان پیام
   let timeEl = msgElem.querySelector(".message-time");
   if (!timeEl) {
     timeEl = document.createElement("span");
@@ -4511,11 +4514,9 @@ function appendMessageToUI(msg, isTemp = false) {
   }
   timeEl.textContent = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  // حذف لیبل قبلی اگر وجود داشت
+  // لیبل ادیت
   const existingLabel = msgElem.querySelector(".edited-label");
   if (existingLabel) existingLabel.remove();
-
-  // اضافه کردن لیبل ادیتد در صورت نیاز
   if (msg.edited) {
     const editedSpan = document.createElement("span");
     editedSpan.textContent = " (edited)";
@@ -4525,13 +4526,16 @@ function appendMessageToUI(msg, isTemp = false) {
     msgElem.appendChild(editedSpan);
   }
 
-  msgElem.addEventListener("click", () => {
-    window.selectedMessageElement = msgElem;
-  });
+  // لایسنر کلیک پیام
+  msgElem.onclick = (e) => {
+    onEditMessageClick(e); // 🔹 بلاک چک در خود تابع انجام میشه
+  };
 
   chatMessages.scrollTop = chatMessages.scrollHeight;
   return msgElem;
 }
+
+
 
 
 
@@ -4601,7 +4605,6 @@ async function pollMessages() {
     pollMessages();
   }
 
-  // ===== Send / Edit Message =====
 async function sendMessage(event) {
   if (event) event.preventDefault();
 
@@ -4609,32 +4612,30 @@ async function sendMessage(event) {
   if (!message || !window.currentUserId || !window.currentChatUserId) return;
 
   let blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(String);
-  if (blockedUsers.includes(String(window.currentChatUserId))) {
-    showBlockedToast();
-    return;
-  }
 
   let url, method;
-  let tempMsgElem = null;
 
   if (window.editingMessageId && window.selectedMessageElement) {
+    // 🚫 بلاک چک برای ادیت
+    if (blockedUsers.includes(String(window.currentChatUserId))) {
+      showBlockedToast();
+      // ریست حالت ادیت
+      window.editingMessageId = null;
+      window.selectedMessageElement = null;
+      return;
+    }
+
     url = `/api/chat/messages/${window.editingMessageId}/`;
     method = "PATCH";
   } else {
+    // 🚫 بلاک چک برای ارسال جدید
+    if (blockedUsers.includes(String(window.currentChatUserId))) {
+      showBlockedToast();
+      return;
+    }
+
     url = `/api/chat/send/${window.currentChatUserId}/`;
     method = "POST";
-
-    const tempMsgData = {
-      sender_id: window.currentUserId,
-      message,
-      timestamp: Date.now(),
-      id: "temp-" + Date.now()
-    };
-
-    // ⚠️ فقط اگر پیام قابل نمایش است، append کن
-    if (shouldDisplayMessage(tempMsgData)) {
-      tempMsgElem = appendMessageToUI(tempMsgData);
-    }
   }
 
   chatInput.value = "";
@@ -4653,11 +4654,22 @@ async function sendMessage(event) {
 
     const data = await response.json().catch(() => ({}));
 
-    if (response.status === 403 || data.blocked) showBlockedToast();
+    if (response.status === 403 || data.blocked) {
+      showBlockedToast();
+      return;
+    }
+
     if (!response.ok) throw new Error("Server error");
 
-    if (method === "POST" && tempMsgElem && data.id) {
-      tempMsgElem.dataset.id = data.id;
+    if (method === "POST" && data.id) {
+      const newMsg = {
+        sender_id: window.currentUserId,
+        receiver_id: window.currentChatUserId, // ⚠️ اضافه شد
+        message,
+        timestamp: Date.now(),
+        id: data.id
+      };
+      appendMessageToUI(newMsg);
       lastMessageId = Math.max(lastMessageId, data.id);
     }
 
@@ -4685,28 +4697,41 @@ async function sendMessage(event) {
   }
 }
 
+
+
+
   if (chatForm) chatForm.addEventListener("submit", sendMessage);
 
 document.addEventListener("click", (e) => {
-    const editBtn = e.target.closest(".edit-btn");
-    if (!editBtn) return;
+  const editBtn = e.target.closest(".edit-btn");
+  if (!editBtn) return;
 
-    e.preventDefault();
-    e.stopPropagation();
+  e.preventDefault();
+  e.stopPropagation();
 
-    const messageEl = editBtn.closest(".chat-message");
-    if (!messageEl) return alert("پیام پیدا نشد.");
+  // 🚫 بلاک چک
+  let blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(String);
+  if (blockedUsers.includes(String(window.currentChatUserId))) {
+    showBlockedToast();
+    return; // ❌ اصلا نره تو حالت ادیت
+  }
 
-    window.selectedMessageElement = messageEl;
+  const messageEl = editBtn.closest(".chat-message");
+  if (!messageEl) return alert("پیام پیدا نشد.");
 
-    const textEl = messageEl.querySelector(".message-text");
-    if (!textEl) return alert("متن پیام پیدا نشد.");
+  window.selectedMessageElement = messageEl;
+  window.editingMessageId = messageEl.dataset.id;
 
-    chatInput.value = textEl.textContent;
-    chatInput.focus();
+  const textEl = messageEl.querySelector(".message-text");
+  if (!textEl) return alert("متن پیام پیدا نشد.");
 
-    console.log("✏️ Editing message ID set:", window.editingMessageId);
+  chatInput.value = textEl.textContent;
+  chatInput.focus();
+
+  console.log("✏️ Editing message ID set:", window.editingMessageId);
 });
+
+
 
 
   // ===== Change Chat User =====
@@ -4912,7 +4937,7 @@ async function updateRequestsBadge() {
 
 // اجرای اولیه و زمان‌بندی برای بروزرسانی خودکار
 updateRequestsBadge();
-setInterval(updateRequestsBadge, 5000);
+setInterval(updateRequestsBadge, 3000);
 
 async function safeText(res) {
   try {
@@ -4936,7 +4961,7 @@ function showChatBadge(count) {
 
 // اجرا و زمان‌بندی
 updateNewMessagesBadge();
-setInterval(updateNewMessagesBadge, 5000);
+setInterval(updateNewMessagesBadge, 3000);
 
 
   async function safeText(res) {
@@ -4961,7 +4986,7 @@ setInterval(updateNewMessagesBadge, 5000);
 
   // اجرا و رفرش خودکار
   updateNewMessagesBadge();
-  setInterval(updateNewMessagesBadge, 5000);
+  setInterval(updateNewMessagesBadge, 3000);
 
 async function safeText(res) {
   try {
@@ -4985,7 +5010,7 @@ function showChatBadge(count) {
 
 // اجرا و رفرش خودکار
 updateNewMessagesBadge();
-setInterval(updateNewMessagesBadge, 5000);
+setInterval(updateNewMessagesBadge, 3000);
 
 
 
@@ -5160,19 +5185,25 @@ function openModal(modal, options = {}) {
 
 
   // ===== تابع رندر پیام‌ها =====
-  async function renderMessages() {
-    try {
-      const res = await fetch(`/api/get_messages/?chat_user_id=${user.id}`);
-      if (!res.ok) throw new Error("Network error");
+async function renderMessages() {
+  try {
+    const res = await fetch(`/api/get_messages/?chat_user_id=${user.id}`);
+    if (!res.ok) throw new Error("Network error");
 
-      const data = await res.json();
-      if (!data || !Array.isArray(data.messages)) return;
+    const data = await res.json();
+    if (!data || !Array.isArray(data.messages)) return;
 
-      data.messages.forEach(msg => appendMessageToUI(msg));
-    } catch (err) {
-      console.error("Error fetching messages:", err);
-    }
+    data.messages.forEach(msg => {
+      // ⚠️ مطمئن شدن از وجود sender_id و receiver_id
+      if (!msg.sender_id) msg.sender_id = msg.sender?.id || null;
+      if (!msg.receiver_id) msg.receiver_id = msg.receiver?.id || null;
+
+      appendMessageToUI(msg);
+    });
+  } catch (err) {
+    console.error("Error fetching messages:", err);
   }
+}
 
   renderMessages(); // نمایش تمام پیام‌های موجود با لیبل ادیتد
   pollMessages();   // شروع polling برای پیام‌های جدید
@@ -6512,9 +6543,55 @@ deleteMessageBtn.addEventListener("click", () => {
 const confirmDeleteMessageBtn = document.getElementById('confirmDeleteMessageBtn');
 const deleteForAllCheckbox = document.getElementById('deleteForAllCheckbox');
 
+  function showToast(message = "You Are Blocked By This User!") {
+    const containerId = "toastContainer";
+    let container = document.getElementById(containerId);
+    if (!container) {
+      container = document.createElement("div");
+      container.id = containerId;
+      container.style.position = "fixed";
+      container.style.top = "20px";
+      container.style.right = "20px";
+      container.style.zIndex = "9999";
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.style.cssText = `
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #f44336;
+      color: white;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      min-width: 250px;
+      max-width: 300px;
+      font-family: sans-serif;
+      animation: slideIn 0.5s ease-out;
+    `;
+    toast.innerHTML = `<span>${message}</span><span class="toast-close" style="cursor:pointer; font-weight:bold; margin-left:12px;">&times;</span>`;
+
+    toast.querySelector(".toast-close").addEventListener("click", () => {
+      toast.style.animation = "slideOut 0.5s forwards";
+      setTimeout(() => toast.remove(), 500);
+    });
+
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.animation = "slideOut 0.5s forwards";
+      setTimeout(() => toast.remove(), 500);
+    }, 5000);
+  }
+
+
+// استفاده در حذف پیام
 confirmDeleteMessageBtn.addEventListener('click', () => {
   if (!window.currentMessageIdToDelete) {
-    alert("شناسه پیام برای حذف یافت نشد.");
+    showToast("شناسه پیام برای حذف یافت نشد.");
     return;
   }
 
@@ -6543,14 +6620,16 @@ confirmDeleteMessageBtn.addEventListener('click', () => {
         setTimeout(() => msgEl.remove(), 300);
       }
     } else if (response.status === 404) {
-      alert("پیام قبلاً حذف شده است.");
+      showToast("پیام قبلاً حذف شده است.");
+    } else if (response.status === 403) {
+      showToast("You Are Blocked By This User!");
     } else {
-      alert("حذف پیام موفق نبود.");
+      showToast("حذف پیام موفق نبود.");
     }
     window.currentMessageIdToDelete = null;
   })
   .catch(() => {
-    alert("خطا در ارسال درخواست حذف.");
+    showToast("خطا در ارسال درخواست حذف.");
     confirmDeleteMessageBtn.disabled = false;
     window.currentMessageIdToDelete = null;
   });
@@ -6908,29 +6987,6 @@ cancelBtn.addEventListener('click', closeLogoutModal);
 
 // ادامه کد جاوااسکریپت قبلی
 
-// تابع نمایش پیام‌ها
-function renderMessages(messages) {
-  const chatMessages = document.getElementById("chatMessages");
-  chatMessages.innerHTML = "";
-  
-  messages.forEach(msg => {
-    const div = document.createElement("div");
-    div.className = `chat-message ${msg.sender_id === window.currentUserId ? "me" : "them"}`;
-    div.dataset.id = msg.id;
-    div.innerHTML = `
-      <p class="message-text">${msg.message}</p>
-      <span class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
-    `;
-    chatMessages.appendChild(div);
-  });
-
-  // 🔹 اسکرول به پایین
-  const isScrolledToBottom = chatMessages.scrollHeight - chatMessages.scrollTop === chatMessages.clientHeight;
-  
-  if (isScrolledToBottom || chatMessages.scrollHeight - chatMessages.scrollTop <= 20) {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-}
 
 
 
@@ -7069,14 +7125,37 @@ document.addEventListener("DOMContentLoaded", () => {
     // کلیک راست روی پیام‌ها
 document.addEventListener("contextmenu", (e) => {
     const messageEl = e.target.closest(".chat-message");
+
+    console.log("Right-click event:", e.target);
+    console.log("Message element found:", messageEl);
+
     if (!messageEl) {
         // اگه روی پیام راست‌کلیک نشد
+        console.log("No message element, hiding menu.");
         messageMenu.classList.add("hidden");
         document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
         window.selectedMessageId = null;
         window.selectedMessageElement = null;
-        window.currentMessageIdToDelete = null; // ✅ اضافه شد
+        window.currentMessageIdToDelete = null;
         return;
+    }
+
+    // ⚠️ چک بلاک
+    const senderId = messageEl.dataset.senderId;
+    const receiverId = messageEl.dataset.receiverId;
+    const blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(String);
+
+    console.log("Sender ID:", senderId);
+    console.log("Receiver ID:", receiverId);
+    console.log("Blocked users:", blockedUsers);
+
+    if (!senderId || !receiverId) {
+        console.warn("⚠️ senderId یا receiverId موجود نیست!");
+    }
+
+    if (blockedUsers.includes(senderId) || blockedUsers.includes(receiverId)) {
+        console.log("⛔ User is blocked, menu won't open.");
+        return; // بلاک شده -> منو باز نشه
     }
 
     e.preventDefault();
@@ -7084,7 +7163,7 @@ document.addEventListener("contextmenu", (e) => {
     // ست کردن پیام انتخاب‌شده
     window.selectedMessageElement = messageEl;
     window.selectedMessageId = messageEl.dataset.id;
-    window.currentMessageIdToDelete = messageEl.dataset.id; // ✅ اضافه شد
+    window.currentMessageIdToDelete = messageEl.dataset.id;
 
     // هایلایت کردن پیام انتخاب‌شده
     document.querySelectorAll(".chat-message.selected").forEach(el => el.classList.remove("selected"));
@@ -7117,6 +7196,7 @@ document.addEventListener("contextmenu", (e) => {
     messageMenu.style.left = `${newLeft}px`;
     messageMenu.style.top = `${newTop}px`;
 });
+
 
 document.getElementById("copyMessage").addEventListener("click", async (e) => {
   e.stopPropagation();
@@ -7505,6 +7585,17 @@ document.addEventListener("contextmenu", (e) => {
 
 
 function openMessageMenuFor(messageEl) {
+  const senderId = messageEl.dataset.senderId;
+  const receiverId = messageEl.dataset.receiverId;
+  let blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(String);
+  console.log("📌 senderId:", senderId, "receiverId:", receiverId, "blockedUsers:", blockedUsers);
+
+  // 🛑 اگر کاربر مقابل بلاک باشه، منو اصلا باز نشه
+  if (blockedUsers.includes(senderId) || blockedUsers.includes(receiverId)) {
+    console.log("⛔ User is blocked, menu won't open.");
+    return;
+  }
+
   selectedMessageId = messageEl.dataset.id ?? null;
   selectedMessageElement = messageEl;
 
@@ -7589,35 +7680,33 @@ function getCSRFToken() {
     .find(row => row.startsWith('csrftoken='))
     ?.split('=')[1];
 }
-
 const editMessageBtn = document.getElementById("editMessage");
 
 editMessageBtn.addEventListener("click", function(e) {
   e.preventDefault();
   e.stopPropagation();
 
-  // اگه کاربر روی پیام راست‌کلیک کرده باشه، باید همون پیام ذخیره شده باشه
-  if (!window.selectedMessageElement) {
-    alert("پیامی انتخاب نشده است.");
-    return;
+  if (!window.selectedMessageElement) return alert("پیامی انتخاب نشده است.");
+
+  const blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(String);
+  const blockedByUsers = JSON.parse(localStorage.getItem("blockedByUsers") || "[]").map(String);
+
+  const myId = String(window.currentUserId);
+  const senderId = String(window.selectedMessageElement.dataset.senderId);
+
+  // 🔹 Check blocks properly
+  if (blockedUsers.includes(senderId) || blockedByUsers.includes(myId)) {
+    showBlockedToast();
+    return; // ❌ Blocked -> do not allow edit
   }
 
-  // متن پیام رو بگیر
   const textEl = window.selectedMessageElement.querySelector(".message-text");
-  if (!textEl) {
-    alert("متن پیام پیدا نشد.");
-    return;
-  }
+  if (!textEl) return alert("متن پیام پیدا نشد.");
 
-  // متن رو داخل input بذار
   chatInput.value = textEl.textContent;
-
-  // اینجا حتما ID پیام رو ذخیره کن
   window.editingMessageId = window.selectedMessageElement.dataset.id;
 
-
-  // بستن منو
-  messageMenu.classList.add("hidden");
+  if (typeof messageMenu !== "undefined") messageMenu.classList.add("hidden");
   chatInput.focus();
 });
 
@@ -7626,15 +7715,24 @@ function onEditMessageClick(e) {
   e.preventDefault();
   e.stopPropagation();
 
-  // 🔹 find the message container
-  const messageElement = e.target.closest(".message-item"); 
+  const messageElement = e.target.closest(".chat-message");
   if (!messageElement) return;
 
-  // 🔹 set global variables
+  const blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]").map(String);
+  const blockedByUsers = JSON.parse(localStorage.getItem("blockedByUsers") || "[]").map(String);
+
+  const myId = String(window.currentUserId);
+  const senderId = String(messageElement.dataset.senderId);
+
+  // 🔹 Check blocks properly
+  if (blockedUsers.includes(senderId) || blockedByUsers.includes(myId)) {
+    showBlockedToast();
+    return; // ❌ Blocked -> do not allow edit
+  }
+
   window.selectedMessageElement = messageElement;
   window.editingMessageId = messageElement.dataset.id;
 
-  // 🔹 fill input
   const textEl = messageElement.querySelector(".message-text");
   if (!textEl) {
     chatInput.value = "";
@@ -7646,10 +7744,7 @@ function onEditMessageClick(e) {
   chatInput.value = textEl.textContent;
   chatInput.focus();
 
-  // 🔹 hide dropdown menu if exists
   if (typeof messageMenu !== "undefined") messageMenu.classList.add("hidden");
-
-  console.log("✏️ Editing message ID set:", window.editingMessageId);
 }
 
 
@@ -7740,79 +7835,6 @@ if (confirmDeleteBtn) {
   confirmDeleteBtn.removeEventListener("click", onConfirmDelete);
   confirmDeleteBtn.addEventListener("click", onConfirmDelete);
 }
-
-
-
-
-
-// شناسه کاربران (از backend مقداردهی کنید)
-document.addEventListener("DOMContentLoaded", () => {
-    const userId = window.currentUserId;   // شناسه کاربر فعلی (از قالب مقداردهی کن)
-    const chatUserId = window.currentChatUserId; // شناسه مخاطب انتخاب شده
-
-    if (!userId || !chatUserId) {
-        console.error("❌ شناسه کاربر یا مخاطب تعریف نشده است.");
-        return;
-    }
-
-    // نام اتاق یکتا (با مرتب‌کردن شناسه‌ها)
-    const roomName = [userId, chatUserId].sort().join("_");
-
-    // آدرس WebSocket (برای http -> ws و برای https -> wss)
-    const wsScheme = window.location.protocol === "https:" ? "wss://" : "ws://";
-    const chatSocket = new WebSocket(
-        wsScheme + window.location.host + `/ws/chat/${roomName}/`
-    );
-
-    // وقتی اتصال برقرار شد
-    chatSocket.onopen = () => {
-        console.log("✅ WebSocket connected.");
-    };
-
-    // وقتی پیام جدید از سرور می‌رسه
-    chatSocket.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        const message = data.message;
-        const sender = data.sender_id;
-
-        if (!message) return;
-
-        const chatMessages = document.getElementById("chatMessages");
-        if (!chatMessages) return;
-
-        // ایجاد المان پیام
-        const msgElem = document.createElement("div");
-        msgElem.classList.add("chat-message");
-        msgElem.classList.add(sender == userId ? "me" : "them");
-
-        const textSpan = document.createElement("span");
-        textSpan.classList.add("message-text");
-        textSpan.textContent = message;
-
-        const timeSpan = document.createElement("span");
-        timeSpan.classList.add("message-time");
-        timeSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-        msgElem.appendChild(textSpan);
-        msgElem.appendChild(timeSpan);
-
-        chatMessages.appendChild(msgElem);
-
-        // اسکرول به آخر لیست پیام‌ها
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    };
-
-    chatSocket.onclose = (e) => {
-        console.warn("⚠️ WebSocket connection closed.", e.reason || "");
-    };
-
-    chatSocket.onerror = (e) => {
-        console.error("❌ WebSocket error:", e);
-    };
-
-    // ارسال پیام از کلاینت به سرور
-
-});
 
 
 document.addEventListener("DOMContentLoaded", () => {

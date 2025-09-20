@@ -1127,6 +1127,7 @@ class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
             Q(sender=self.request.user) | Q(receiver=self.request.user)
         )
 
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         message_text = request.data.get('message', '').strip()
@@ -1134,13 +1135,40 @@ class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         if not message_text:
             return Response({'error': 'متن پیام خالی است.'}, status=400)
 
+        # ⚠️ چک بلاک با مدل Block
+        # بررسی اینکه آیا فرستنده یا گیرنده، کاربر فعلی را بلاک کرده‌اند
+        if Block.objects.filter(
+            Q(blocker=instance.sender, blocked=request.user) |
+            Q(blocker=instance.receiver, blocked=request.user)
+        ).exists():
+            return Response(
+                {'error': '❌ شما توسط این کاربر بلاک شده‌اید و نمی‌توانید پیام را ویرایش کنید.'},
+                status=403
+            )
+
+        # فقط فرستنده خودش اجازه ویرایش دارد
+        if instance.sender != request.user:
+            return Response({'error': 'فقط می‌توانید پیام‌های خودتان را ویرایش کنید.'}, status=403)
+
         instance.message = message_text
         instance.edited = True
         instance.save()
+
         return Response(self.get_serializer(instance).data)
 
-    def destroy(self, request, *args, **kwargs):  # ⚡ این باید بیرون از update باشه
+    def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+
+        # ⚠️ چک بلاک: اگر کاربر توسط فرستنده یا گیرنده بلاک شده باشد
+        if Block.objects.filter(
+            Q(blocker=instance.sender, blocked=request.user) |
+            Q(blocker=instance.receiver, blocked=request.user)
+        ).exists():
+            return Response(
+                {'error': '❌ شما توسط این کاربر بلاک شده‌اید و نمی‌توانید پیام را حذف کنید.'},
+                status=403
+            )
+
         delete_for_all = (
             request.query_params.get('delete_for_all', 'false').lower() == 'true'
         )
