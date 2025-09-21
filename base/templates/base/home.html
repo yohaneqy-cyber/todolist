@@ -26,7 +26,6 @@
 
 <div class="add-buttons-container">
   <a href="{% url 'add_task' %}" class="add-btn">➕ Add Task</a>
-  <a href="{% url 'create_recurring_task' %}" class="add-btn">➕ Add New Recurring Task</a>
 </div>
 
 
@@ -119,15 +118,16 @@
           </div>
           {% endif %}
           {% for subtask in task.subtasks.all %}
-            <li>
-              {{ subtask.title }}
+            <li class="subtask-item">
+              <span class="subtask-title">{{ subtask.title }}</span>
+              
               {% if subtask.completed %}
                 <span class="done">✅</span>
               {% else %}
                 <span class="pending">⏳</span>
                 <form method="POST" action="{% url 'complete_subtask' subtask.id %}" style="display:inline;">
                   {% csrf_token %}
-                  <button type="submit" class="btn btn-success btn-sm">Done</button>
+                  <button type="submit" class="btn btn-success btn-sm task-done-btn">Done</button>
                 </form>
               {% endif %}
             </li>
@@ -184,20 +184,24 @@
           <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
         </div>
         {% endif %}
-        {% for subtask in task.subtasks.all %}
-          <li>
-            {{ subtask.title }}
-            {% if subtask.completed %}
-              <span class="done">✅</span>
-            {% else %}
-              <span class="pending">⏳</span>
-              <form method="POST" action="{% url 'complete_subtask' subtask.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-sm">Done</button>
-              </form>
-            {% endif %}
-          </li>
-        {% endfor %}
+        <ul class="subtask-list">
+          {% for subtask in task.subtasks.all %}
+            <li class="subtask-item">
+              <span class="subtask-title">{{ subtask.title }}</span>
+              
+              {% if subtask.completed %}
+                <span class="status done">✅</span>
+              {% else %}
+                <span class="status pending">⏳</span>
+                <form method="POST" action="{% url 'complete_subtask' subtask.id %}" class="inline-form">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success btn-sm">Done</button>
+                </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+
       </div>
     {% endif %}
   {% empty %}
@@ -244,24 +248,32 @@
           {% endif %}
         </div>
 
-        {% if task.subtasks.exists %}
-          <ul>
-            {% for subtask in task.subtasks.all %}
-              <li>
-                {{ subtask.title }}
-                {% if subtask.completed %}
-                  <span class="done">✅</span>
-                {% else %}
-                  <span class="pending">⏳</span>
-                  <form method="POST" action="{% url 'complete_subtask' subtask.id %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success btn-sm">Done</button>
-                  </form>
-                {% endif %}
-              </li>
-            {% endfor %}
-          </ul>
-        {% endif %}
+{% if tasks %}
+  {% for task in tasks %}
+    <div class="task-card">
+      <h4>{{ task.title }}</h4>
+
+      {% if task.subtasks.all %}
+        <ul class="subtask-list">
+          {% for subtask in task.subtasks.all %}
+            <li class="subtask-item">
+              <span class="subtask-title">{{ subtask.title }}</span>
+              {% if subtask.completed %}
+                <span class="done">✅</span>
+              {% else %}
+                <span class="pending">⏳</span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="no-subtasks">No subtasks</p>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% else %}
+  <p>No tasks for today.</p>
+{% endif %}
 
       </div>
     {% empty %}
@@ -284,6 +296,7 @@
           <span class="task-title">{{ task.title }}</span>
           <span class="task-date">{{ task.created|date:"Y-m-d H:i" }}</span>
         </div>
+
         <div class="task-meta">
           <span class="task-priority">Priority: {{ task.get_priority_display }}</span>
           <span class="status">{% if task.completed %}✅{% else %}⏳{% endif %}</span>
@@ -291,37 +304,44 @@
             <p class="shared-note">Shared with you by {{ task.user.name }}</p>
           {% endif %}
         </div>
+
         <br>
+
         {% if task.user != request.user and request.user in task.share_with.all %}
           <a href="{% url 'view_task' task.id %}" class="btn">View Task</a>
         {% else %}
-        <div class="task-actions">
-          <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
-          <button
-            class="btn btn-danger delete-btn"
-            data-title="{{ task.title }}"
-            data-url="{% url 'delete_task' task.id %}">
-            Delete
-          </button>
-          {% if not task.completed %}
-            <form method="POST" action="{% url 'complete_task' task.id %}" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-success">Done</button>
-            </form>
-          {% endif %}
-          <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
-        </div>
-        {% endif %}
-        {% for subtask in task.subtasks.all %}
-          <li>
-            {{ subtask.title }}
-            {% if subtask.completed %}
-              <span class="done">✅</span>
-            {% else %}
-              <span class="pending">⏳</span>
+          <div class="task-actions">
+            <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
+            <button
+              class="btn btn-danger delete-btn"
+              data-title="{{ task.title }}"
+              data-url="{% url 'delete_task' task.id %}">
+              Delete
+            </button>
+            {% if not task.completed %}
+              <form method="POST" action="{% url 'complete_task' task.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Done</button>
+              </form>
             {% endif %}
-          </li>
-        {% endfor %}
+            <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
+          </div>
+        {% endif %}
+
+        {% if task.subtasks.all %}
+          <ul class="subtask-list">
+            {% for subtask in task.subtasks.all %}
+              <li class="subtask-item">
+                <span class="subtask-title">{{ subtask.title }}</span>
+                {% if subtask.completed %}
+                  <span class="done">✅</span>
+                {% else %}
+                  <span class="pending">⏳</span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
     {% endif %}
   {% empty %}
@@ -329,34 +349,6 @@
   {% endfor %}
 </div>
 
-
-<h4>Today's Recurring Tasks</h4>
-
-<div class="task-list">
-  {% for rec in recurring_tasks %}
-    <div class="task-card">
-      <div class="task-header">
-        <span class="task-title" title="{{ rec.title }}">
-          {{ rec.title }}
-        </span>
-        <span class="task-date">{{ rec.start_date|date:"Y-m-d H:i" }}</span>
-      </div>
-      <div class="task-actions">
-        <a href="{% url 'update_recurring_task' rec.id %}" class="btn">Edit</a>
-        <button class="btn btn-danger delete-btn"
-        data-url="{% url 'delete_recurring_task' rec.id %}"
-        data-title="{{ rec.title }}">
-          Delete
-        </button>
-      </div>
-      <div>
-        every {{ rec.interval }} {{ rec.interval_type }}
-      </div>
-    </div>
-  {% empty %}
-    <p>No recurring tasks for today.</p>
-  {% endfor %}
-</div>
 
 
 {% elif show_only == 'tomorrow' %}
@@ -369,6 +361,7 @@
           <span class="task-title">{{ task.title }}</span>
           <span class="task-date">{{ task.created|date:"Y-m-d H:i" }}</span>
         </div>
+
         <div class="task-meta">
           <span class="task-priority">Priority: {{ task.get_priority_display }}</span>
           <span class="status">{% if task.completed %}✅{% else %}⏳{% endif %}</span>
@@ -376,41 +369,48 @@
             <p class="shared-note">Shared with you by {{ task.user.name }}</p>
           {% endif %}
         </div>
+
         <br>
+
         {% if task.user != request.user and request.user in task.share_with.all %}
           <a href="{% url 'view_task' task.id %}" class="btn">View Task</a>
         {% else %}
-        <div class="task-actions">
-          <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
-          <button
-            class="btn btn-danger delete-btn"
-            data-title="{{ task.title }}"
-            data-url="{% url 'delete_task' task.id %}">
-            Delete
-          </button>
-          {% if not task.completed %}
-            <form method="POST" action="{% url 'complete_task' task.id %}" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-success">Done</button>
-            </form>
-          {% endif %}
-          <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
-        </div>
-        {% endif %}
-        {% for subtask in task.subtasks.all %}
-          <li>
-            {{ subtask.title }}
-            {% if subtask.completed %}
-              <span class="done">✅</span>
-            {% else %}
-              <span class="pending">⏳</span>
-              <form method="POST" action="{% url 'complete_subtask' subtask.id %}" style="display:inline;">
+          <div class="task-actions">
+            <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
+            <button
+              class="btn btn-danger delete-btn"
+              data-title="{{ task.title }}"
+              data-url="{% url 'delete_task' task.id %}">
+              Delete
+            </button>
+            {% if not task.completed %}
+              <form method="POST" action="{% url 'complete_task' task.id %}" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-sm">Done</button>
+                <button type="submit" class="btn btn-success">Done</button>
               </form>
             {% endif %}
-          </li>
-        {% endfor %}
+            <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
+          </div>
+        {% endif %}
+
+        {% if task.subtasks.all %}
+          <ul class="subtask-list">
+            {% for subtask in task.subtasks.all %}
+              <li class="subtask-item">
+                <span class="subtask-title">{{ subtask.title }}</span>
+                {% if subtask.completed %}
+                  <span class="done">✅</span>
+                {% else %}
+                  <span class="pending">⏳</span>
+                  <form method="POST" action="{% url 'complete_subtask' subtask.id %}" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm">Done</button>
+                  </form>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
     {% endif %}
   {% empty %}
@@ -420,34 +420,7 @@
 
 
 
-<h4>Tomorrow's Recurring Tasks</h4>
 
-<div class="task-list">
-  {% for rec in recurring_tasks %}
-    <div class="task-card">
-      <div class="task-header">
-        <span class="task-title" title="{{ rec.title }}">
-          {{ rec.title }}
-        </span>
-        <span class="task-date">Start: {{ rec.start_date|date:"Y-m-d H:i" }}</span>
-      </div>
-      <div>
-        Every {{ rec.interval }} {{ rec.interval_type }}
-      </div>
-      <div class="task-actions">
-        <a href="{% url 'update_recurring_task' rec.id %}" class="btn">Edit</a>
-        <button class="btn btn-danger delete-btn"
-                data-url="{% url 'delete_recurring_task' rec.id %}"
-                data-title="{{ rec.title }}">
-          Delete
-        </button>
-      </div>
-      </div>
-    </div>
-  {% empty %}
-    <p>No recurring tasks for tomorrow.</p>
-  {% endfor %}
-</div>
 
 {% elif show_only == 'week' %}
 <h3>This Week's Tasks</h3>
@@ -459,6 +432,7 @@
           <span class="task-title">{{ task.title }}</span>
           <span class="task-date">{{ task.created|date:"Y-m-d H:i" }}</span>
         </div>
+
         <div class="task-meta">
           <span class="task-priority">Priority: {{ task.get_priority_display }}</span>
           <span class="status">{% if task.completed %}✅{% else %}⏳{% endif %}</span>
@@ -466,77 +440,52 @@
             <p class="shared-note">Shared with you by {{ task.user.name }}</p>
           {% endif %}
         </div>
+
         <br>
+
         {% if task.user != request.user and request.user in task.share_with.all %}
           <a href="{% url 'view_task' task.id %}" class="btn">View Task</a>
         {% else %}
-        <div class="task-actions">
-          <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
-          <button
-            class="btn btn-danger delete-btn"
-            data-title="{{ task.title }}"
-            data-url="{% url 'delete_task' task.id %}">
-            Delete
-          </button>
-          {% if not task.completed %}
-            <form method="POST" action="{% url 'complete_task' task.id %}" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-success">Done</button>
-            </form>
-          {% endif %}
-          <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
-        </div>
-        {% endif %}
-        {% for subtask in task.subtasks.all %}
-          <li>
-            {{ subtask.title }}
-            {% if subtask.completed %}
-              <span class="done">✅</span>
-            {% else %}
-              <span class="pending">⏳</span>
-              <form method="POST" action="{% url 'complete_subtask' subtask.id %}" style="display:inline;">
+          <div class="task-actions">
+            <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
+            <button
+              class="btn btn-danger delete-btn"
+              data-title="{{ task.title }}"
+              data-url="{% url 'delete_task' task.id %}">
+              Delete
+            </button>
+            {% if not task.completed %}
+              <form method="POST" action="{% url 'complete_task' task.id %}" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-sm">Done</button>
+                <button type="submit" class="btn btn-success">Done</button>
               </form>
             {% endif %}
-          </li>
-        {% endfor %}
+            <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
+          </div>
+        {% endif %}
+
+        {% if task.subtasks.all %}
+          <ul class="subtask-list">
+            {% for subtask in task.subtasks.all %}
+              <li class="subtask-item">
+                <span class="subtask-title">{{ subtask.title }}</span>
+                {% if subtask.completed %}
+                  <span class="done">✅</span>
+                {% else %}
+                  <span class="pending">⏳</span>
+                  <form method="POST" action="{% url 'complete_subtask' subtask.id %}" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm">Done</button>
+                  </form>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
     {% endif %}
   {% empty %}
     <p>No Task</p>
-  {% endfor %}
-</div>
-
-
-
-
-<h4>This Week's Recurring Tasks</h4>
-<div class="task-list">
-  {% for rec in recurring_tasks %}
-    <div class="task-card">
-      <div class="task-header">
-        <span class="task-title" title="{{ rec.title }}">{{ rec.title }}</span>
-        <span class="task-date">Start: {{ rec.start_date|date:"Y-m-d H:i" }}</span>
-      </div>
-
-      <div class="task-actions">
-        <div class="task-frequency">
-          Every {{ rec.interval }} {{ rec.interval_type }}
-        </div>
-      </div>
-
-      <div class="task-actions">
-        <a href="{% url 'update_recurring_task' rec.id %}" class="btn">Edit</a>
-        <button class="btn btn-danger delete-btn"
-                data-url="{% url 'delete_recurring_task' rec.id %}"
-                data-title="{{ rec.title }}">
-          Delete
-        </button>
-      </div>
-    </div>
-  {% empty %}
-    <p>No recurring tasks for this week.</p>
   {% endfor %}
 </div>
 
@@ -550,6 +499,7 @@
           <span class="task-title">{{ task.title }}</span>
           <span class="task-date">{{ task.created|date:"Y-m-d H:i" }}</span>
         </div>
+
         <div class="task-meta">
           <span class="task-priority">Priority: {{ task.get_priority_display }}</span>
           <span class="status">⏳</span>
@@ -557,45 +507,53 @@
             <p class="shared-note">Shared with you by {{ task.user.name }}</p>
           {% endif %}
         </div>
+
         <br>
+
         {% if task.user != request.user and request.user in task.share_with.all %}
           <a href="{% url 'view_task' task.id %}" class="btn">View Task</a>
         {% else %}
-        <div class="task-actions">
-          <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
-          <button
-            class="btn btn-danger delete-btn"
-            data-title="{{ task.title }}"
-            data-url="{% url 'delete_task' task.id %}">
-            Delete
-          </button>
-          <form method="POST" action="{% url 'complete_task' task.id %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success">Done</button>
-          </form>
-          <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
-        </div>
+          <div class="task-actions">
+            <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
+            <button
+              class="btn btn-danger delete-btn"
+              data-title="{{ task.title }}"
+              data-url="{% url 'delete_task' task.id %}">
+              Delete
+            </button>
+            <form method="POST" action="{% url 'complete_task' task.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success">Done</button>
+            </form>
+            <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
+          </div>
         {% endif %}
-        {% for subtask in task.subtasks.all %}
-          <li>
-            {{ subtask.title }}
-            {% if subtask.completed %}
-              <span class="done">✅</span>
-            {% else %}
-              <span class="pending">⏳</span>
-              <form method="POST" action="{% url 'complete_subtask' subtask.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-sm">Done</button>
-              </form>
-            {% endif %}
-          </li>
-        {% endfor %}
+
+        {% if task.subtasks.all %}
+          <ul class="subtask-list">
+            {% for subtask in task.subtasks.all %}
+              <li class="subtask-item">
+                <span class="subtask-title">{{ subtask.title }}</span>
+                {% if subtask.completed %}
+                  <span class="done">✅</span>
+                {% else %}
+                  <span class="pending">⏳</span>
+                  <form method="POST" action="{% url 'complete_subtask' subtask.id %}" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm">Done</button>
+                  </form>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
     {% endif %}
   {% empty %}
     <p>No pending tasks.</p>
   {% endfor %}
 </div>
+
 
 
 
@@ -609,6 +567,7 @@
           <span class="task-title">{{ task.title }}</span>
           <span class="task-date">{{ task.created|date:"Y-m-d H:i" }}</span>
         </div>
+
         <div class="task-meta">
           <span class="task-priority">Priority: {{ task.get_priority_display }}</span>
           <span class="status">✅</span>
@@ -616,31 +575,38 @@
             <p class="shared-note">Shared with you by {{ task.user.name }}</p>
           {% endif %}
         </div>
+
         <br>
+
         {% if task.user != request.user and request.user in task.share_with.all %}
           <a href="{% url 'view_task' task.id %}" class="btn">View Task</a>
         {% else %}
-        <div class="task-actions">
-          <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
-          <button
-            class="btn btn-danger delete-btn"
-            data-title="{{ task.title }}"
-            data-url="{% url 'delete_task' task.id %}">
-            Delete
-          </button>
-          <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
-        </div>
+          <div class="task-actions">
+            <a href="{% url 'update_task' task.id %}" class="btn">Edit</a>
+            <button
+              class="btn btn-danger delete-btn"
+              data-title="{{ task.title }}"
+              data-url="{% url 'delete_task' task.id %}">
+              Delete
+            </button>
+            <a href="{% url 'add_subtask' task.id %}" class="btn btn-secondary">Add Subtask</a>
+          </div>
         {% endif %}
-        {% for subtask in task.subtasks.all %}
-          <li>
-            {{ subtask.title }}
-            {% if subtask.completed %}
-              <span class="done">✅</span>
-            {% else %}
-              <span class="pending">⏳</span>
-            {% endif %}
-          </li>
-        {% endfor %}
+
+        {% if task.subtasks.all %}
+          <ul class="subtask-list">
+            {% for subtask in task.subtasks.all %}
+              <li class="subtask-item">
+                <span class="subtask-title">{{ subtask.title }}</span>
+                {% if subtask.completed %}
+                  <span class="done">✅</span>
+                {% else %}
+                  <span class="pending">⏳</span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
     {% endif %}
   {% empty %}

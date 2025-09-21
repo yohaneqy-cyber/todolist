@@ -9,6 +9,30 @@
     flex: 1 !important; /* هر کدوم نصف عرض بگیره */
   }
 }
+.subtask-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;            /* فاصله بین عنوان و آیکون/دکمه */
+  margin-bottom: 16px !important;  /* فاصله عمودی بین subtasks */
+}
+
+.subtask-title {
+  flex: 1;                       /* کل فضای باقیمانده را بگیره */
+  white-space: normal;           /* اجازه بده متن بره خط بعد */
+  word-break: break-word;        /* بشکنه اگه خیلی بلند شد */
+  font-size: clamp(13px, 1.6vw, 16px); /* خودکار ریز/درشت بشه */
+  color: #333;
+}
+
+.done {
+  color: green;
+  margin-left: 4px;
+}
+
+.pending {
+  color: orange;
+  margin-left: 4px;
+}
 
 
 .add-buttons-container {
@@ -1432,7 +1456,7 @@ html.dark-mode, body.dark-mode select:-webkit-autofill {
 .subtasks {
   padding-top: 8px;
   margin-top: 6px;
-  border-top: 1px solid #c5cae9;
+  border-top: 1px solid #0022ff;
 }
 .subtasks ul {
   list-style: none;
@@ -1441,7 +1465,7 @@ html.dark-mode, body.dark-mode select:-webkit-autofill {
 }
 .subtasks li {
   font-size: 0.9rem;
-  color: #3f51b5;
+  color: #1f40ff;
   margin-bottom: 4px;
   display: flex;
   align-items: center;
@@ -1758,7 +1782,9 @@ html.dark-mode, body.dark-mode select:-webkit-autofill {
 .btn-success {
   background: linear-gradient(135deg, #43a047, #66bb6a);
   box-shadow: 0 3px 8px rgba(67, 160, 71, 0.3);
+  margin-bottom: 5px; /* فاصله عمودی بین دکمه‌ها */
 }
+
 
 .btn-success:hover {
   background: linear-gradient(135deg, #2e7d32, #388e3c);

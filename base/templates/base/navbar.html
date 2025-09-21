@@ -6622,7 +6622,18 @@ confirmDeleteMessageBtn.addEventListener('click', () => {
     } else if (response.status === 404) {
       showToast("پیام قبلاً حذف شده است.");
     } else if (response.status === 403) {
-      showToast("You Are Blocked By This User!");
+      const data = await response.json().catch(() => ({}));
+      if (data.error) {
+        if (data.error.includes("شما یا کاربر مقابل بلاک هستید")) {
+          showToast("❌ شما کاربر مقابل را بلاک کرده‌اید و نمی‌توانید پیام را حذف کنید.");
+        } else if (data.error.includes("بلاک شده‌اید")) {
+          showToast("❌ شما توسط این کاربر بلاک شده‌اید و نمی‌توانید پیام را حذف کنید.");
+        } else {
+          showToast("You Are Blocked By This User!");
+        }
+      } else {
+        showToast("Unblock User For Delete message");
+      }
     } else {
       showToast("حذف پیام موفق نبود.");
     }
@@ -6634,6 +6645,7 @@ confirmDeleteMessageBtn.addEventListener('click', () => {
     window.currentMessageIdToDelete = null;
   });
 });
+
 
 
 function getCSRFToken() {

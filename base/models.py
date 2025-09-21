@@ -66,7 +66,7 @@ class Task(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     reminder_at = models.DateTimeField(null=True, blank=True)
     is_notified = models.BooleanField(default=False)
-    due_date = models.DateTimeField(null=True, blank=True)
+    due_date = models.DateTimeField(default=timezone.now)
     recurring_task = models.ForeignKey('RecurringTask', null=True, blank=True, on_delete=models.SET_NULL, related_name='tasks')
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE,related_name='subtasks')
     updated_at = models.DateTimeField(null=True, blank=True)

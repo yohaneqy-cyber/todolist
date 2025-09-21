@@ -1159,13 +1159,15 @@ class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
 
-        # ⚠️ چک بلاک: اگر کاربر توسط فرستنده یا گیرنده بلاک شده باشد
+        # ⚠️ چک بلاک: اگر کاربر فعلی یا کاربر مقابل بلاک کرده باشند
         if Block.objects.filter(
-            Q(blocker=instance.sender, blocked=request.user) |
-            Q(blocker=instance.receiver, blocked=request.user)
+            Q(blocker=instance.sender, blocked=request.user) |    # کاربر فعلی توسط فرستنده بلاک شده
+            Q(blocker=instance.receiver, blocked=request.user) |  # کاربر فعلی توسط گیرنده بلاک شده
+            Q(blocker=request.user, blocked=instance.sender) |    # کاربر فعلی فرستنده را بلاک کرده
+            Q(blocker=request.user, blocked=instance.receiver)    # کاربر فعلی گیرنده را بلاک کرده
         ).exists():
             return Response(
-                {'error': '❌ شما توسط این کاربر بلاک شده‌اید و نمی‌توانید پیام را حذف کنید.'},
+                {'error': '❌ شما یا کاربر مقابل بلاک هستید و نمی‌توانید پیام را حذف کنید.'},
                 status=403
             )
 
@@ -1189,7 +1191,6 @@ class MessageUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
             instance.hidden_for_receiver = True
         instance.save()
         return Response({'success': True, 'message': 'پیام فقط برای شما حذف شد'}, status=200)
-
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
