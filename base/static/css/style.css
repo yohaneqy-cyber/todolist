@@ -34,6 +34,35 @@
   margin-left: 4px;
 }
 
+/* Dark Mode Subtask Items */
+.dark-mode .subtask-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;            
+  margin-bottom: 16px !important;  
+  background-color: #1e1e1e;   /* پس‌زمینه تیره */
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.dark-mode .subtask-title {
+  flex: 1;                       
+  white-space: normal;           
+  word-break: break-word;        
+  font-size: clamp(13px, 1.6vw, 16px); 
+  color: #e0e0e0;       /* متن روشن */
+}
+
+/* دکمه و آیکون داخل subtasks */
+.dark-mode .subtask-item button,
+.dark-mode .subtask-item .icon {
+  color: #ccc;           
+  background-color: transparent;
+}
+
+.dark-mode .subtask-item button:hover {
+  color: #fff;
+}
 
 .add-buttons-container {
   display: flex;           /* نمایش افقی */

@@ -6589,7 +6589,7 @@ const deleteForAllCheckbox = document.getElementById('deleteForAllCheckbox');
 
 
 // استفاده در حذف پیام
-confirmDeleteMessageBtn.addEventListener('click', () => {
+confirmDeleteMessageBtn.addEventListener('click', async () => {
   if (!window.currentMessageIdToDelete) {
     showToast("شناسه پیام برای حذف یافت نشد.");
     return;
@@ -6604,15 +6604,22 @@ confirmDeleteMessageBtn.addEventListener('click', () => {
   const deleteForAll = deleteForAllCheckbox.checked;
   const url = `/api/chat/messages/${window.currentMessageIdToDelete}/?delete_for_all=${deleteForAll}`;
 
-  fetch(url, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCSRFToken(),
-    }
-  })
-  .then(async response => {
+  try {
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      }
+    });
+
     confirmDeleteMessageBtn.disabled = false;
+
+    // دیباگ: چاپ وضعیت و داده سرور
+    console.log("DELETE response status:", response.status);
+    const data = await response.json().catch(() => ({}));
+    console.log("DELETE response data:", data);
+
     if (response.ok) {
       const msgEl = document.querySelector(`[data-id="${window.currentMessageIdToDelete}"]`);
       if (msgEl) {
@@ -6622,30 +6629,38 @@ confirmDeleteMessageBtn.addEventListener('click', () => {
     } else if (response.status === 404) {
       showToast("پیام قبلاً حذف شده است.");
     } else if (response.status === 403) {
-      const data = await response.json().catch(() => ({}));
+      // دیباگ: بررسی دقیق error
+      if (data.error) console.log("Error text:", data.error);
+
       if (data.error) {
-        if (data.error.includes("شما یا کاربر مقابل بلاک هستید")) {
+        if (data.error.includes("You are blocked")) {
+          // کاربر بلاک‌شده است
+          showToast("❌ You are blocked by this user!");
+        } else if (data.error.includes("You blocked")) {
+          // کاربر بلاکر است
+          showToast("⛔ You blocked this user. Unblock to delete messages.");
+        } else if (data.error.includes("شما یا کاربر مقابل بلاک هستید")) {
           showToast("❌ شما کاربر مقابل را بلاک کرده‌اید و نمی‌توانید پیام را حذف کنید.");
         } else if (data.error.includes("بلاک شده‌اید")) {
           showToast("❌ شما توسط این کاربر بلاک شده‌اید و نمی‌توانید پیام را حذف کنید.");
         } else {
-          showToast("You Are Blocked By This User!");
+          showToast("❌ به دلیل بلاک بودن، امکان حذف پیام وجود ندارد.");
         }
       } else {
-        showToast("Unblock User For Delete message");
+        // هیچ error از سرور نیامده
+        showToast("blocked");
       }
     } else {
       showToast("حذف پیام موفق نبود.");
     }
-    window.currentMessageIdToDelete = null;
-  })
-  .catch(() => {
+  } catch (err) {
+    console.error("DELETE message error:", err);
     showToast("خطا در ارسال درخواست حذف.");
     confirmDeleteMessageBtn.disabled = false;
+  } finally {
     window.currentMessageIdToDelete = null;
-  });
+  }
 });
-
 
 
 function getCSRFToken() {
